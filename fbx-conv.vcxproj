@@ -81,6 +81,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\FbxConverter.cpp" />
+    <ClCompile Include="src\HierarchyPrinter.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\FbxConverter.h" />
+    <ClInclude Include="src\HierarchyPrinter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

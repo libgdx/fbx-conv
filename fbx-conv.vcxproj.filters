@@ -10,5 +10,16 @@
     <ClCompile Include="src\FbxConverter.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\HierarchyPrinter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\FbxConverter.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\HierarchyPrinter.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
