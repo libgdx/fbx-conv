@@ -1,2 +1,5 @@
+ipch/
+Debug/
+Release/
 *.*sdf
 *.suo
