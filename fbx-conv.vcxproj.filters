@@ -5,12 +5,33 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="src\math">
+      <UniqueIdentifier>{00ebf5e2-29fa-47ca-b354-cf8f8f0fe10c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\FbxConverter.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\HierarchyPrinter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math\Matrix.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math\Quaternion.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math\Vector2.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math\Vector3.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math\Vector4.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Node.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -21,5 +42,40 @@
     <ClInclude Include="src\HierarchyPrinter.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\Node.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\Matrix.h">
+      <Filter>src\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\Quaternion.h">
+      <Filter>src\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\Vector2.h">
+      <Filter>src\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\Vector3.h">
+      <Filter>src\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\Vector4.h">
+      <Filter>src\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\Constants.h">
+      <Filter>src\math</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\math\Quaternion.inl">
+      <Filter>src\math</Filter>
+    </None>
+    <None Include="src\math\Vector2.inl">
+      <Filter>src\math</Filter>
+    </None>
+    <None Include="src\math\Vector3.inl">
+      <Filter>src\math</Filter>
+    </None>
+    <None Include="src\math\Vector4.inl">
+      <Filter>src\math</Filter>
+    </None>
   </ItemGroup>
 </Project>

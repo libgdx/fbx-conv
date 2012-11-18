@@ -13,6 +13,8 @@ namespace fbxconv {
 		void printHierarchy();
 		bool write(const char* file);
 	private:
+		void triangulateRecursive(FbxNode* node);
+
 		FbxManager* fbxManager;
 		FbxScene* fbxScene;
 	};

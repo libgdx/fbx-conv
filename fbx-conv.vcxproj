@@ -82,10 +82,29 @@
   <ItemGroup>
     <ClCompile Include="src\FbxConverter.cpp" />
     <ClCompile Include="src\HierarchyPrinter.cpp" />
+    <ClCompile Include="src\math\Matrix.cpp" />
+    <ClCompile Include="src\math\Quaternion.cpp" />
+    <ClCompile Include="src\math\Vector2.cpp" />
+    <ClCompile Include="src\math\Vector3.cpp" />
+    <ClCompile Include="src\math\Vector4.cpp" />
+    <ClCompile Include="src\Node.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FbxConverter.h" />
     <ClInclude Include="src\HierarchyPrinter.h" />
+    <ClInclude Include="src\math\Constants.h" />
+    <ClInclude Include="src\math\Matrix.h" />
+    <ClInclude Include="src\math\Quaternion.h" />
+    <ClInclude Include="src\math\Vector2.h" />
+    <ClInclude Include="src\math\Vector3.h" />
+    <ClInclude Include="src\math\Vector4.h" />
+    <ClInclude Include="src\Node.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\math\Quaternion.inl" />
+    <None Include="src\math\Vector2.inl" />
+    <None Include="src\math\Vector3.inl" />
+    <None Include="src\math\Vector4.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

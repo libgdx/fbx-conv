@@ -34,6 +34,10 @@ bool FbxConverter::load(const char* file) {
 	fbxScene = FbxScene::Create(fbxManager, "__scene__");
 	importer->Import(fbxScene);
 	importer->Destroy();
+
+	// triangulate all meshes, nurbs etc.
+	printf("Triangulating all meshes\n");
+	triangulateRecursive(fbxScene->GetRootNode());
 	return true;
 }
 
@@ -44,6 +48,26 @@ void FbxConverter::printHierarchy() {
 	}
 
 	fbxconv::PrintHierarchy(fbxScene);
+}
+
+void FbxConverter::triangulateRecursive(FbxNode* node) {
+	// Triangulate all NURBS, patch and mesh under this node recursively.
+    FbxNodeAttribute* nodeAttribute = node->GetNodeAttribute();
+
+    if (nodeAttribute) {
+        if (nodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh ||
+            nodeAttribute->GetAttributeType() == FbxNodeAttribute::eNurbs ||
+            nodeAttribute->GetAttributeType() == FbxNodeAttribute::eNurbsSurface ||
+            nodeAttribute->GetAttributeType() == FbxNodeAttribute::ePatch) {
+            FbxGeometryConverter converter(node->GetFbxManager());
+            converter.TriangulateInPlace(node);
+        }
+    }
+
+    const int childCount = node->GetChildCount();
+    for (int childIndex = 0; childIndex < childCount; ++childIndex) {
+        triangulateRecursive(node->GetChild(childIndex));
+    }
 }
 
 void main(int argc, char** argv) {
