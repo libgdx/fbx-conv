@@ -67,7 +67,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);FBXSDK_NEW_API</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>libs\fbx-sdk\windows\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
