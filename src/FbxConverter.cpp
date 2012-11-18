@@ -1,5 +1,8 @@
 #include <stdio.h>
+#include <fbxsdk.h>
 
 int main(int argc, char** argv) {
-	printf("This is a test");
+	FbxManager* fbxManager = FbxManager::Create();
+
+	fbxManager->Destroy();
 }
