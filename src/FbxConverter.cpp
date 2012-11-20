@@ -54,7 +54,7 @@ void printNode(Node* node, int tabs) {
 	for(int i = 0; i < tabs; i++) printf("   ");
 	printf("node\n");
 	for(int i = 0; i < node->getChildren().size(); i++) {
-		printNode(node->getChildren()[i], tabs++);
+		printNode(node->getChildren()[i], ++tabs);
 	}	
 }
 
