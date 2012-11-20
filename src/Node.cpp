@@ -6,6 +6,21 @@ Node::Node(): _parent(0), _isJoint(false) {
 }
 
 Node::~Node() {
+	for(unsigned i = 0; i < _children.size(); i++) {
+		delete _children[i];
+	}
+}
+
+const std::string& Node::getName() {
+	return _name;
+}
+
+void Node::setName(const char* name) {
+	_name = name;
+}
+
+void Node::setName(const std::string& name) {
+	_name = name;
 }
 		
 bool Node::isJoint() {
@@ -24,20 +39,16 @@ void Node::setParent(Node* node) {
 	_parent = node;
 }
 
-int Node::getChildCount() {
-	return _children.size();
-}
-
-Node* Node::getChild(int index) {
-	return _children[index];
-}
-
-void Node::addChild(Node* node) {
-	_children.push_back(node);
+std::vector<Node*>& Node::getChildren() {
+	return _children;
 }
 
 Matrix& Node::getTransform() {
 	return _transform;
+}
+
+void Node::setTransform(float* matrix) {
+	memcpy(_transform.m, matrix, sizeof(float) * 16);
 }
 
 Matrix& Node::getWorldTransform() {
@@ -46,7 +57,6 @@ Matrix& Node::getWorldTransform() {
 	} else {
 		memcpy(_worldTransform.m, _transform.m, sizeof(float) * 16);
 	}
-
 	return _worldTransform;
 }
 

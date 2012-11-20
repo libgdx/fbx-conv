@@ -63,6 +63,9 @@
     <ClInclude Include="src\math\Constants.h">
       <Filter>src\math</Filter>
     </ClInclude>
+    <ClInclude Include="src\Scene.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\math\Quaternion.inl">

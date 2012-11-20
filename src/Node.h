@@ -2,6 +2,7 @@
 #define NODE_H
 
 #include <vector>
+#include <string>
 #include "math/Matrix.h"
 
 namespace fbxconv {
@@ -9,9 +10,16 @@ namespace fbxconv {
 	// node containing (parts) of a mesh, or an empty node for the purpose of
 	// grouping other nodes.
 	class Node {
+	public:
 		Node();
 		~Node();
 		
+		const std::string& getName();
+
+		void setName(const char* name);
+
+		void setName(const std::string& name);
+
 		bool isJoint();
 
 		void setIsJoint(bool isJoint);
@@ -20,17 +28,17 @@ namespace fbxconv {
 
 		void setParent(Node* parent);
 
-		int getChildCount();
-
-		Node* getChild(int index);
-
-		void addChild(Node* node);		
+		std::vector<Node*>& getChildren();		
 
 		Matrix& getTransform();
+
+		void setTransform(float* matrix);
 
 		Matrix& getWorldTransform();
 
 	private:
+		// the name of the node
+		std::string _name;
 		// whether this is a joint node or not
 		bool _isJoint;
 		// local transformation
