@@ -1,4 +1,5 @@
 #include "G3djWriter.h"
+#include <sstream>
 
 namespace fbxconv {
 
@@ -163,10 +164,20 @@ namespace fbxconv {
 	}
 
 	void G3djWriter::writeMeshParts(Mesh* mesh){
+		int partNumber = 0;
+
 		for (std::vector<MeshPart*>::iterator i = mesh->parts.begin(); i != mesh->parts.end(); ++i)
 		{
 			MeshPart *meshPart = (*i);
-			writer->writeStringPair("id", meshPart->getId().c_str());
+
+			if(partNumber > 0)
+				writer->nextValue(true);
+
+			std::stringstream ss;
+			ss << "part" << partNumber;
+
+			writer->openObject();
+			writer->writeStringPair("id", ss.str().c_str());
 			writer->nextValue(true);
 
 			writer->writeStringPair("type", getPrimitiveTypeString(meshPart->_primitiveType));
@@ -178,6 +189,7 @@ namespace fbxconv {
 				writer->nextValue(false);
 			}
 			writer->closeArray();
+			writer->closeObject();
 		}
 	}
 
