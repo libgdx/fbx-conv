@@ -5,33 +5,123 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="src\math">
-      <UniqueIdentifier>{00ebf5e2-29fa-47ca-b354-cf8f8f0fe10c}</UniqueIdentifier>
+    <Filter Include="src\gameplay">
+      <UniqueIdentifier>{5ca4061c-cc63-4c3a-87a6-86da9842b29a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\FbxConverter.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\HierarchyPrinter.cpp">
+    <ClCompile Include="src\gameplay\Animation.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\AnimationChannel.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Animations.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Base.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\BoundingVolume.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Camera.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Curve.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Effect.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\EncoderArguments.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\FileIO.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Light.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Material.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\MaterialParameter.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Matrix.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Mesh.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\MeshPart.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\MeshSkin.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\MeshSubSet.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Model.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Node.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Object.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Quaternion.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Reference.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\ReferenceTable.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Scene.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\StringUtil.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Transform.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Vector2.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Vector3.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Vector4.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Vertex.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\VertexElement.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\GPBFile.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameplay\Heightmap.cpp">
+      <Filter>src\gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\math\Matrix.cpp">
-      <Filter>src\math</Filter>
+    <ClCompile Include="src\JFbxFile.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\math\Quaternion.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
-    <ClCompile Include="src\math\Vector2.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
-    <ClCompile Include="src\math\Vector3.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
-    <ClCompile Include="src\math\Vector4.cpp">
-      <Filter>src\math</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Node.cpp">
+    <ClCompile Include="src\JFbxJSONWriter.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -39,46 +129,136 @@
     <ClInclude Include="src\FbxConverter.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\HierarchyPrinter.h">
+    <ClInclude Include="src\gameplay\Animation.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\AnimationChannel.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Animations.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Base.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\BoundingVolume.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Camera.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Curve.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Effect.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\EncoderArguments.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\FileIO.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Light.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Material.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\MaterialParameter.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Matrix.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Mesh.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\MeshPart.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\MeshSkin.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\MeshSubSet.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Model.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Node.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Object.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Quaternion.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Reference.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\ReferenceTable.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Scene.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\StringUtil.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Thread.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Transform.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Vector2.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Vector3.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Vector4.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Vertex.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\VertexElement.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\GPBFile.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gameplay\Heightmap.h">
+      <Filter>src\gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="src\JFbxFile.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\Node.h">
+    <ClInclude Include="src\JFbxFileWriter.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\math\Matrix.h">
-      <Filter>src\math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\math\Quaternion.h">
-      <Filter>src\math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\math\Vector2.h">
-      <Filter>src\math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\math\Vector3.h">
-      <Filter>src\math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\math\Vector4.h">
-      <Filter>src\math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\math\Constants.h">
-      <Filter>src\math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene.h">
+    <ClInclude Include="src\JFbxJSONWriter.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\math\Quaternion.inl">
-      <Filter>src\math</Filter>
+    <None Include="src\gameplay\Curve.inl">
+      <Filter>src\gameplay</Filter>
     </None>
-    <None Include="src\math\Vector2.inl">
-      <Filter>src\math</Filter>
+    <None Include="src\gameplay\Quaternion.inl">
+      <Filter>src\gameplay</Filter>
     </None>
-    <None Include="src\math\Vector3.inl">
-      <Filter>src\math</Filter>
+    <None Include="src\gameplay\Vector2.inl">
+      <Filter>src\gameplay</Filter>
     </None>
-    <None Include="src\math\Vector4.inl">
-      <Filter>src\math</Filter>
+    <None Include="src\gameplay\Vector3.inl">
+      <Filter>src\gameplay</Filter>
+    </None>
+    <None Include="src\gameplay\Vector4.inl">
+      <Filter>src\gameplay</Filter>
     </None>
   </ItemGroup>
 </Project>

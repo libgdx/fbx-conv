@@ -50,13 +50,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);FBXSDK_NEW_API</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>libs\fbx-sdk\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>libs\fbx-sdk\windows\include;libs\libpng\include;libs\zlib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>libs\fbx-sdk\windows\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);fbxsdk-2013.3-mdd.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>libs\fbx-sdk\windows\lib;libs\libpng\lib\windows\x86;libs\zlib\lib\windows\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);fbxsdk-2013.3-mdd.lib;libpng14.lib;zlib.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -81,31 +81,91 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\FbxConverter.cpp" />
-    <ClCompile Include="src\HierarchyPrinter.cpp" />
-    <ClCompile Include="src\math\Matrix.cpp" />
-    <ClCompile Include="src\math\Quaternion.cpp" />
-    <ClCompile Include="src\math\Vector2.cpp" />
-    <ClCompile Include="src\math\Vector3.cpp" />
-    <ClCompile Include="src\math\Vector4.cpp" />
-    <ClCompile Include="src\Node.cpp" />
+    <ClCompile Include="src\gameplay\Animation.cpp" />
+    <ClCompile Include="src\gameplay\AnimationChannel.cpp" />
+    <ClCompile Include="src\gameplay\Animations.cpp" />
+    <ClCompile Include="src\gameplay\Base.cpp" />
+    <ClCompile Include="src\gameplay\BoundingVolume.cpp" />
+    <ClCompile Include="src\gameplay\Camera.cpp" />
+    <ClCompile Include="src\gameplay\Curve.cpp" />
+    <ClCompile Include="src\gameplay\Effect.cpp" />
+    <ClCompile Include="src\gameplay\EncoderArguments.cpp" />
+    <ClCompile Include="src\gameplay\FileIO.cpp" />
+    <ClCompile Include="src\gameplay\GPBFile.cpp" />
+    <ClCompile Include="src\gameplay\Heightmap.cpp" />
+    <ClCompile Include="src\gameplay\Light.cpp" />
+    <ClCompile Include="src\gameplay\Material.cpp" />
+    <ClCompile Include="src\gameplay\MaterialParameter.cpp" />
+    <ClCompile Include="src\gameplay\Matrix.cpp" />
+    <ClCompile Include="src\gameplay\Mesh.cpp" />
+    <ClCompile Include="src\gameplay\MeshPart.cpp" />
+    <ClCompile Include="src\gameplay\MeshSkin.cpp" />
+    <ClCompile Include="src\gameplay\MeshSubSet.cpp" />
+    <ClCompile Include="src\gameplay\Model.cpp" />
+    <ClCompile Include="src\gameplay\Node.cpp" />
+    <ClCompile Include="src\gameplay\Object.cpp" />
+    <ClCompile Include="src\gameplay\Quaternion.cpp" />
+    <ClCompile Include="src\gameplay\Reference.cpp" />
+    <ClCompile Include="src\gameplay\ReferenceTable.cpp" />
+    <ClCompile Include="src\gameplay\Scene.cpp" />
+    <ClCompile Include="src\gameplay\StringUtil.cpp" />
+    <ClCompile Include="src\gameplay\Transform.cpp" />
+    <ClCompile Include="src\gameplay\Vector2.cpp" />
+    <ClCompile Include="src\gameplay\Vector3.cpp" />
+    <ClCompile Include="src\gameplay\Vector4.cpp" />
+    <ClCompile Include="src\gameplay\Vertex.cpp" />
+    <ClCompile Include="src\gameplay\VertexElement.cpp" />
+    <ClCompile Include="src\JFbxFile.cpp" />
+    <ClCompile Include="src\JFbxJSONWriter.cpp" />
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FbxConverter.h" />
-    <ClInclude Include="src\HierarchyPrinter.h" />
-    <ClInclude Include="src\math\Constants.h" />
-    <ClInclude Include="src\math\Matrix.h" />
-    <ClInclude Include="src\math\Quaternion.h" />
-    <ClInclude Include="src\math\Vector2.h" />
-    <ClInclude Include="src\math\Vector3.h" />
-    <ClInclude Include="src\math\Vector4.h" />
-    <ClInclude Include="src\Node.h" />
-    <ClInclude Include="src\Scene.h" />
+    <ClInclude Include="src\gameplay\Animation.h" />
+    <ClInclude Include="src\gameplay\AnimationChannel.h" />
+    <ClInclude Include="src\gameplay\Animations.h" />
+    <ClInclude Include="src\gameplay\Base.h" />
+    <ClInclude Include="src\gameplay\BoundingVolume.h" />
+    <ClInclude Include="src\gameplay\Camera.h" />
+    <ClInclude Include="src\gameplay\Curve.h" />
+    <ClInclude Include="src\gameplay\Effect.h" />
+    <ClInclude Include="src\gameplay\EncoderArguments.h" />
+    <ClInclude Include="src\gameplay\FileIO.h" />
+    <ClInclude Include="src\gameplay\GPBFile.h" />
+    <ClInclude Include="src\gameplay\Heightmap.h" />
+    <ClInclude Include="src\gameplay\Light.h" />
+    <ClInclude Include="src\gameplay\Material.h" />
+    <ClInclude Include="src\gameplay\MaterialParameter.h" />
+    <ClInclude Include="src\gameplay\Matrix.h" />
+    <ClInclude Include="src\gameplay\Mesh.h" />
+    <ClInclude Include="src\gameplay\MeshPart.h" />
+    <ClInclude Include="src\gameplay\MeshSkin.h" />
+    <ClInclude Include="src\gameplay\MeshSubSet.h" />
+    <ClInclude Include="src\gameplay\Model.h" />
+    <ClInclude Include="src\gameplay\Node.h" />
+    <ClInclude Include="src\gameplay\Object.h" />
+    <ClInclude Include="src\gameplay\Quaternion.h" />
+    <ClInclude Include="src\gameplay\Reference.h" />
+    <ClInclude Include="src\gameplay\ReferenceTable.h" />
+    <ClInclude Include="src\gameplay\Scene.h" />
+    <ClInclude Include="src\gameplay\StringUtil.h" />
+    <ClInclude Include="src\gameplay\Thread.h" />
+    <ClInclude Include="src\gameplay\Transform.h" />
+    <ClInclude Include="src\gameplay\Vector2.h" />
+    <ClInclude Include="src\gameplay\Vector3.h" />
+    <ClInclude Include="src\gameplay\Vector4.h" />
+    <ClInclude Include="src\gameplay\Vertex.h" />
+    <ClInclude Include="src\gameplay\VertexElement.h" />
+    <ClInclude Include="src\JFbxFile.h" />
+    <ClInclude Include="src\JFbxFileWriter.h" />
+    <ClInclude Include="src\JFbxJSONWriter.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\math\Quaternion.inl" />
-    <None Include="src\math\Vector2.inl" />
-    <None Include="src\math\Vector3.inl" />
-    <None Include="src\math\Vector4.inl" />
+    <None Include="src\gameplay\Curve.inl" />
+    <None Include="src\gameplay\Quaternion.inl" />
+    <None Include="src\gameplay\Vector2.inl" />
+    <None Include="src\gameplay\Vector3.inl" />
+    <None Include="src\gameplay\Vector4.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
