@@ -2,16 +2,15 @@
 #define JFBXFILE_H
 
 #include "gameplay\Scene.h"
-#include "JFbxFileWriter.h"
 
 using namespace gameplay;
 
 namespace fbxconv {
 
-	class JFbxFile {
+	class G3djFile {
 	public:
-		JFbxFile();
-		~JFbxFile();
+		G3djFile();
+		~G3djFile();
 
 		void addScene(Scene *scene);
 
@@ -19,16 +18,13 @@ namespace fbxconv {
 		void addMesh(Mesh* mesh);
 
 		Node* getNode(const char* nodeId);
+		Node* getNode(unsigned int nodeIndex);
 		Mesh* getMesh(const char* meshId);
-		
-		void exportWith(JFbxFileWriter *writer);
+		Mesh* getMesh(unsigned int meshIndex);
+
+		unsigned int getMeshCount();
+		unsigned int getNodeCount();
 	private:
-		void writeAttributes(Mesh* mesh, JFbxFileWriter *writer);
-		void writeVertices(Mesh* mesh, JFbxFileWriter *writer);
-		void writeMeshParts(Mesh* mesh, JFbxFileWriter *writer);
-
-		const char* JFbxFile::getPrimitiveTypeString(int primitiveTypeId);
-
 		Scene* scene;
 
 		std::map<std::string, Node*> nodes;

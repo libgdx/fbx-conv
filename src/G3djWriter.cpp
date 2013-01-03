@@ -1,28 +1,30 @@
-#include "JFbxFile.h"
-#include "JFbxJSONWriter.h"
-
-using namespace gameplay;
+#include "G3djWriter.h"
 
 namespace fbxconv {
-	JFbxFile::JFbxFile(){
+
+	G3djWriter::G3djWriter(){
+	
 	}
 
-	JFbxFile::~JFbxFile(){
+	G3djWriter::~G3djWriter(){
+	
 	}
 
-	void JFbxFile::exportWith(JFbxFileWriter* writer){
+	void G3djWriter::exportG3dj(G3djFile *file, const char* filePath){
+		writer = new JSONWriter(filePath);
+
 		writer->openObject();
 
-		writer->writeStringPair("version", JSONFORMAT_VERSION);
+		writer->writeStringPair("version", G3DJ_VERSION);
 		writer->nextValue(true);
 
 		// Write Meshes
 		writer->openArray("meshes");
 
 		// meshes
-		for (std::map<std::string, Mesh*>::const_iterator iter = meshes.begin(); iter != meshes.end(); ++iter)
+		for (unsigned int i=0; i<file->getMeshCount(); i++)
 		{
-			Mesh *mesh = iter->second;
+			Mesh *mesh = file->getMesh(i);
 			writer->openObject();
 
 			// write ID out first
@@ -31,20 +33,20 @@ namespace fbxconv {
 
 			// then the attributes
 			writer->openArray("attributes");
-				writeAttributes(mesh, writer);
+				writeAttributes(mesh);
 			writer->closeArray();
 			writer->nextValue(true);
 
 			// then the interleaved vertices
 			writer->openArray("vertices");
-				writeVertices(mesh, writer);
+				writeVertices(mesh);
 			writer->closeArray();
 			writer->nextValue(true);
 
 			// then the mesh parts (optional)
 			if(mesh->parts.size() > 0){
 				writer->openArray("parts");
-					writeMeshParts(mesh, writer);
+					writeMeshParts(mesh);
 				writer->closeArray();
 			}
 			writer->closeObject();
@@ -67,7 +69,7 @@ namespace fbxconv {
 		writer->closeObject();
 	}
 
-	void JFbxFile::writeAttributes(Mesh * mesh, JFbxFileWriter* writer){
+	void G3djWriter::writeAttributes(Mesh * mesh){
 		if (mesh->getVertexCount() > 0 )
 		{
 			for(int i=0; i<mesh->getVertexElementCount(); i++){
@@ -79,7 +81,7 @@ namespace fbxconv {
 		}
 	}
 
-	void JFbxFile::writeVertices(Mesh* mesh, JFbxFileWriter* writer){
+	void G3djWriter::writeVertices(Mesh* mesh){
 		if (mesh->getVertexCount() > 0 )
 		{
 			for(int i=0; i<mesh->getVertexCount(); i++){
@@ -160,7 +162,7 @@ namespace fbxconv {
 		}
 	}
 
-	void JFbxFile::writeMeshParts(Mesh* mesh, JFbxFileWriter* writer){
+	void G3djWriter::writeMeshParts(Mesh* mesh){
 		for (std::vector<MeshPart*>::iterator i = mesh->parts.begin(); i != mesh->parts.end(); ++i)
 		{
 			MeshPart *meshPart = (*i);
@@ -179,7 +181,7 @@ namespace fbxconv {
 		}
 	}
 
-	const char* JFbxFile::getPrimitiveTypeString(int primitiveTypeId){
+	const char* G3djWriter::getPrimitiveTypeString(int primitiveTypeId){
 		switch(primitiveTypeId){
 		case 0:
 			return "POINTS";
@@ -194,25 +196,5 @@ namespace fbxconv {
 		default:
             return "UNKNOWN";
 		}
-	}
-
-	void JFbxFile::addScene(Scene* scene){
-		this->scene = scene;
-	}
-
-	void JFbxFile::addNode(Node* node){
-		nodes[node->getId()] = node;
-	}
-
-	void JFbxFile::addMesh(Mesh* mesh){
-		meshes[mesh->getId()] = mesh;
-	}
-
-	Node* JFbxFile::getNode(const char* nodeId){
-		return nodes[nodeId];
-	}
-
-	Mesh* JFbxFile::getMesh(const char* meshId){
-		return meshes[meshId];
 	}
 };

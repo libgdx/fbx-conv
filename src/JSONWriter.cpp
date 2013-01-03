@@ -1,7 +1,9 @@
-#include "JFbxJSONWriter.h"
+#include "JSONWriter.h"
 
 namespace fbxconv {
-	JFbxJSONWriter::JFbxJSONWriter(const char* fileName) : JFbxFileWriter() {
+	JSONWriter::JSONWriter(const char* fileName) {
+		currentIndention = 0;
+
 		file = fopen(fileName, "w");
 		if (!file)
 		{
@@ -9,68 +11,68 @@ namespace fbxconv {
 		}
 	}
 
-	JFbxJSONWriter::~JFbxJSONWriter(){
+	JSONWriter::~JSONWriter(){
 		fclose(file);
 	}
 
-	void JFbxJSONWriter::newLine(){
+	void JSONWriter::newLine(){
 		fprintf(file, "\n");
 		printTabs();
 	}
 
-	void JFbxJSONWriter::nextValue(bool newLine){
+	void JSONWriter::nextValue(bool newLine){
 		fprintf(file, ",");
 
 		if(newLine)
 			this->newLine();
 	}
 
-	void JFbxJSONWriter::openObject(){
+	void JSONWriter::openObject(){
 		fprintf(file, "{");
 		indent();
 		newLine();
 	}
 
-	void JFbxJSONWriter::closeObject(){
+	void JSONWriter::closeObject(){
 		dedent();
 		newLine();
 
 		fprintf(file, "}");
 	}
 
-	void JFbxJSONWriter::openArray(const char* key){
+	void JSONWriter::openArray(const char* key){
 		fprintf(file, "\"%s\" : [", key);
 		indent();
 		newLine();
 	}
 
-	void JFbxJSONWriter::closeArray(){
+	void JSONWriter::closeArray(){
 		dedent();
 		newLine();
 		fprintf(file, "]");
 	}
 
-	void JFbxJSONWriter::writeStringPair(const char* key, const char* value){
+	void JSONWriter::writeStringPair(const char* key, const char* value){
 		fprintf(file, "\"%s\" : \"%s\"", key, value);
 	}
 
-	void JFbxJSONWriter::writeFloat(float value){
+	void JSONWriter::writeFloat(float value){
 		fprintf(file, "%f", value);
 	}
 
-	void JFbxJSONWriter::writeInteger(int value){
+	void JSONWriter::writeInteger(int value){
 		fprintf(file, "%i", value);
 	}
 
-	void JFbxJSONWriter::writeString(const char* value){
+	void JSONWriter::writeString(const char* value){
 		fprintf(file, "\"%s\"", value);
 	}
 
-	void JFbxJSONWriter::writeRawString(const char* value){
+	void JSONWriter::writeRawString(const char* value){
 		fprintf(file, "%s", value);
 	}
 
-	void JFbxJSONWriter::printTabs() {
+	void JSONWriter::printTabs() {
 		for(int i = 0; i < currentIndention; i++)
 			fprintf(file, "\t");
 	}

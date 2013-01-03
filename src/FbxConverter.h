@@ -1,7 +1,7 @@
 #ifndef FBXCONVERTER_H
 #define FBXCONVERTER_H
 
-#include "JFbxFile.h"
+#include "G3djFile.h"
 #include <fbxsdk.h>
 
 namespace fbxconv
@@ -13,8 +13,7 @@ namespace fbxconv
 		FbxConverter();
 		~FbxConverter();
 
-		void load(const char* fileName);
-		void exportWith(JFbxFileWriter *fileWriter);
+		G3djFile* load(const char* fileName);
 	private:
 		void loadScene(FbxScene* fbxScene);
 		Node* loadNode(FbxNode* fbxNode);
@@ -39,7 +38,7 @@ namespace fbxconv
 		Mesh* getMesh(FbxUInt64 meshId);
 		void saveMesh(FbxUInt64 meshId, Mesh* mesh);
 
-		JFbxFile jFbxFile;
+		G3djFile* g3djFile;
 
 		// The collection of meshes for the purpose of making sure that the same model is not loaded twice. (Mesh instancing)
 		std::map<FbxUInt64, Mesh*> meshes;

@@ -81,6 +81,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\FbxConverter.cpp" />
+    <ClCompile Include="src\G3djWriter.cpp" />
     <ClCompile Include="src\gameplay\Animation.cpp" />
     <ClCompile Include="src\gameplay\AnimationChannel.cpp" />
     <ClCompile Include="src\gameplay\Animations.cpp" />
@@ -115,12 +116,13 @@
     <ClCompile Include="src\gameplay\Vector4.cpp" />
     <ClCompile Include="src\gameplay\Vertex.cpp" />
     <ClCompile Include="src\gameplay\VertexElement.cpp" />
-    <ClCompile Include="src\JFbxFile.cpp" />
-    <ClCompile Include="src\JFbxJSONWriter.cpp" />
+    <ClCompile Include="src\G3djFile.cpp" />
+    <ClCompile Include="src\JSONWriter.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FbxConverter.h" />
+    <ClInclude Include="src\G3djWriter.h" />
     <ClInclude Include="src\gameplay\Animation.h" />
     <ClInclude Include="src\gameplay\AnimationChannel.h" />
     <ClInclude Include="src\gameplay\Animations.h" />
@@ -156,9 +158,8 @@
     <ClInclude Include="src\gameplay\Vector4.h" />
     <ClInclude Include="src\gameplay\Vertex.h" />
     <ClInclude Include="src\gameplay\VertexElement.h" />
-    <ClInclude Include="src\JFbxFile.h" />
-    <ClInclude Include="src\JFbxFileWriter.h" />
-    <ClInclude Include="src\JFbxJSONWriter.h" />
+    <ClInclude Include="src\G3djFile.h" />
+    <ClInclude Include="src\JSONWriter.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\gameplay\Curve.inl" />

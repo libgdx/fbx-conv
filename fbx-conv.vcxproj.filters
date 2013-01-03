@@ -118,10 +118,13 @@
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\JFbxFile.cpp">
+    <ClCompile Include="src\JSONWriter.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\JFbxJSONWriter.cpp">
+    <ClCompile Include="src\G3djWriter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\G3djFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -234,13 +237,13 @@
     <ClInclude Include="src\gameplay\Heightmap.h">
       <Filter>src\gameplay</Filter>
     </ClInclude>
-    <ClInclude Include="src\JFbxFile.h">
+    <ClInclude Include="src\JSONWriter.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\JFbxFileWriter.h">
+    <ClInclude Include="src\G3djWriter.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\JFbxJSONWriter.h">
+    <ClInclude Include="src\G3djFile.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

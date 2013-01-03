@@ -6,14 +6,17 @@ using namespace gameplay;
 namespace fbxconv {
 
 	FbxConverter::FbxConverter(){
-	
+		g3djFile = new G3djFile();
 	}
 
 	FbxConverter::~FbxConverter(){
-	
+		if(g3djFile){
+			delete g3djFile;
+			g3djFile = NULL;
+		}
 	}
 
-	void FbxConverter::load(const char* fileName){
+	G3djFile* FbxConverter::load(const char* fileName){
 		FbxManager* sdkManager = FbxManager::Create();
 		FbxIOSettings *ios = FbxIOSettings::Create(sdkManager, IOSROOT);
 		sdkManager->SetIOSettings(ios);
@@ -80,6 +83,8 @@ namespace fbxconv {
 				LOG(1, "Error writing binary file: %s\n", outputFilePath.c_str());
 			}
 		}*/
+
+		return g3djFile;
 	}
 
 	void FbxConverter::loadScene(FbxScene* fbxScene){
@@ -123,7 +128,7 @@ namespace fbxconv {
 		// TODO: add logic to find the "active" camera node in the fbxScene
 		scene->setActiveCameraNode(scene->getFirstCameraNode());
     
-		jFbxFile.addScene(scene);
+		g3djFile->addScene(scene);
 	}
 
 	void FbxConverter::triangulateRecursive(FbxNode* fbxNode){
@@ -156,7 +161,7 @@ namespace fbxconv {
 		const char* id = fbxNode->GetName();
 		if (id && strlen(id) > 0)
 		{
-			node = jFbxFile.getNode(fbxNode->GetName());
+			node = g3djFile->getNode(fbxNode->GetName());
 			if (node)
 			{
 				return node;
@@ -167,7 +172,7 @@ namespace fbxconv {
 		{
 			node->setId(id);
 		}
-		jFbxFile.addNode(node);
+		g3djFile->addNode(node);
 
 		transformNode(fbxNode, node);
     
@@ -390,7 +395,7 @@ namespace fbxconv {
 			mesh->addVetexAttribute(BLENDINDICES, Vertex::BLEND_INDICES_COUNT);
 		}
 
-		jFbxFile.addMesh(mesh);
+		g3djFile->addMesh(mesh);
 		saveMesh(fbxMesh->GetUniqueID(), mesh);
 		return mesh;
 	}
@@ -802,10 +807,6 @@ namespace fbxconv {
 
 	void FbxConverter::loadBindShapes(FbxScene* fbxScene){
 
-	}
-
-	void FbxConverter::exportWith(JFbxFileWriter* fileWriter){
-		jFbxFile.exportWith(fileWriter);
 	}
 };
 

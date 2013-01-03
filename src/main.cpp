@@ -1,5 +1,5 @@
 #include "FbxConverter.h"
-#include "JFbxJSONWriter.h"
+#include "G3djWriter.h"
 
 using namespace fbxconv;
 using namespace gameplay;
@@ -8,13 +8,11 @@ int main(int argc, const char** argv) {
 	const char* file = "samples/cube.fbx";
 
 	FbxConverter converter;
-	converter.load(file);
+	G3djFile *g3djFile = converter.load(file);
 
 	printf("Exporting to json.\n");
-	JFbxJSONWriter *jsonWriter = new JFbxJSONWriter("test.json");
-	converter.exportWith(jsonWriter);
-
-	delete jsonWriter;
+	G3djWriter *writer = new G3djWriter();
+	writer->exportG3dj(g3djFile, "test.g3dj");
 
 	printf("Done.\n");
 

@@ -1,13 +1,14 @@
-#ifndef JFBXJSONWRITER_H
-#define JFBXJSONWRITER_H
+#ifndef JSONWRITER_H
+#define JSONWRITER_H
 
-#include "JFbxFileWriter.h"
+#include <stdio.h>
 
 namespace fbxconv {
-	class JFbxJSONWriter: public JFbxFileWriter {
+
+	class JSONWriter{
 	public:
-		JFbxJSONWriter(const char* fileName);
-		~JFbxJSONWriter();
+		JSONWriter(const char* filePath);
+		~JSONWriter();
 
 		void openArray(const char* key);
 		void closeArray();
@@ -16,7 +17,6 @@ namespace fbxconv {
 		void closeObject();
 
 		void nextValue(bool newLine);
-		void newLine();
 
 		void writeStringPair(const char* key, const char* value);
 
@@ -26,6 +26,13 @@ namespace fbxconv {
 		void writeInteger(int value);
 
 		void printTabs();
+	private:
+		FILE* file;
+		int currentIndention;
+
+		void newLine();
+		void indent() { currentIndention++; }
+		void dedent() { currentIndention--; if(currentIndention < 0) currentIndention = 0; }
 	};
 }
 
