@@ -305,6 +305,9 @@ namespace fbxconv {
 					writer->nextValue(false);
 					writer->writeFloat(texture->uvScale.y);
 				writer->closeArray(false);
+				writer->nextValue(true);
+
+				writer->writeStringPair("type", getTextureUseString(texture->textureUse));
 
 				writer->closeObject();
 			}
@@ -398,6 +401,25 @@ namespace fbxconv {
 			return "LAMBERT";
 		case 1:
 			return "PHONG";
+		default:
+            return "UNKNOWN";
+		}
+	}
+
+	const char* G3djWriter::getTextureUseString(int textureUse){
+		switch(textureUse){
+		case 0:
+			return "STANDARD";
+		case 1:
+			return "SHADOWMAP";
+		case 2:
+			return "LIGHTMAP";
+		case 3:
+			return "SPHERICAL_REFLEXION";
+		case 4:
+			return "SPHERE_REFLEXION";
+		case 5:
+			return "BUMPMAP";
 		default:
             return "UNKNOWN";
 		}

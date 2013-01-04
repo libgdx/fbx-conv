@@ -35,7 +35,8 @@
 					"id" : "Map #1",
 					"filename" : "mineShaftWall001.png",
 					"uvtranslation" : [0.0,0.0],
-					"uvscaling" : [1.0,1.0]
+					"uvscaling" : [1.0,1.0],
+					"type" : "STANDARD"
 				}
 			]
 		}

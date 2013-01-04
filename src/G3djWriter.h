@@ -24,6 +24,7 @@ namespace fbxconv {
 
 		const char* getPrimitiveTypeString(int primitiveTypeId);
 		const char* getMaterialTypeString(int primitiveTypeId);
+		const char* getTextureUseString(int textureUse);
 	};
 };
 
