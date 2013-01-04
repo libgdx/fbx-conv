@@ -16,6 +16,7 @@ namespace fbxconv
 		G3djFile* load(const char* fileName);
 	private:
 		void loadScene(FbxScene* fbxScene);
+
 		G3djNode* loadNode(FbxNode* fbxNode);
 		void loadBindShapes(FbxScene* fbxScene);
 		void loadModel(FbxNode* fbxNode, Node* node);

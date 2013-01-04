@@ -69,6 +69,10 @@ namespace fbxconv {
 		fprintf(file, "\"%s\" : \"%s\"", key, value);
 	}
 
+	void JSONWriter::writeFloatPair(const char* key, float value){
+		fprintf(file, "\"%s\" : %f", key, value);
+	}
+
 	void JSONWriter::writeFloat(float value){
 		if(value == 1.0f)
 			fprintf(file, "%s", "1.0");

@@ -60,9 +60,21 @@ namespace fbxconv {
 		writer->nextValue(true);
 
 		// Write Materials
-		writer->openArray("materials");
-		writer->closeArray();
-		writer->nextValue(true);
+		if(file->getMaterialCount() > 0){
+			writer->openArray("materials");
+
+			for(unsigned int i=0; i<file->getMaterialCount(); i++){
+				G3djMaterial* material = file->getMaterial(i);
+			
+				if(i>0)
+					writer->nextValue(true);
+
+				writeMaterial(material);
+			}
+
+			writer->closeArray();
+			writer->nextValue(true);
+		}
 
 		// Write Nodes
 		writer->openArray("nodes");
@@ -210,6 +222,66 @@ namespace fbxconv {
 		}
 	}
 
+	void G3djWriter::writeMaterial(G3djMaterial* material){
+		writer->openObject();
+
+		writer->writeStringPair("id", material->getId().c_str());
+		writer->nextValue(true);
+
+		writer->writeStringPair("type", getMaterialTypeString(material->getMaterialType()));
+		writer->nextValue(true);
+
+		writer->openArray("diffuse", false);
+			writer->writeFloat(material->getDiffuse().x);
+			writer->nextValue(false);
+			writer->writeFloat(material->getDiffuse().y);
+			writer->nextValue(false);
+			writer->writeFloat(material->getDiffuse().z);
+			writer->nextValue(false);
+		writer->closeArray(false);
+		writer->nextValue(true);
+
+		writer->openArray("ambient", false);
+			writer->writeFloat(material->getAmbient().x);
+			writer->nextValue(false);
+			writer->writeFloat(material->getAmbient().y);
+			writer->nextValue(false);
+			writer->writeFloat(material->getAmbient().z);
+			writer->nextValue(false);
+		writer->closeArray(false);
+		writer->nextValue(true);
+
+		writer->openArray("emissive", false);
+			writer->writeFloat(material->getEmissive().x);
+			writer->nextValue(false);
+			writer->writeFloat(material->getEmissive().y);
+			writer->nextValue(false);
+			writer->writeFloat(material->getEmissive().z);
+			writer->nextValue(false);
+		writer->closeArray(false);
+		writer->nextValue(true);
+
+		writer->writeFloatPair("opacity", material->getOpacity());
+
+		if(material->getMaterialType() == MATERIAL_TYPE::PHONG){
+			writer->nextValue(true);
+
+			writer->openArray("specular", false);
+				writer->writeFloat(material->getSpecular().x);
+				writer->nextValue(false);
+				writer->writeFloat(material->getSpecular().y);
+				writer->nextValue(false);
+				writer->writeFloat(material->getSpecular().z);
+				writer->nextValue(false);
+			writer->closeArray(false);
+			writer->nextValue(true);
+
+			writer->writeFloatPair("shininess", material->getShininess());
+		}
+
+		writer->closeObject();
+	}
+
 	void G3djWriter::writeNodeRecursive(G3djNode* node){
 		writer->openObject();
 
@@ -282,6 +354,17 @@ namespace fbxconv {
 			return "TRIANGLES";
 		case 5:
 			return "TRIANGLE_STRIP";
+		default:
+            return "UNKNOWN";
+		}
+	}
+
+	const char* G3djWriter::getMaterialTypeString(int materialType){
+		switch(materialType){
+		case 0:
+			return "LAMBERT";
+		case 1:
+			return "PHONG";
 		default:
             return "UNKNOWN";
 		}

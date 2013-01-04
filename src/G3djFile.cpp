@@ -21,8 +21,17 @@ namespace fbxconv {
 		meshes[mesh->getId()] = mesh;
 	}
 
+	void G3djFile::addMaterial(G3djMaterial* material){
+		materials[material->getId()] = material;
+	}
+
 	G3djNode* G3djFile::getNode(const char* nodeId){
-		return nodes[nodeId];
+		std::map<std::string, G3djNode*>::iterator it = nodes.find(nodeId);
+		if (it != nodes.end())
+		{
+			return it->second;
+		}
+		return NULL;
 	}
 
 	G3djNode* G3djFile::getNode(unsigned int nodeIndex){
@@ -36,7 +45,12 @@ namespace fbxconv {
 	}
 
 	Mesh* G3djFile::getMesh(const char* meshId){
-		return meshes[meshId];
+		std::map<std::string, Mesh*>::iterator it = meshes.find(meshId);
+		if (it != meshes.end())
+		{
+			return it->second;
+		}
+		return NULL;
 	}
 
 	Mesh* G3djFile::getMesh(unsigned int meshIndex){
@@ -49,11 +63,34 @@ namespace fbxconv {
 		return i->second;
 	}
 
+	G3djMaterial* G3djFile::getMaterial(const char* materialId){
+		std::map<std::string, G3djMaterial*>::iterator it = materials.find(materialId);
+		if (it != materials.end())
+		{
+			return it->second;
+		}
+		return NULL;
+	}
+
+	G3djMaterial* G3djFile::getMaterial(unsigned int materialIndex){
+		// Ugh, this seems ugly. But without having a second flat list I don't see a better way right now.
+		if(materialIndex >= meshes.size())
+			return NULL;
+		std::map<std::string, G3djMaterial*>::iterator i( materials.begin() );
+		std::advance(i, materialIndex);
+
+		return i->second;
+	}
+
 	unsigned int G3djFile::getNodeCount(){
 		return nodes.size();
 	}
 
 	unsigned int G3djFile::getMeshCount(){
 		return meshes.size();
+	}
+
+	unsigned int G3djFile::getMaterialCount(){
+		return materials.size();
 	}
 };

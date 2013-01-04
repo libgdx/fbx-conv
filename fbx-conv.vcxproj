@@ -120,6 +120,7 @@
     <ClCompile Include="src\G3djFile.cpp" />
     <ClCompile Include="src\JSONWriter.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\G3djMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FbxConverter.h" />
@@ -162,6 +163,7 @@
     <ClInclude Include="src\gameplay\VertexElement.h" />
     <ClInclude Include="src\G3djFile.h" />
     <ClInclude Include="src\JSONWriter.h" />
+    <ClInclude Include="src\G3djMaterial.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\gameplay\Curve.inl" />

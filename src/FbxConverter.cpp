@@ -1,5 +1,6 @@
 #include "FbxConverter.h"
 #include "gameplay\Scene.h"
+#include <sstream>
 
 using namespace gameplay;
 
@@ -270,6 +271,88 @@ namespace fbxconv {
 		for (int i = 0; i < meshPartSize; ++i)
 		{
 			meshParts.push_back(new MeshPart());
+		}
+
+		// Load the individual Materials for this node, if they haven't already been loaded
+		for(int i=0; i<fbxMesh->GetNode()->GetMaterialCount(); i++){
+			FbxSurfaceMaterial *fbxMaterial = fbxMesh->GetNode()->GetMaterial(i);
+
+			if(g3djFile->getMaterial(fbxMaterial->GetName()) == NULL){
+				// material doesn't exist, add
+				G3djMaterial *material;
+
+				// we need a name for the material
+				const char* id = fbxMaterial->GetName();
+				if(id || strlen(id) == 0){
+					std::stringstream ss;
+					ss << "material" << i;
+					id = ss.str().c_str();
+				}
+
+				//Get the implementation to see if it's a shader.
+				if(GetImplementation(fbxMaterial, FBXSDK_IMPLEMENTATION_HLSL) 
+					|| GetImplementation(fbxMaterial, FBXSDK_IMPLEMENTATION_CGFX)){
+						// We don't support shaders
+						printf("Materials with shaders aren't supported. Skipping..");
+						continue;
+				}
+				else if(fbxMaterial->ClassId.Is(FbxSurfacePhong::ClassId)) {
+					
+					material = new G3djMaterial(id, MATERIAL_TYPE::PHONG);
+
+					// cast to phong
+					FbxSurfacePhong *phongMaterial = ((FbxSurfacePhong *)fbxMaterial);
+					
+					// set the material values
+					material->setDiffuse(phongMaterial->Diffuse.Get().mData[0], 
+										 phongMaterial->Diffuse.Get().mData[1],
+										 phongMaterial->Diffuse.Get().mData[2]);
+
+					material->setAmbient(phongMaterial->Ambient.Get().mData[0], 
+										 phongMaterial->Ambient.Get().mData[1],
+										 phongMaterial->Ambient.Get().mData[2]);
+
+					material->setEmissive(phongMaterial->Emissive.Get().mData[0], 
+										 phongMaterial->Emissive.Get().mData[1],
+										 phongMaterial->Emissive.Get().mData[2]);
+
+					material->setSpecular(phongMaterial->Specular.Get().mData[0], 
+										 phongMaterial->Specular.Get().mData[1],
+										 phongMaterial->Specular.Get().mData[2]);
+
+					material->setShininess(phongMaterial->Shininess.Get());
+					// Opacity = 1.0f - TransparencyFactor
+					material->setOpacity(1.0f - phongMaterial->TransparencyFactor.Get());
+
+					g3djFile->addMaterial(material);
+				}
+				else if(fbxMaterial->ClassId.Is(FbxSurfaceLambert::ClassId)) {
+					material = new G3djMaterial(id, MATERIAL_TYPE::LAMBERT);
+
+					// cast to phong
+					FbxSurfaceLambert *lambertMaterial = ((FbxSurfaceLambert *)fbxMaterial);
+					
+					// set the material values
+					material->setDiffuse(lambertMaterial->Diffuse.Get().mData[0], 
+										 lambertMaterial->Diffuse.Get().mData[1],
+										 lambertMaterial->Diffuse.Get().mData[2]);
+
+					material->setAmbient(lambertMaterial->Ambient.Get().mData[0], 
+										 lambertMaterial->Ambient.Get().mData[1],
+										 lambertMaterial->Ambient.Get().mData[2]);
+
+					material->setEmissive(lambertMaterial->Emissive.Get().mData[0], 
+										 lambertMaterial->Emissive.Get().mData[1],
+										 lambertMaterial->Emissive.Get().mData[2]);
+
+					// Opacity = 1.0f - TransparencyFactor
+					material->setOpacity(1.0f - lambertMaterial->TransparencyFactor.Get());
+
+					g3djFile->addMaterial(material);
+				}
+				else
+					printf("Unknown type of material.\n");
+			}
 		}
 
 		// Find the blend weights and blend indices if this mesh is skinned.
