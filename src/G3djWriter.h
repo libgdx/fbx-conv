@@ -19,6 +19,7 @@ namespace fbxconv {
 		void writeAttributes(Mesh* mesh);
 		void writeVertices(Mesh* mesh);
 		void writeMeshParts(Mesh* mesh);
+		void writeNodeRecursive(G3djNode* node);
 
 		const char* getPrimitiveTypeString(int primitiveTypeId);
 	};

@@ -16,7 +16,7 @@ namespace fbxconv
 		G3djFile* load(const char* fileName);
 	private:
 		void loadScene(FbxScene* fbxScene);
-		Node* loadNode(FbxNode* fbxNode);
+		G3djNode* loadNode(FbxNode* fbxNode);
 		void loadBindShapes(FbxScene* fbxScene);
 		void loadModel(FbxNode* fbxNode, Node* node);
 		Mesh* loadMesh(FbxMesh* fbxMesh);
@@ -31,9 +31,10 @@ namespace fbxconv
 		void loadBlendData(const std::vector<Vector2>& vertexWeights, Vertex* vertex);
 
 		void triangulateRecursive(FbxNode* fbxNode);
-		void transformNode(FbxNode* fbxNode, Node* node);
+		void transformNode(FbxNode* fbxNode, G3djNode* node);
 
 		void copyMatrix(const FbxMatrix& fbxMatrix, float* matrix);
+		void copyMatrix(const FbxMatrix& fbxMatrix, Matrix& matrix);
 
 		Mesh* getMesh(FbxUInt64 meshId);
 		void saveMesh(FbxUInt64 meshId, Mesh* mesh);

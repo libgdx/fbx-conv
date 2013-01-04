@@ -13,7 +13,7 @@ namespace fbxconv {
 		this->scene = scene;
 	}
 
-	void G3djFile::addNode(Node* node){
+	void G3djFile::addNode(G3djNode* node){
 		nodes[node->getId()] = node;
 	}
 
@@ -21,15 +21,15 @@ namespace fbxconv {
 		meshes[mesh->getId()] = mesh;
 	}
 
-	Node* G3djFile::getNode(const char* nodeId){
+	G3djNode* G3djFile::getNode(const char* nodeId){
 		return nodes[nodeId];
 	}
 
-	Node* G3djFile::getNode(unsigned int nodeIndex){
+	G3djNode* G3djFile::getNode(unsigned int nodeIndex){
 		// Ugh, this seems ugly. But without having a second flat list I don't see a better way right now.
 		if(nodeIndex >= nodes.size())
 			return NULL;
-		std::map<std::string, Node*>::iterator i( nodes.begin() );
+		std::map<std::string, G3djNode*>::iterator i( nodes.begin() );
 		std::advance(i, nodeIndex);
 
 		return i->second;

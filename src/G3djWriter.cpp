@@ -26,6 +26,9 @@ namespace fbxconv {
 		for (unsigned int i=0; i<file->getMeshCount(); i++)
 		{
 			Mesh *mesh = file->getMesh(i);
+			if(i>0)
+				writer->nextValue(true);
+
 			writer->openObject();
 
 			// write ID out first
@@ -51,7 +54,6 @@ namespace fbxconv {
 				writer->closeArray();
 			}
 			writer->closeObject();
-			writer->nextValue(true);
 		}
 
 		writer->closeArray();
@@ -64,6 +66,21 @@ namespace fbxconv {
 
 		// Write Nodes
 		writer->openArray("nodes");
+
+		for(unsigned int i=0; i<file->getNodeCount(); i++){
+			G3djNode* node = file->getNode(i);
+
+			if(i>0)
+				writer->nextValue(true);
+
+			writeNodeRecursive(node);
+		}
+
+		writer->closeArray();
+		writer->nextValue(true);
+
+		// Write Animations
+		writer->openArray("animations");
 		writer->closeArray();
 
 		// Main object closing
@@ -191,6 +208,66 @@ namespace fbxconv {
 			writer->closeArray();
 			writer->closeObject();
 		}
+	}
+
+	void G3djWriter::writeNodeRecursive(G3djNode* node){
+		writer->openObject();
+
+		writer->writeStringPair("id", node->getId().c_str());
+		writer->nextValue(true);
+		
+		writer->openArray("translation", false);
+			Vector3 translation = node->getTranslation();
+
+			writer->writeFloat(translation.x);
+			writer->nextValue(false);
+			writer->writeFloat(translation.y);
+			writer->nextValue(false);
+			writer->writeFloat(translation.z);
+		writer->closeArray(false);
+		writer->nextValue(true);
+
+		writer->openArray("rotation", false);
+			Vector3 rotation = node->getRotation();
+
+			writer->writeFloat(rotation.x);
+			writer->nextValue(false);
+			writer->writeFloat(rotation.y);
+			writer->nextValue(false);
+			writer->writeFloat(rotation.z);
+		writer->closeArray(false);
+		writer->nextValue(true);
+
+		writer->openArray("scale", false);
+			Vector3 scale = node->getScale();
+
+			writer->writeFloat(scale.x);
+			writer->nextValue(false);
+			writer->writeFloat(scale.y);
+			writer->nextValue(false);
+			writer->writeFloat(scale.z);
+		writer->closeArray(false);
+
+		if(node->getModel() != NULL){
+			writer->nextValue(true);
+			writer->writeStringPair("mesh", node->getModel()->getMesh()->getId().c_str());
+		}
+		
+		if(node->hasChildren()){
+			writer->nextValue(true);
+
+			writer->openArray("children", true);
+
+			// children
+			for (G3djNode* cnode = dynamic_cast<G3djNode*>(node->getFirstChild()); cnode != NULL; cnode = dynamic_cast<G3djNode*>(node->getNextSibling()))
+			{
+				writeNodeRecursive(cnode);
+			}
+
+			writer->closeArray();
+		}
+
+		writer->closeObject();
 	}
 
 	const char* G3djWriter::getPrimitiveTypeString(int primitiveTypeId){

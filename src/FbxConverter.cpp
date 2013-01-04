@@ -107,7 +107,7 @@ namespace fbxconv {
 			const int childCount = rootNode->GetChildCount();
 			for (int i = 0; i < childCount; ++i)
 			{
-				Node* node = loadNode(rootNode->GetChild(i));
+				G3djNode* node = loadNode(rootNode->GetChild(i));
 				if (node)
 				{
 					scene->add(node);
@@ -154,8 +154,8 @@ namespace fbxconv {
 		}
 	}
 
-	Node* FbxConverter::loadNode(FbxNode* fbxNode){
-		Node* node = NULL;
+	G3djNode* FbxConverter::loadNode(FbxNode* fbxNode){
+		G3djNode* node = NULL;
 
 		// Check if this node has already been loaded
 		const char* id = fbxNode->GetName();
@@ -167,7 +167,7 @@ namespace fbxconv {
 				return node;
 			}
 		}
-		node = new Node();
+		node = new G3djNode();
 		if (id)
 		{
 			node->setId(id);
@@ -192,7 +192,7 @@ namespace fbxconv {
 		const int childCount = fbxNode->GetChildCount();
 		for (int i = 0; i < childCount; ++i)
 		{
-			Node* child = loadNode(fbxNode->GetChild(i));
+			G3djNode* child = loadNode(fbxNode->GetChild(i));
 			if (child)
 			{
 				node->addChild(child);
@@ -201,7 +201,7 @@ namespace fbxconv {
 		return node;
 	}
 
-	void FbxConverter::transformNode(FbxNode* fbxNode, Node* node){
+	void FbxConverter::transformNode(FbxNode* fbxNode, G3djNode* node){
 		FbxAMatrix matrix;
 
 		if (fbxNode->GetCamera() || fbxNode->GetLight())
@@ -217,18 +217,11 @@ namespace fbxconv {
 		float m[16];
 		copyMatrix(matrix, m);
 		node->setTransformMatrix(m);
-	}
 
-	void FbxConverter::copyMatrix(const FbxMatrix& fbxMatrix, float* matrix)
-	{
-		int i = 0;
-		for (int row = 0; row < 4; ++row)
-		{
-			for (int col = 0; col < 4; ++col)
-			{
-				matrix[i++] = (float)fbxMatrix.Get(row, col);
-			}
-		}
+		// Extended note stuff
+		node->setTranslation(fbxNode->LclTranslation.Get().mData[0], fbxNode->LclTranslation.Get().mData[1], fbxNode->LclTranslation.Get().mData[2]);
+		node->setRotation(fbxNode->LclRotation.Get().mData[0], fbxNode->LclRotation.Get().mData[1], fbxNode->LclRotation.Get().mData[2]);
+		node->setScale(fbxNode->LclScaling.Get().mData[0], fbxNode->LclScaling.Get().mData[1], fbxNode->LclScaling.Get().mData[2]);
 	}
 
 	void FbxConverter::loadModel(FbxNode* fbxNode, Node* node){
@@ -802,11 +795,100 @@ namespace fbxconv {
 	}
 
 	void FbxConverter::loadSkin(FbxMesh* fbxMesh, Model* model){
+		const int deformerCount = fbxMesh->GetDeformerCount();
+		for (int i = 0; i < deformerCount; ++i)
+		{
+			FbxDeformer* deformer = fbxMesh->GetDeformer(i);
+			if (deformer->GetDeformerType() == FbxDeformer::eSkin)
+			{
+				FbxSkin* fbxSkin = static_cast<FbxSkin*>(deformer);
 
+				MeshSkin* skin = new MeshSkin();
+
+				std::vector<std::string> jointNames;
+				std::vector<Node*> joints;
+				std::vector<Matrix> bindPoses;
+
+				const int clusterCount = fbxSkin->GetClusterCount();
+				for (int j = 0; j < clusterCount; ++j)
+				{
+					FbxCluster* cluster = fbxSkin->GetCluster(j);
+					assert(cluster);
+					FbxNode* linkedNode = cluster->GetLink();
+					if (linkedNode && linkedNode->GetSkeleton())
+					{
+						const char* jointName = linkedNode->GetName();
+						assert(jointName);
+						jointNames.push_back(jointName);
+						Node* joint = loadNode(linkedNode);
+						assert(joint);
+						joints.push_back(joint);
+
+						FbxAMatrix matrix;
+						cluster->GetTransformLinkMatrix(matrix);
+						Matrix m;
+						copyMatrix(matrix.Inverse(), m);
+						bindPoses.push_back(m);
+					}
+				}
+				skin->setJointNames(jointNames);
+				skin->setJoints(joints);
+				skin->setBindPoses(bindPoses);
+				model->setSkin(skin);
+				break;
+			}
+		}
 	}
 
 	void FbxConverter::loadBindShapes(FbxScene* fbxScene){
+		float m[16];
+		const int poseCount = fbxScene->GetPoseCount();
+		for (int i = 0; i < poseCount; ++i)
+		{
+			FbxPose* pose = fbxScene->GetPose(i);
+			assert(pose);
+			if (pose->IsBindPose() && pose->GetCount() > 0)
+			{
+				FbxNode* fbxNode = pose->GetNode(0);
+				if (fbxNode->GetMesh() != NULL)
+				{
+					Node* node = g3djFile->getNode(fbxNode->GetName());
+					assert(node && node->getModel());
 
+					Model* model = node->getModel();
+					if (model && model->getSkin())
+					{
+						MeshSkin* skin = model->getSkin();
+						copyMatrix(pose->GetMatrix(0), m);
+						skin->setBindShape(m);
+					}
+				}
+			}
+		}
+	}
+
+	void FbxConverter::copyMatrix(const FbxMatrix& fbxMatrix, float* matrix)
+	{
+		int i = 0;
+		for (int row = 0; row < 4; ++row)
+		{
+			for (int col = 0; col < 4; ++col)
+			{
+				matrix[i++] = (float)fbxMatrix.Get(row, col);
+			}
+		}
+	}
+
+	void FbxConverter::copyMatrix(const FbxMatrix& fbxMatrix, Matrix& matrix)
+	{
+		int i = 0;
+		for (int row = 0; row < 4; ++row)
+		{
+			for (int col = 0; col < 4; ++col)
+			{
+				matrix.m[i++] = (float)fbxMatrix.Get(row, col);
+			}
+		}
 	}
 };
 

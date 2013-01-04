@@ -8,6 +8,9 @@
     <Filter Include="src\gameplay">
       <UniqueIdentifier>{5ca4061c-cc63-4c3a-87a6-86da9842b29a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\gameplay-extend">
+      <UniqueIdentifier>{898aab8c-3a05-41b6-8459-ab1760821f43}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\FbxConverter.cpp">
@@ -127,6 +130,9 @@
     <ClCompile Include="src\G3djFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\G3djNode.cpp">
+      <Filter>src\gameplay-extend</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FbxConverter.h">
@@ -245,6 +251,9 @@
     </ClInclude>
     <ClInclude Include="src\G3djFile.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\G3djNode.h">
+      <Filter>src\gameplay-extend</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

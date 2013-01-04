@@ -2,6 +2,7 @@
 #define JFBXFILE_H
 
 #include "gameplay\Scene.h"
+#include "G3djNode.h"
 
 using namespace gameplay;
 
@@ -14,11 +15,11 @@ namespace fbxconv {
 
 		void addScene(Scene *scene);
 
-		void addNode(Node* node);
+		void addNode(G3djNode* node);
 		void addMesh(Mesh* mesh);
 
-		Node* getNode(const char* nodeId);
-		Node* getNode(unsigned int nodeIndex);
+		G3djNode* getNode(const char* nodeId);
+		G3djNode* getNode(unsigned int nodeIndex);
 		Mesh* getMesh(const char* meshId);
 		Mesh* getMesh(unsigned int meshIndex);
 
@@ -27,7 +28,7 @@ namespace fbxconv {
 	private:
 		Scene* scene;
 
-		std::map<std::string, Node*> nodes;
+		std::map<std::string, G3djNode*> nodes;
 		std::map<std::string, Mesh*> meshes;
 	};
 };

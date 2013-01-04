@@ -11,7 +11,9 @@ namespace fbxconv {
 		~JSONWriter();
 
 		void openArray(const char* key);
+		void openArray(const char* key, bool newLine);
 		void closeArray();
+		void closeArray(bool newLine);
 
 		void openObject();
 		void closeObject();

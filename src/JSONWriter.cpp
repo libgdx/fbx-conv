@@ -41,14 +41,27 @@ namespace fbxconv {
 	}
 
 	void JSONWriter::openArray(const char* key){
+		openArray(key, true);
+	}
+
+	void JSONWriter::openArray(const char* key, bool newLine){
 		fprintf(file, "\"%s\" : [", key);
-		indent();
-		newLine();
+		if(newLine)
+		{
+			indent();
+			this->newLine();
+		}
 	}
 
 	void JSONWriter::closeArray(){
-		dedent();
-		newLine();
+		closeArray(true);
+	}
+
+	void JSONWriter::closeArray(bool newLine){
+		if(newLine){
+			dedent();
+			this->newLine();
+		}
 		fprintf(file, "]");
 	}
 
