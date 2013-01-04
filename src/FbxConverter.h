@@ -21,6 +21,7 @@ namespace fbxconv
 		void loadBindShapes(FbxScene* fbxScene);
 		void loadModel(FbxNode* fbxNode, Node* node);
 		Mesh* loadMesh(FbxMesh* fbxMesh);
+		void loadTexturesFromProperty(FbxProperty fbxProperty, G3djMaterial* material);
 		void loadSkin(FbxMesh* fbxMesh, Model* model);
 		bool loadBlendWeights(FbxMesh* fbxMesh, std::vector<std::vector<Vector2> >& weights);
 		

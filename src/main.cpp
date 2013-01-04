@@ -5,7 +5,7 @@ using namespace fbxconv;
 using namespace gameplay;
 
 int main(int argc, const char** argv) {
-	const char* file = "samples/blender/cube.fbx";
+	const char* file = "samples/3dsmax/textured.fbx";
 
 	FbxConverter converter;
 	G3djFile *g3djFile = converter.load(file);

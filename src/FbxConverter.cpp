@@ -298,7 +298,7 @@ namespace fbxconv {
 				}
 				else if(fbxMaterial->GetClassId().Is(FbxSurfacePhong::ClassId)) {
 					
-					material = new G3djMaterial(id, MATERIAL_TYPE::PHONG);
+					material = new G3djMaterial(id, MATERIALTYPE::PHONG);
 
 					// cast to phong
 					FbxSurfacePhong *phongMaterial = ((FbxSurfacePhong *)fbxMaterial);
@@ -327,7 +327,7 @@ namespace fbxconv {
 					g3djFile->addMaterial(material);
 				}
 				else if(fbxMaterial->GetClassId().Is(FbxSurfaceLambert::ClassId)) {
-					material = new G3djMaterial(id, MATERIAL_TYPE::LAMBERT);
+					material = new G3djMaterial(id, MATERIALTYPE::LAMBERT);
 
 					// cast to phong
 					FbxSurfaceLambert *lambertMaterial = ((FbxSurfaceLambert *)fbxMaterial);
@@ -352,6 +352,13 @@ namespace fbxconv {
 				}
 				else
 					printf("Unknown type of material.\n");
+
+				int textureCount = FbxLayerElement::sTypeTextureCount;
+				for(int i=0; i<textureCount; i++){
+					FbxProperty fbxProperty = fbxMaterial->FindProperty(FbxLayerElement::sTextureChannelNames[i]);
+					if(fbxProperty.IsValid())
+						loadTexturesFromProperty(fbxProperty, material);
+				}
 			}
 		}
 
@@ -493,6 +500,43 @@ namespace fbxconv {
 		if (!getMesh(meshId))
 		{
 			meshes[meshId] = mesh;
+		}
+	}
+
+	void FbxConverter::loadTexturesFromProperty(FbxProperty fbxProperty, G3djMaterial* material){
+		int textureCount = fbxProperty.GetSrcObjectCount(FbxTexture::ClassId);
+
+		for(int i=0; i<textureCount; i++){
+			// Try cast to LayeredTexture
+			FbxLayeredTexture *layeredTexture = FbxCast<FbxLayeredTexture>(fbxProperty.GetSrcObject(FbxLayeredTexture::ClassId, i));
+
+			if(layeredTexture){
+				// We have a layered texture, oh joy
+			}
+			else {
+				// Non-layered, get it from the property
+				FbxTexture* fbxTexture = FbxCast <FbxTexture>(fbxProperty.GetSrcObject(FbxTexture::ClassId, i));
+				
+				// Only support file textures for now
+                FbxFileTexture* fbxFileTexture = FbxCast<FbxFileTexture>(fbxTexture);
+                if(fbxFileTexture)
+                {
+					// TODO: This only caters for same material texture reuse, but we probably should support global.
+					if(material->getTexture(fbxTexture->GetName()) == NULL){
+						Texture* texture = new Texture();
+
+						texture->id = fbxTexture->GetName();
+
+						// Assumes files to be in the same folder as fbx, hrm
+						texture->relativePath = fbxFileTexture->GetRelativeFileName();
+						texture->uvScale.set(fbxTexture->GetUVScaling().mData[0], fbxTexture->GetUVScaling().mData[1]);
+						texture->uvTranslation.set(fbxTexture->GetUVTranslation().mData[0],fbxTexture->GetUVTranslation().mData[1]);
+						texture->textureUse = fbxTexture->GetTextureUse();
+
+						material->addTexture(texture);
+					}
+                }
+			}
 		}
 	}
 

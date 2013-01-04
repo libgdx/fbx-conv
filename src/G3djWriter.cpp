@@ -261,7 +261,7 @@ namespace fbxconv {
 
 		writer->writeFloatPair("opacity", material->getOpacity());
 
-		if(material->getMaterialType() == MATERIAL_TYPE::PHONG){
+		if(material->getMaterialType() == MATERIALTYPE::PHONG){
 			writer->nextValue(true);
 
 			writer->openArray("specular", false);
@@ -274,6 +274,42 @@ namespace fbxconv {
 			writer->nextValue(true);
 
 			writer->writeFloatPair("shininess", material->getShininess());
+		}
+
+		if(material->getTextureCount() > 0){
+			writer->nextValue(true);
+			writer->openArray("textures", true);
+
+			for(int i=0; i<material->getTextureCount(); i++){
+				Texture* texture = material->getTexture(i);
+
+				if(i>0)
+					writer->nextValue(true);
+
+				writer->openObject();
+
+				writer->writeStringPair("id", texture->id);
+				writer->nextValue(true);
+				writer->writeStringPair("filename", texture->relativePath);
+				writer->nextValue(true);
+
+				writer->openArray("uvtranslation", false);
+					writer->writeFloat(texture->uvTranslation.x);
+					writer->nextValue(false);
+					writer->writeFloat(texture->uvTranslation.y);
+				writer->closeArray(false);
+				writer->nextValue(true);
+
+				writer->openArray("uvscaling", false);
+					writer->writeFloat(texture->uvScale.x);
+					writer->nextValue(false);
+					writer->writeFloat(texture->uvScale.y);
+				writer->closeArray(false);
+
+				writer->closeObject();
+			}
+
+			writer->closeArray();
 		}
 
 		writer->closeObject();

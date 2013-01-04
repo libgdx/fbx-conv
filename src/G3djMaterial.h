@@ -2,13 +2,16 @@
 #define MATERIAL_H
 
 #include <stdio.h>
+#include <map>
+
 #include "gameplay\Vector3.h"
 #include "gameplay\Vector4.h"
+#include "Texture.h"
 
 using namespace gameplay;
 
 namespace fbxconv {
-	enum MATERIAL_TYPE {
+	enum MATERIALTYPE {
 		LAMBERT = 0,
 		PHONG = 1
 	};
@@ -36,6 +39,13 @@ namespace fbxconv {
 		float getOpacity();
 		float getShininess();
 
+		void addTexture(Texture *texture);
+
+		Texture* getTexture(const char* id);
+		Texture* getTexture(unsigned int index);
+
+		unsigned int getTextureCount();
+
 	private:
 		std::string id;
 		unsigned int materialType;
@@ -46,6 +56,8 @@ namespace fbxconv {
 		Vector3 specular;
 		float shininess;
 		float opacity;
+
+		std::map<std::string, Texture*> textures;
 	};
 };
 

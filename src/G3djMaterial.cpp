@@ -65,4 +65,31 @@ namespace fbxconv {
 	float G3djMaterial::getShininess(){
 		return shininess;
 	}
+
+	void G3djMaterial::addTexture(Texture* texture){
+		textures[texture->id] = texture;
+	}
+
+	unsigned int G3djMaterial::getTextureCount(){
+		return textures.size();
+	}
+
+	Texture* G3djMaterial::getTexture(const char* id){
+		std::map<std::string, Texture*>::iterator it = textures.find(id);
+		if (it != textures.end())
+		{
+			return it->second;
+		}
+		return NULL;
+	}
+
+	Texture* G3djMaterial::getTexture(unsigned int index){
+		// Ugh, this seems ugly. But without having a second flat list I don't see a better way right now.
+		if(index >= textures.size())
+			return NULL;
+		std::map<std::string, Texture*>::iterator i( textures.begin() );
+		std::advance(i, index);
+
+		return i->second;
+	}
 };
