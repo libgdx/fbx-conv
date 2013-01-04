@@ -296,7 +296,7 @@ namespace fbxconv {
 						printf("Materials with shaders aren't supported. Skipping..");
 						continue;
 				}
-				else if(fbxMaterial->ClassId.Is(FbxSurfacePhong::ClassId)) {
+				else if(fbxMaterial->GetClassId().Is(FbxSurfacePhong::ClassId)) {
 					
 					material = new G3djMaterial(id, MATERIAL_TYPE::PHONG);
 
@@ -326,7 +326,7 @@ namespace fbxconv {
 
 					g3djFile->addMaterial(material);
 				}
-				else if(fbxMaterial->ClassId.Is(FbxSurfaceLambert::ClassId)) {
+				else if(fbxMaterial->GetClassId().Is(FbxSurfaceLambert::ClassId)) {
 					material = new G3djMaterial(id, MATERIAL_TYPE::LAMBERT);
 
 					// cast to phong
