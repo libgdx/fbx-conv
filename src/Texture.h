@@ -14,10 +14,16 @@ namespace fbxconv {
 		Vector2 uvTranslation;
 		Vector2 uvScale;
 
-		const char* id;
-
 		unsigned int textureUse;
-		const char* relativePath;
+
+		void setId(const char* id);
+		void setRelativePath(const char* path);
+
+		char* getId();
+		char* getRelativePath();
+	private:
+		char *id;
+		char* relativePath;
 	};
 };
 

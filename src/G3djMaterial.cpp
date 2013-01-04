@@ -67,7 +67,7 @@ namespace fbxconv {
 	}
 
 	void G3djMaterial::addTexture(Texture* texture){
-		textures[texture->id] = texture;
+		textures[texture->getId()] = texture;
 	}
 
 	unsigned int G3djMaterial::getTextureCount(){

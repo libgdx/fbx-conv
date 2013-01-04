@@ -525,10 +525,9 @@ namespace fbxconv {
 					if(material->getTexture(fbxTexture->GetName()) == NULL){
 						Texture* texture = new Texture();
 
-						texture->id = fbxTexture->GetName();
-
+						texture->setId(fbxTexture->GetName());
 						// Assumes files to be in the same folder as fbx, hrm
-						texture->relativePath = fbxFileTexture->GetRelativeFileName();
+						texture->setRelativePath(fbxFileTexture->GetRelativeFileName());
 						texture->uvScale.set(fbxTexture->GetUVScaling().mData[0], fbxTexture->GetUVScaling().mData[1]);
 						texture->uvTranslation.set(fbxTexture->GetUVTranslation().mData[0],fbxTexture->GetUVTranslation().mData[1]);
 						texture->textureUse = fbxTexture->GetTextureUse();

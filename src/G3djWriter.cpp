@@ -288,9 +288,9 @@ namespace fbxconv {
 
 				writer->openObject();
 
-				writer->writeStringPair("id", texture->id);
+				writer->writeStringPair("id", texture->getId());
 				writer->nextValue(true);
-				writer->writeStringPair("filename", texture->relativePath);
+				writer->writeStringPair("filename", texture->getRelativePath());
 				writer->nextValue(true);
 
 				writer->openArray("uvtranslation", false);
