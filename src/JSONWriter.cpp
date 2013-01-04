@@ -70,7 +70,14 @@ namespace fbxconv {
 	}
 
 	void JSONWriter::writeFloat(float value){
-		fprintf(file, "%f", value);
+		if(value == 1.0f)
+			fprintf(file, "%s", "1.0");
+		else if(value == -1.0f)
+			fprintf(file, "%s", "-1.0");
+		else if(value == 0.0f)
+			fprintf(file, "%s", "0.0");
+		else
+			fprintf(file, "%f", value);
 	}
 
 	void JSONWriter::writeInteger(int value){

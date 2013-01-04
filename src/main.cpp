@@ -5,7 +5,7 @@ using namespace fbxconv;
 using namespace gameplay;
 
 int main(int argc, const char** argv) {
-	const char* file = "samples/WoodenBoxOpen02.fbx";
+	const char* file = "samples/cube.fbx";
 
 	FbxConverter converter;
 	G3djFile *g3djFile = converter.load(file);
