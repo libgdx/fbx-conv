@@ -214,8 +214,9 @@ namespace fbxconv {
 
 			writer->openArray("indices");
 			for(int i=0; i<meshPart->getIndicesCount(); i++){
-				writer->writeInteger(meshPart->getIndex(i));
-				writer->nextValue(false);
+				if(i>0)
+					writer->nextValue(false);
+				writer->writeInteger(meshPart->getIndex(i));				
 			}
 			writer->closeArray();
 			writer->closeObject();
@@ -237,7 +238,6 @@ namespace fbxconv {
 			writer->writeFloat(material->getDiffuse().y);
 			writer->nextValue(false);
 			writer->writeFloat(material->getDiffuse().z);
-			writer->nextValue(false);
 		writer->closeArray(false);
 		writer->nextValue(true);
 
@@ -247,7 +247,6 @@ namespace fbxconv {
 			writer->writeFloat(material->getAmbient().y);
 			writer->nextValue(false);
 			writer->writeFloat(material->getAmbient().z);
-			writer->nextValue(false);
 		writer->closeArray(false);
 		writer->nextValue(true);
 
@@ -257,7 +256,6 @@ namespace fbxconv {
 			writer->writeFloat(material->getEmissive().y);
 			writer->nextValue(false);
 			writer->writeFloat(material->getEmissive().z);
-			writer->nextValue(false);
 		writer->closeArray(false);
 		writer->nextValue(true);
 
@@ -272,7 +270,6 @@ namespace fbxconv {
 				writer->writeFloat(material->getSpecular().y);
 				writer->nextValue(false);
 				writer->writeFloat(material->getSpecular().z);
-				writer->nextValue(false);
 			writer->closeArray(false);
 			writer->nextValue(true);
 

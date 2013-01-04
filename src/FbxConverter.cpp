@@ -283,7 +283,7 @@ namespace fbxconv {
 
 				// we need a name for the material
 				const char* id = fbxMaterial->GetName();
-				if(id || strlen(id) == 0){
+				if((!id) || strlen(id) == 0){
 					std::stringstream ss;
 					ss << "material" << i;
 					id = ss.str().c_str();
