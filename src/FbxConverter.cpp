@@ -108,7 +108,7 @@ namespace fbxconv {
 			const int childCount = rootNode->GetChildCount();
 			for (int i = 0; i < childCount; ++i)
 			{
-				G3djNode* node = loadNode(rootNode->GetChild(i));
+				G3djNode* node = loadNode(rootNode->GetChild(i), true);
 				if (node)
 				{
 					scene->add(node);
@@ -155,7 +155,7 @@ namespace fbxconv {
 		}
 	}
 
-	G3djNode* FbxConverter::loadNode(FbxNode* fbxNode){
+	G3djNode* FbxConverter::loadNode(FbxNode* fbxNode, bool isRoot){
 		G3djNode* node = NULL;
 
 		// Check if this node has already been loaded
@@ -173,7 +173,8 @@ namespace fbxconv {
 		{
 			node->setId(id);
 		}
-		g3djFile->addNode(node);
+		if(isRoot)
+			g3djFile->addNode(node);
 
 		transformNode(fbxNode, node);
     
@@ -193,7 +194,7 @@ namespace fbxconv {
 		const int childCount = fbxNode->GetChildCount();
 		for (int i = 0; i < childCount; ++i)
 		{
-			G3djNode* child = loadNode(fbxNode->GetChild(i));
+			G3djNode* child = loadNode(fbxNode->GetChild(i), false);
 			if (child)
 			{
 				node->addChild(child);
@@ -946,7 +947,7 @@ namespace fbxconv {
 						const char* jointName = linkedNode->GetName();
 						assert(jointName);
 						jointNames.push_back(jointName);
-						Node* joint = loadNode(linkedNode);
+						Node* joint = loadNode(linkedNode, false);
 						assert(joint);
 						joints.push_back(joint);
 

@@ -17,7 +17,7 @@ namespace fbxconv
 	private:
 		void loadScene(FbxScene* fbxScene);
 
-		G3djNode* loadNode(FbxNode* fbxNode);
+		G3djNode* loadNode(FbxNode* fbxNode, bool isRoot);
 		void loadBindShapes(FbxScene* fbxScene);
 		void loadModel(FbxNode* fbxNode, Node* node);
 		Mesh* loadMesh(FbxMesh* fbxMesh);
