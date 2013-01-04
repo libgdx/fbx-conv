@@ -136,6 +136,9 @@
     <ClCompile Include="src\G3djMaterial.cpp">
       <Filter>src\gameplay-extend</Filter>
     </ClCompile>
+    <ClCompile Include="src\Texture.cpp">
+      <Filter>src\gameplay-extend</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FbxConverter.h">
@@ -259,6 +262,9 @@
       <Filter>src\gameplay-extend</Filter>
     </ClInclude>
     <ClInclude Include="src\G3djMaterial.h">
+      <Filter>src\gameplay-extend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Texture.h">
       <Filter>src\gameplay-extend</Filter>
     </ClInclude>
   </ItemGroup>
