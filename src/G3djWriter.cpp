@@ -1,4 +1,5 @@
 #include "G3djWriter.h"
+#include "G3djMeshPart.h"
 #include <sstream>
 
 namespace fbxconv {
@@ -202,11 +203,8 @@ namespace fbxconv {
 			if(partNumber > 0)
 				writer->nextValue(true);
 
-			std::stringstream ss;
-			ss << "part" << partNumber;
-
 			writer->openObject();
-			writer->writeStringPair("id", ss.str().c_str());
+			writer->writeStringPair("id", meshPart->getId().c_str());
 			writer->nextValue(true);
 
 			writer->writeStringPair("type", getPrimitiveTypeString(meshPart->_primitiveType));
@@ -359,6 +357,30 @@ namespace fbxconv {
 		if(node->getModel() != NULL){
 			writer->nextValue(true);
 			writer->writeStringPair("mesh", node->getModel()->getMesh()->getId().c_str());
+
+			if(node->getModel()->getMesh()->parts.size() > 0){
+				writer->nextValue(true);
+
+				writer->openArray("materials", true);
+
+				Mesh* mesh = node->getModel()->getMesh();
+				for (std::vector<MeshPart*>::iterator i = mesh->parts.begin(); i != mesh->parts.end(); ++i)
+				{
+					G3djMeshPart* meshPart = dynamic_cast<G3djMeshPart*>(*i);
+					if(i != mesh->parts.begin())
+						writer->nextValue(true);
+
+					writer->openObject();
+
+					writer->writeStringPair("meshpartid", meshPart->getId().c_str());
+					writer->nextValue(true);
+					writer->writeStringPair("materialid", meshPart->getMaterialId()); 
+
+					writer->closeObject();
+				}
+
+				writer->closeArray(true);
+			}
 		}
 		
 		if(node->hasChildren()){

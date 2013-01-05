@@ -1,6 +1,8 @@
 #include "FbxConverter.h"
 #include "gameplay\Scene.h"
+#include "G3djMeshPart.h"
 #include <sstream>
+
 
 using namespace gameplay;
 
@@ -266,12 +268,19 @@ namespace fbxconv {
 
 		// The number of mesh parts is equal to the number of materials that affect this mesh.
 		// There is always at least one mesh part.
-		std::vector<MeshPart*> meshParts;
+		std::vector<G3djMeshPart*> meshParts;
 		const int materialCount = fbxMesh->GetNode()->GetMaterialCount();
 		int meshPartSize = (materialCount > 0) ? materialCount : 1;
 		for (int i = 0; i < meshPartSize; ++i)
 		{
-			meshParts.push_back(new MeshPart());
+			G3djMeshPart* meshPart = new G3djMeshPart();
+
+			std::stringstream ss;
+			ss << "part" << i;
+
+			meshPart->setId(ss.str());
+
+			meshParts.push_back(meshPart);
 		}
 
 		// Load the individual Materials for this node, if they haven't already been loaded
@@ -409,11 +418,34 @@ namespace fbxconv {
 
 				// Determine which mesh part this vertex index should be added to based on the material that affects it.
 				int meshPartIndex = 0;
-				const int elementMatrialCount = fbxMesh->GetElementMaterialCount();
-				for (int k = 0; k < elementMatrialCount; ++k)
-				{
-					FbxGeometryElementMaterial* elementMaterial = fbxMesh->GetElementMaterial(k);
-					meshPartIndex = elementMaterial->GetIndexArray().GetAt(polyIndex);
+				const int elementMaterialCount = fbxMesh->GetElementMaterialCount();
+
+				// Should find a better way to do this, not every vertex :/
+				if(elementMaterialCount == 0){
+					// one material for the entire mesh, easy
+					FbxGeometryElementMaterial* elementMaterial = fbxMesh->GetElementMaterial(0);
+
+					FbxSurfaceMaterial* fbxMaterial = fbxMesh->GetNode()->GetMaterial(elementMaterial->GetIndexArray().GetAt(0));    
+					int matId = elementMaterial->GetIndexArray().GetAt(0);
+					if(matId >= 0)
+					{
+						meshParts[meshPartIndex]->setMaterialId(fbxMaterial->GetName()); 
+					}
+				}
+				else {
+					// we have multiple materials for the mesh
+					for (int k = 0; k < elementMaterialCount; ++k)
+					{
+						FbxGeometryElementMaterial* elementMaterial = fbxMesh->GetElementMaterial(k);
+						meshPartIndex = elementMaterial->GetIndexArray().GetAt(polyIndex);
+
+						FbxSurfaceMaterial* fbxMaterial = fbxMesh->GetNode()->GetMaterial(meshPartIndex);
+						
+						if(meshPartIndex >= 0)
+						{
+							meshParts[meshPartIndex]->setMaterialId(fbxMaterial->GetName());
+						}
+					}
 				}
 
 				// Add the vertex to the mesh if it hasn't already been added and find the vertex index.

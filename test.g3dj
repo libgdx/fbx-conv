@@ -69,7 +69,13 @@
 			"translation" : [0.0,0.0,0.0],
 			"rotation" : [0.0,0.0,0.0],
 			"scale" : [1.0,1.0,1.0],
-			"mesh" : "Box01_Mesh"
+			"mesh" : "Box01_Mesh",
+			"materials" : [
+				{
+					"meshpartid" : "part0",
+					"materialid" : "02 - Default"
+				}
+			]
 		}
 	],
 	"animations" : [

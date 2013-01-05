@@ -125,6 +125,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FbxConverter.h" />
+    <ClInclude Include="src\G3djMeshPart.h" />
     <ClInclude Include="src\G3djNode.h" />
     <ClInclude Include="src\G3djWriter.h" />
     <ClInclude Include="src\gameplay\Animation.h" />
