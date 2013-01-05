@@ -39,7 +39,7 @@
 			"textures" : [
 				{
 					"id" : "cube",
-					"filename" : "..\Pictures\checkboard.png",
+					"filename" : "checkboard.png",
 					"uvtranslation" : [0.0,0.0],
 					"uvscaling" : [1.0,1.0],
 					"type" : "STANDARD"
@@ -58,7 +58,7 @@
 			"textures" : [
 				{
 					"id" : "Polygon",
-					"filename" : "..\Pictures\checkboard1.png",
+					"filename" : "checkboard1.png",
 					"uvtranslation" : [0.0,0.0],
 					"uvscaling" : [1.0,1.0],
 					"type" : "STANDARD"

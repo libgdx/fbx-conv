@@ -559,8 +559,12 @@ namespace fbxconv {
 						Texture* texture = new Texture();
 
 						texture->setId(fbxTexture->GetName());
+						// Extract fileName from path, is this cross-platform safe?
+						std::string absolutePath(fbxFileTexture->GetFileName());
+						unsigned int npos = absolutePath.find_last_of("/\\");
+
 						// Assumes files to be in the same folder as fbx, hrm
-						texture->setRelativePath(fbxFileTexture->GetRelativeFileName());
+						texture->setRelativePath(absolutePath.substr(npos+1).c_str());
 						texture->uvScale.set(fbxTexture->GetUVScaling().mData[0], fbxTexture->GetUVScaling().mData[1]);
 						texture->uvTranslation.set(fbxTexture->GetUVTranslation().mData[0],fbxTexture->GetUVTranslation().mData[1]);
 						texture->textureUse = fbxTexture->GetTextureUse();
