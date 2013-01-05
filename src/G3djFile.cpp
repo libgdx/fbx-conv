@@ -74,7 +74,7 @@ namespace fbxconv {
 
 	G3djMaterial* G3djFile::getMaterial(unsigned int materialIndex){
 		// Ugh, this seems ugly. But without having a second flat list I don't see a better way right now.
-		if(materialIndex >= meshes.size())
+		if(materialIndex >= materials.size())
 			return NULL;
 		std::map<std::string, G3djMaterial*>::iterator i( materials.begin() );
 		std::advance(i, materialIndex);
