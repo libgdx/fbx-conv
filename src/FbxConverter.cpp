@@ -8,8 +8,9 @@ using namespace gameplay;
 
 namespace fbxconv {
 
-	FbxConverter::FbxConverter(){
+	FbxConverter::FbxConverter(FbxConverterConfig config){
 		g3djFile = new G3djFile();
+		this->config = config;
 	}
 
 	FbxConverter::~FbxConverter(){
@@ -660,7 +661,10 @@ namespace fbxconv {
 		{
 			FbxVector2 uvValue = uvs->GetDirectArray().GetAt(uvIndex);
 			vertex->texCoord[uvSetIndex].x = (float)uvValue[0];
-			vertex->texCoord[uvSetIndex].y = (float)uvValue[1];
+			if(config.flipV)
+				vertex->texCoord[uvSetIndex].y = 1.0f-(float)uvValue[1];
+			else
+				vertex->texCoord[uvSetIndex].y = (float)uvValue[1];
 		}
 	}
 

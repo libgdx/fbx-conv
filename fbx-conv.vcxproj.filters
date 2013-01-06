@@ -270,6 +270,9 @@
     <ClInclude Include="src\G3djMeshPart.h">
       <Filter>src\gameplay-extend</Filter>
     </ClInclude>
+    <ClInclude Include="src\FbxConverterConfig.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\gameplay\Curve.inl">

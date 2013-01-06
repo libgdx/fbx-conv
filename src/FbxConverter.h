@@ -4,13 +4,13 @@
 #include "G3djFile.h"
 #include <fbxsdk.h>
 
+#include "FbxConverterConfig.h"
+
 namespace fbxconv
 {
-	class JFbxFile;
-
 	class FbxConverter {
 	public:
-		FbxConverter();
+		FbxConverter(FbxConverterConfig config);
 		~FbxConverter();
 
 		G3djFile* load(const char* fileName);
@@ -42,6 +42,7 @@ namespace fbxconv
 		void saveMesh(FbxUInt64 meshId, Mesh* mesh);
 
 		G3djFile* g3djFile;
+		FbxConverterConfig config;
 
 		// The collection of meshes for the purpose of making sure that the same model is not loaded twice. (Mesh instancing)
 		std::map<FbxUInt64, Mesh*> meshes;
