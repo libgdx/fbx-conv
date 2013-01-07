@@ -5,8 +5,8 @@ namespace fbxconv {
 		translation.set(x, y, z);
 	}
 	
-	void G3djNode::setRotation(float x, float y, float z){
-		rotation.set(x, y, z);
+	void G3djNode::setRotation(float x, float y, float z, float w){
+		rotation.set(x, y, z, w);
 	}
 
 	void G3djNode::setScale(float x, float y, float z){
@@ -17,7 +17,7 @@ namespace fbxconv {
 		return translation;
 	}
 
-	Vector3 G3djNode::getRotation(){
+	Quaternion G3djNode::getRotation(){
 		return rotation;
 	}
 

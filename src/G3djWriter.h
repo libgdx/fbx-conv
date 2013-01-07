@@ -21,6 +21,7 @@ namespace fbxconv {
 		void writeMeshParts(Mesh* mesh);
 		void writeMaterial(G3djMaterial *material);
 		void writeNodeRecursive(G3djNode* node);
+		void writeAnimationClip(AnimationClip* animationClip);
 
 		const char* getPrimitiveTypeString(int primitiveTypeId);
 		const char* getMaterialTypeString(int primitiveTypeId);

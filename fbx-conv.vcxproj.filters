@@ -139,6 +139,12 @@
     <ClCompile Include="src\Texture.cpp">
       <Filter>src\gameplay-extend</Filter>
     </ClCompile>
+    <ClCompile Include="src\G3djAnimation.cpp">
+      <Filter>src\gameplay-extend</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AnimationClip.cpp">
+      <Filter>src\gameplay-extend</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FbxConverter.h">
@@ -272,6 +278,15 @@
     </ClInclude>
     <ClInclude Include="src\FbxConverterConfig.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\G3djAnimation.h">
+      <Filter>src\gameplay-extend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Keyframe.h">
+      <Filter>src\gameplay-extend</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AnimationClip.h">
+      <Filter>src\gameplay-extend</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

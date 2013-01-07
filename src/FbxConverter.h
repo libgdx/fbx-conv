@@ -2,6 +2,7 @@
 #define FBXCONVERTER_H
 
 #include "G3djFile.h"
+#include "G3djAnimation.h"
 #include <fbxsdk.h>
 
 #include "FbxConverterConfig.h"
@@ -27,8 +28,8 @@ namespace fbxconv
 		void loadSkin(FbxMesh* fbxMesh, Model* model);
 		bool loadBlendWeights(FbxMesh* fbxMesh, std::vector<std::vector<Vector2> >& weights);
 
-		void loadAnimationLayer(FbxAnimLayer* fbxAnimLayer, FbxNode* fbxNode);
-		void loadAnimationChannels(FbxAnimLayer* animLayer, FbxNode* fbxNode, Animation* animation);
+		void loadAnimationLayer(FbxAnimLayer* fbxAnimLayer, FbxNode* fbxNode, AnimationClip* clip);
+		void loadAnimationChannels(FbxAnimLayer* animLayer, FbxNode* fbxNode, G3djAnimation* animation, AnimationClip* clip);
 
 		void loadTextureCoords(FbxMesh*, const FbxGeometryElementUV*, int, int, int, int, Vertex*);
 		void loadNormal(FbxMesh* fbxMesh, int vertexIndex, int controlPointIndex, Vertex* vertex);
@@ -49,7 +50,6 @@ namespace fbxconv
 
 		FbxAnimCurve* getCurve(FbxPropertyT<FbxDouble3>& prop, FbxAnimLayer* animLayer, const char* pChannel);
 		void findMinMaxTime(FbxAnimCurve* animCurve, float* startTime, float* stopTime, float* frameRate);
-		void appendKeyFrame(FbxNode*, AnimationChannel*, float, const Vector3&, const Quaternion&, const Vector3&);
 		Mesh* getMesh(FbxUInt64 meshId);
 		void saveMesh(FbxUInt64 meshId, Mesh* mesh);
 

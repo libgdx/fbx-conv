@@ -29,8 +29,8 @@ namespace fbxconv {
 		materials[material->getId()] = material;
 	}
 
-	void G3djFile::addAnimation(Animation* animation){
-		animations[animation->getId()] = animation;
+	void G3djFile::addAnimationClip(AnimationClip* animationClip){
+		animationClips.push_back(animationClip);
 	}
 
 	G3djNode* G3djFile::getNodeFlatList(const char* nodeId){
@@ -99,23 +99,8 @@ namespace fbxconv {
 		return i->second;
 	}
 
-	Animation* G3djFile::getAnimation(const char* animationId){
-		std::map<std::string, Animation*>::iterator it = animations.find(animationId);
-		if (it != animations.end())
-		{
-			return it->second;
-		}
-		return NULL;
-	}
-
-	Animation* G3djFile::getAnimation(unsigned int animationIndex){
-		// Ugh, this seems ugly. But without having a second flat list I don't see a better way right now.
-		if(animationIndex >= animations.size())
-			return NULL;
-		std::map<std::string, Animation*>::iterator i( animations.begin() );
-		std::advance(i, animationIndex);
-
-		return i->second;
+	AnimationClip* G3djFile::getAnimationClip(unsigned int clipIndex){
+		return animationClips[clipIndex];
 	}
 
 	unsigned int G3djFile::getNodeCount(){
@@ -130,7 +115,7 @@ namespace fbxconv {
 		return materials.size();
 	}
 
-	unsigned int G3djFile::getAnimationCount(){
-		return animations.size();
+	unsigned int G3djFile::getAnimationClipCount(){
+		return animationClips.size();
 	}
 };

@@ -41,14 +41,14 @@ namespace fbxconv {
 		importer->Import(fbxScene);
 		importer->Destroy();
 
-		// Determine if animations should be grouped.
-		if (isGroupAnimationPossible(fbxScene))
+		// Determine if animations should be grouped. Do we want this?!
+		/*if (isGroupAnimationPossible(fbxScene))
 		{
 			if (promptUserGroupAnimations())
 			{
 				autoGroupAnimations = true;
 			}
-		}
+		}*/
 
 		printf("Loading Scene.\n");
 		loadScene(fbxScene);
@@ -223,13 +223,21 @@ namespace fbxconv {
 		}
 
 		float m[16];
+		Matrix tmatrix;
 		copyMatrix(matrix, m);
+		copyMatrix(matrix, tmatrix);
 		node->setTransformMatrix(m);
 
+		Vector3 translation;
+		Vector3 scale;
+		Quaternion rotation;
+
+		tmatrix.decompose(&scale, &rotation, &translation);
+
 		// Extended note stuff
-		node->setTranslation(fbxNode->LclTranslation.Get().mData[0], fbxNode->LclTranslation.Get().mData[1], fbxNode->LclTranslation.Get().mData[2]);
-		node->setRotation(fbxNode->LclRotation.Get().mData[0], fbxNode->LclRotation.Get().mData[1], fbxNode->LclRotation.Get().mData[2]);
-		node->setScale(fbxNode->LclScaling.Get().mData[0], fbxNode->LclScaling.Get().mData[1], fbxNode->LclScaling.Get().mData[2]);
+		node->setTranslation(translation.x, translation.y, translation.z);
+		node->setRotation(rotation.x, rotation.y, rotation.z, rotation.w);
+		node->setScale(scale.x, scale.y, scale.z);
 	}
 
 	void FbxConverter::loadModel(FbxNode* fbxNode, Node* node){
@@ -1049,47 +1057,39 @@ namespace fbxconv {
 		{
 			FbxAnimStack* animStack = FbxCast<FbxAnimStack>(fbxScene->GetSrcObject(FBX_TYPE(FbxAnimStack), i));
 			int nbAnimLayers = animStack->GetMemberCount(FBX_TYPE(FbxAnimLayer));
+
+			AnimationClip* animationClip = new AnimationClip();
+			animationClip->setClipId(animStack->GetName());
+
 			for (int l = 0; l < nbAnimLayers; ++l)
 			{
 				FbxAnimLayer* animLayer = animStack->GetMember(FBX_TYPE(FbxAnimLayer), l);
-				loadAnimationLayer(animLayer, fbxScene->GetRootNode());
+				loadAnimationLayer(animLayer, fbxScene->GetRootNode(), animationClip);
 			}
+
+			g3djFile->addAnimationClip(animationClip);
 		}
 	}
 
-	void FbxConverter::loadAnimationLayer(FbxAnimLayer* fbxAnimLayer, FbxNode* fbxNode)
+	void FbxConverter::loadAnimationLayer(FbxAnimLayer* fbxAnimLayer, FbxNode* fbxNode, AnimationClip* clip)
 	{
 		bool animationGroupId = false;
 		const char* name = fbxNode->GetName();
-		// Check if this node's animations are supposed to be grouped
-		// TODO: See if we want to group stuff or not
-		/*if (name && arguments.containsGroupNodeId(name))
-		{
-			animationGroupId = true;
-			_groupAnimation = new Animation();
-			_groupAnimation->setId(arguments.getAnimationId(name));
-		}*/
-		Animation* animation = groupAnimation;
-		if (!animation)
-		{
-			animation = new Animation();
-			animation->setId(name);
-		}
-		loadAnimationChannels(fbxAnimLayer, fbxNode, animation);
+		
+		G3djAnimation* animation = new G3djAnimation();
+		animation->setId(name);
+		animation->setBoneId(name);
+		
+		loadAnimationChannels(fbxAnimLayer, fbxNode, animation, clip);
 
 		const int childCount = fbxNode->GetChildCount();
 		for (int modelCount = 0; modelCount < childCount; ++modelCount)
 		{
-			loadAnimationLayer(fbxAnimLayer, fbxNode->GetChild(modelCount));
-		}
-		if (animationGroupId)
-		{
-			g3djFile->addAnimation(groupAnimation);
-			groupAnimation = NULL;
+			loadAnimationLayer(fbxAnimLayer, fbxNode->GetChild(modelCount), clip);
 		}
 	}
 
-	void FbxConverter::loadAnimationChannels(FbxAnimLayer* animLayer, FbxNode* fbxNode, Animation* animation)
+	void FbxConverter::loadAnimationChannels(FbxAnimLayer* animLayer, FbxNode* fbxNode, G3djAnimation* animation, AnimationClip* clip)
 	{
 		const char* name = fbxNode->GetName();
 		//Node* node = _gamePlayFile.getNode(name);
@@ -1163,102 +1163,6 @@ namespace fbxconv {
 		assert(startTime != FLT_MAX);
 		assert(stopTime >= 0.0f);
 
-		// Determine which animation channels to create
-		std::vector<unsigned int> channelAttribs;
-		if (sx && sy && sz)
-		{
-			if (rx || ry || rz)
-			{
-				if (tx && ty && tz)
-				{
-					channelAttribs.push_back(Transform::ANIMATE_SCALE_ROTATE_TRANSLATE);
-				}
-				else
-				{
-					channelAttribs.push_back(Transform::ANIMATE_SCALE_ROTATE);
-					if (tx)
-						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_X);
-					if (ty)
-						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_Y);
-					if (tz)
-						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_Z);
-				}
-			}
-			else
-			{
-				if (tx && ty && tz)
-				{
-					channelAttribs.push_back(Transform::ANIMATE_SCALE_TRANSLATE);
-				}
-				else
-				{
-					channelAttribs.push_back(Transform::ANIMATE_SCALE);
-					if (tx)
-						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_X);
-					if (ty)
-						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_Y);
-					if (tz)
-						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_Z);
-				}
-			}
-		}
-		else
-		{
-			if (rx || ry || rz)
-			{
-				if (tx && ty && tz)
-				{
-					channelAttribs.push_back(Transform::ANIMATE_ROTATE_TRANSLATE);
-				}
-				else
-				{
-					channelAttribs.push_back(Transform::ANIMATE_ROTATE);
-					if (tx)
-						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_X);
-					if (ty)
-						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_Y);
-					if (tz)
-						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_Z);
-				}
-			}
-			else
-			{
-				if (tx && ty && tz)
-				{
-					channelAttribs.push_back(Transform::ANIMATE_TRANSLATE);
-				}
-				else
-				{
-					if (tx)
-						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_X);
-					if (ty)
-						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_Y);
-					if (tz)
-						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_Z);
-				}
-			}
-
-			if (sx)
-				channelAttribs.push_back(Transform::ANIMATE_SCALE_X);
-			if (sy)
-				channelAttribs.push_back(Transform::ANIMATE_SCALE_Y);
-			if (sz)
-				channelAttribs.push_back(Transform::ANIMATE_SCALE_Z);
-		}
-		unsigned int channelCount = channelAttribs.size();
-		assert(channelCount > 0);
-
-		// Allocate channel list
-		int channelStart = animation->getAnimationChannelCount();
-		for (unsigned int i = 0; i < channelCount; ++i)
-		{
-			AnimationChannel* channel = new AnimationChannel();
-			channel->setTargetId(name);
-			channel->setInterpolation(AnimationChannel::LINEAR);
-			channel->setTargetAttribute(channelAttribs[i]);
-			animation->add(channel);
-		}
-
 		// Evaulate animation curve in increments of frameRate and populate channel data.
 		FbxAMatrix fbxMatrix;
 		Matrix matrix;
@@ -1282,146 +1186,17 @@ namespace fbxconv {
 			matrix.decompose(&scale, &rotation, &translation);
 			rotation.normalize();
 
-			// Append keyframe data to all channels
-			for (unsigned int i = channelStart, channelEnd = channelStart + channelCount; i < channelEnd; ++i)
-			{
-				appendKeyFrame(fbxNode, animation->getAnimationChannel(i), time, scale, rotation, translation);
-			}
+			// Append keyframe data to animation
+			Keyframe* keyframe = new Keyframe();
+			keyframe->keytime = time;
+			keyframe->translation.set(translation);
+			keyframe->rotation.set(rotation);
+			keyframe->scale.set(scale);
+
+			animation->addKeyframe(keyframe);
 		}
 
-		if (groupAnimation != animation)
-		{
-			// TODO explain
-			g3djFile->addAnimation(animation);
-		}
-	}
-
-	void FbxConverter::appendKeyFrame(FbxNode* fbxNode, AnimationChannel* channel, float time, const Vector3& scale, const Quaternion& rotation, const Vector3& translation)
-	{
-		// Write key time
-		channel->getKeyTimes().push_back(time);
-
-		// Write key values
-		std::vector<float>& keyValues = channel->getKeyValues();
-		switch (channel->getTargetAttribute())
-		{
-			case Transform::ANIMATE_SCALE:
-			{
-				keyValues.push_back(scale.x);
-				keyValues.push_back(scale.y);
-				keyValues.push_back(scale.z);
-			}
-			break;
-
-			case Transform::ANIMATE_SCALE_X:
-			{
-				keyValues.push_back(scale.x);
-			}
-			break;
-
-			case Transform::ANIMATE_SCALE_Y:
-			{
-				keyValues.push_back(scale.y);
-			}
-			break;
-
-			case Transform::ANIMATE_SCALE_Z:
-			{
-				keyValues.push_back(scale.z);
-			}
-			break;
-
-			case Transform::ANIMATE_ROTATE:
-			{
-				keyValues.push_back(rotation.x);
-				keyValues.push_back(rotation.y);
-				keyValues.push_back(rotation.z);
-				keyValues.push_back(rotation.w);
-			}
-			break;
-
-			case Transform::ANIMATE_TRANSLATE:
-			{
-				keyValues.push_back(translation.x);
-				keyValues.push_back(translation.y);
-				keyValues.push_back(translation.z);
-			}
-			break;
-
-			case Transform::ANIMATE_TRANSLATE_X:
-			{
-				keyValues.push_back(translation.x);
-			}
-			break;
-
-			case Transform::ANIMATE_TRANSLATE_Y:
-			{
-				keyValues.push_back(translation.y);
-			}
-			break;
-
-			case Transform::ANIMATE_TRANSLATE_Z:
-			{
-				keyValues.push_back(translation.z);
-			}
-			break;
-
-			case Transform::ANIMATE_ROTATE_TRANSLATE:
-			{
-				keyValues.push_back(rotation.x);
-				keyValues.push_back(rotation.y);
-				keyValues.push_back(rotation.z);
-				keyValues.push_back(rotation.w);
-				keyValues.push_back(translation.x);
-				keyValues.push_back(translation.y);
-				keyValues.push_back(translation.z);
-			}
-			break;
-
-			case Transform::ANIMATE_SCALE_ROTATE_TRANSLATE:
-			{
-				keyValues.push_back(scale.x);
-				keyValues.push_back(scale.y);
-				keyValues.push_back(scale.z);
-				keyValues.push_back(rotation.x);
-				keyValues.push_back(rotation.y);
-				keyValues.push_back(rotation.z);
-				keyValues.push_back(rotation.w);
-				keyValues.push_back(translation.x);
-				keyValues.push_back(translation.y);
-				keyValues.push_back(translation.z);
-			}
-			break;
-
-			case Transform::ANIMATE_SCALE_TRANSLATE:
-			{
-				keyValues.push_back(scale.x);
-				keyValues.push_back(scale.y);
-				keyValues.push_back(scale.z);
-				keyValues.push_back(translation.x);
-				keyValues.push_back(translation.y);
-				keyValues.push_back(translation.z);
-			}
-			break;
-
-			case Transform::ANIMATE_SCALE_ROTATE:
-			{
-				keyValues.push_back(scale.x);
-				keyValues.push_back(scale.y);
-				keyValues.push_back(scale.z);
-				keyValues.push_back(rotation.x);
-				keyValues.push_back(rotation.y);
-				keyValues.push_back(rotation.z);
-				keyValues.push_back(rotation.w);
-			}
-			break;
-
-			default:
-			{
-				LOG(1, "Warning: Invalid animatoin target (%d) attribute for node: %s.\n", channel->getTargetAttribute(), fbxNode->GetName());
-			}
-			return;
-		}
+		clip->addAnimation(animation);
 	}
 
 	void FbxConverter::copyMatrix(const FbxMatrix& fbxMatrix, float* matrix)

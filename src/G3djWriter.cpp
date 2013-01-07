@@ -94,6 +94,16 @@ namespace fbxconv {
 
 		// Write Animations
 		writer->openArray("animations");
+
+		for(unsigned int i=0; i<file->getAnimationClipCount(); i++){
+			AnimationClip* animationClip = file->getAnimationClip(i);
+
+			if(i>0)
+				writer->nextValue(true);
+
+			writeAnimationClip(animationClip);
+		}
+
 		writer->closeArray();
 
 		// Main object closing
@@ -334,13 +344,15 @@ namespace fbxconv {
 		writer->nextValue(true);
 
 		writer->openArray("rotation", false);
-			Vector3 rotation = node->getRotation();
+			Quaternion rotation = node->getRotation();
 
 			writer->writeFloat(rotation.x);
 			writer->nextValue(false);
 			writer->writeFloat(rotation.y);
 			writer->nextValue(false);
 			writer->writeFloat(rotation.z);
+			writer->nextValue(false);
+			writer->writeFloat(rotation.w);
 		writer->closeArray(false);
 		writer->nextValue(true);
 
@@ -391,11 +403,84 @@ namespace fbxconv {
 			// children
 			for (G3djNode* cnode = dynamic_cast<G3djNode*>(node->getFirstChild()); cnode != NULL; cnode = dynamic_cast<G3djNode*>(cnode->getNextSibling()))
 			{
+				if(cnode != node->getFirstChild())
+					writer->nextValue(true);
 				writeNodeRecursive(cnode);
 			}
 
 			writer->closeArray();
 		}
+
+		writer->closeObject();
+	}
+
+	void G3djWriter::writeAnimationClip(AnimationClip* animationClip){
+		writer->openObject();
+
+		writer->writeStringPair("id", animationClip->getClipId());
+		writer->nextValue(true);
+		writer->openArray("bones", true);
+
+		for(int i=0; i<animationClip->getAnimationCount(); i++){
+			G3djAnimation* animation = animationClip->getAnimation(i);
+
+			if(i>0)
+				writer->nextValue(true);
+
+			writer->openObject();
+			writer->writeStringPair("boneId", animation->getBoneId());
+			writer->nextValue(true);
+
+			writer->openArray("keyframes", true);
+
+			for(int j=0; j<animation->getKeyframeCount(); j++){
+				Keyframe* keyframe = animation->getKeyframe(j);
+
+				if(j>0)
+					writer->nextValue(true);
+
+				writer->openObject();
+
+				writer->writeFloatPair("keytime", keyframe->keytime);
+				writer->nextValue(true);
+
+				writer->openArray("translation", false);
+				writer->writeFloat(keyframe->translation.x);
+				writer->nextValue(false);
+				writer->writeFloat(keyframe->translation.y);
+				writer->nextValue(false);
+				writer->writeFloat(keyframe->translation.z);
+				writer->closeArray(false);
+				writer->nextValue(true);
+
+				writer->openArray("rotation", false);
+				writer->writeFloat(keyframe->rotation.x);
+				writer->nextValue(false);
+				writer->writeFloat(keyframe->rotation.y);
+				writer->nextValue(false);
+				writer->writeFloat(keyframe->rotation.z);
+				writer->nextValue(false);
+				writer->writeFloat(keyframe->rotation.w);
+				writer->closeArray(false);
+				writer->nextValue(true);
+
+				writer->openArray("scale", false);
+				writer->writeFloat(keyframe->scale.x);
+				writer->nextValue(false);
+				writer->writeFloat(keyframe->scale.y);
+				writer->nextValue(false);
+				writer->writeFloat(keyframe->scale.z);
+				writer->closeArray(false);
+
+				writer->closeObject();
+			}
+
+			writer->closeArray(true);
+
+			writer->closeObject();
+		}
+
+		writer->closeArray(true);
 
 		writer->closeObject();
 	}

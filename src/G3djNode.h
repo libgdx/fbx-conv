@@ -11,16 +11,16 @@ namespace fbxconv {
 	class G3djNode : public Node {
 	public:
 		void setTranslation(float x, float y, float z);
-		void setRotation(float x, float y, float z);
+		void setRotation(float x, float y, float z, float w);
 		void setScale(float x, float y, float z);
 
 		Vector3 getTranslation();
-		Vector3 getRotation();
+		Quaternion getRotation();
 		Vector3 getScale();
 
 	private:
 		Vector3 translation;
-		Vector3 rotation;
+		Quaternion rotation;
 		Vector3 scale;
 	};
 };

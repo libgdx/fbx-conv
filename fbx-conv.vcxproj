@@ -81,6 +81,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\FbxConverter.cpp" />
+    <ClCompile Include="src\G3djAnimation.cpp" />
+    <ClCompile Include="src\AnimationClip.cpp" />
     <ClCompile Include="src\G3djNode.cpp" />
     <ClCompile Include="src\G3djWriter.cpp" />
     <ClCompile Include="src\gameplay\Animation.cpp" />
@@ -124,8 +126,10 @@
     <ClCompile Include="src\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\AnimationClip.h" />
     <ClInclude Include="src\FbxConverter.h" />
     <ClInclude Include="src\FbxConverterConfig.h" />
+    <ClInclude Include="src\G3djAnimation.h" />
     <ClInclude Include="src\G3djMeshPart.h" />
     <ClInclude Include="src\G3djNode.h" />
     <ClInclude Include="src\G3djWriter.h" />
@@ -167,6 +171,7 @@
     <ClInclude Include="src\G3djFile.h" />
     <ClInclude Include="src\JSONWriter.h" />
     <ClInclude Include="src\G3djMaterial.h" />
+    <ClInclude Include="src\Keyframe.h" />
     <ClInclude Include="src\Texture.h" />
   </ItemGroup>
   <ItemGroup>

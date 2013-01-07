@@ -4,6 +4,7 @@
 #include "gameplay\Scene.h"
 #include "G3djNode.h"
 #include "G3djMaterial.h"
+#include "AnimationClip.h"
 
 using namespace gameplay;
 
@@ -20,7 +21,7 @@ namespace fbxconv {
 		void addNodeFlatList(G3djNode* node);
 		void addMesh(Mesh* mesh);
 		void addMaterial(G3djMaterial* material);
-		void addAnimation(Animation* animation);
+		void addAnimationClip(AnimationClip* animationClip);
 
 		G3djNode* getNode(const char* nodeId);
 		G3djNode* getNodeFlatList(const char* nodeId);
@@ -32,13 +33,12 @@ namespace fbxconv {
 		G3djMaterial* getMaterial(const char* materialId);
 		G3djMaterial* getMaterial(unsigned int materialIndex);
 
-		Animation* getAnimation(const char* animationId);
-		Animation* getAnimation(unsigned int materialIndex);
+		AnimationClip* getAnimationClip(unsigned int clipIndex);
 
 		unsigned int getMeshCount();
 		unsigned int getNodeCount();
 		unsigned int getMaterialCount();
-		unsigned int getAnimationCount();
+		unsigned int getAnimationClipCount();
 	private:
 		Scene* scene;
 
@@ -48,7 +48,7 @@ namespace fbxconv {
 		std::map<std::string, G3djNode*> nodes;
 		std::map<std::string, Mesh*> meshes;
 		std::map<std::string, G3djMaterial*> materials;
-		std::map<std::string, Animation*> animations;
+		std::vector<AnimationClip*> animationClips;
 	};
 };
 

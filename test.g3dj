@@ -36,4 +36,98 @@
 					"filename" : "checkboard.png",
 					"uvtranslation" : [0.0,0.0],
 					"uvscaling" : [1.0,1.0],
-					"type" : "STANDARD
+					"type" : "STANDARD"
+				}
+			]
+		}
+	],
+	"nodes" : [
+		{
+			"id" : "cubeanim:cubeanim",
+			"translation" : [0.0,0.0,0.0],
+			"rotation" : [0.0,0.0,0.0,1.0],
+			"scale" : [1.0,1.0,1.0],
+			"children" : [
+				{
+					"id" : "cubeanim:root",
+					"translation" : [-5.393930,0.0,0.0],
+					"rotation" : [0.0,0.0,0.0,1.0],
+					"scale" : [1.0,1.0,1.0],
+					"children" : [
+						{
+							"id" : "cubeanim:bone",
+							"translation" : [0.0,0.0,0.0],
+							"rotation" : [0.0,0.0,0.004592,0.999989],
+							"scale" : [1.000000,1.000000,1.0],
+							"children" : [
+								{
+									"id" : "cubeanim:bone1",
+									"translation" : [5.357296,0.000000,0.0],
+									"rotation" : [0.0,0.0,-0.002285,0.999997],
+									"scale" : [1.0,1.0,1.0],
+									"children" : [
+										{
+											"id" : "cubeanim:eff",
+											"translation" : [5.332552,0.0,0.0],
+											"rotation" : [0.0,0.0,0.0,1.0],
+											"scale" : [1.0,1.0,1.0]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"id" : "cubeanim:cube",
+					"translation" : [0.0,0.0,0.0],
+					"rotation" : [0.0,0.0,0.0,1.0],
+					"scale" : [1.0,1.0,1.0],
+					"mesh" : "cubeanim:cube_Mesh",
+					"materials" : [
+						{
+							"meshpartid" : "part0",
+							"materialid" : "Material_1"
+						}
+					]
+				}
+			]
+		}
+	],
+	"animations" : [
+		{
+			"id" : "Take 001",
+			"bones" : [
+				{
+					"boneId" : "cubeanim:bone1",
+					"keyframes" : [
+						{
+							"keytime" : 33.000000,
+							"translation" : [5.357296,0.000000,0.0],
+							"rotation" : [0.0,0.0,-0.002285,0.999997],
+							"scale" : [1.0,1.0,1.0]
+						},
+						{
+							"keytime" : 66.333328,
+							"translation" : [5.357296,0.000000,0.0],
+							"rotation" : [0.0,0.0,0.054179,0.998531],
+							"scale" : [1.000000,1.000000,1.0]
+						},
+						{
+							"keytime" : 99.666656,
+							"translation" : [5.357296,0.000000,0.0],
+							"rotation" : [0.0,0.0,0.179984,0.983670],
+							"scale" : [1.000000,1.000000,1.0]
+						},
+						{
+							"keytime" : 132.999985,
+							"translation" : [5.357296,0.000000,0.0],
+							"rotation" : [0.0,0.0,0.304870,0.952394],
+							"scale" : [1.0,1.0,1.0]
+						}
+					]
+				}
+			]
+		}
+	]
+}

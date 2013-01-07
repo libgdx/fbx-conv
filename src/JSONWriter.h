@@ -21,7 +21,7 @@ namespace fbxconv {
 		void nextValue(bool newLine);
 
 		void writeStringPair(const char* key, const char* value);
-		void writeFloatPair(const char* kye, float value);
+		void writeFloatPair(const char* key, float value);
 
 		void writeRawString(const char* value);
 		void writeString(const char* value);
