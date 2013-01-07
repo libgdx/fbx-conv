@@ -5,7 +5,7 @@ using namespace fbxconv;
 using namespace gameplay;
 
 int main(int argc, const char** argv) {
-	const char* file = "samples/softimage/head2.fbx";
+	const char* file = "samples/softimage/cube_anim.fbx";
 
 	FbxConverterConfig config = FbxConverterConfig();
 	config.flipV = false;
@@ -15,7 +15,7 @@ int main(int argc, const char** argv) {
 
 	printf("Exporting to json.\n");
 	G3djWriter *writer = new G3djWriter();
-	writer->exportG3dj(g3djFile, "head2.g3dj");
+	writer->exportG3dj(g3djFile, "test.g3dj");
 
 	printf("Done.\n");
 

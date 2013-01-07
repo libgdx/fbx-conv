@@ -1,6 +1,7 @@
 #include "FbxConverter.h"
 #include "gameplay\Scene.h"
 #include "G3djMeshPart.h"
+#include "gameplay\Transform.h"
 #include <sstream>
 
 
@@ -11,6 +12,7 @@ namespace fbxconv {
 	FbxConverter::FbxConverter(FbxConverterConfig config){
 		g3djFile = new G3djFile();
 		this->config = config;
+		this->groupAnimation = NULL;
 	}
 
 	FbxConverter::~FbxConverter(){
@@ -39,20 +41,19 @@ namespace fbxconv {
 		importer->Import(fbxScene);
 		importer->Destroy();
 
-		/* TODO: Add Animation support 
 		// Determine if animations should be grouped.
-		if (arguments.getGroupAnimationAnimationId().empty() && isGroupAnimationPossible(fbxScene))
+		if (isGroupAnimationPossible(fbxScene))
 		{
 			if (promptUserGroupAnimations())
 			{
-				_autoGroupAnimations = true;
+				autoGroupAnimations = true;
 			}
-		}*/
+		}
 
 		printf("Loading Scene.\n");
 		loadScene(fbxScene);
-		//printf("Loading animations.\n");
-		//loadAnimations(fbxScene, arguments);
+		printf("Loading animations.\n");
+		loadAnimations(fbxScene);
 		sdkManager->Destroy();
 
 		/*
@@ -165,7 +166,7 @@ namespace fbxconv {
 		const char* id = fbxNode->GetName();
 		if (id && strlen(id) > 0)
 		{
-			node = g3djFile->getNode(fbxNode->GetName());
+			node = g3djFile->getNodeFlatList(fbxNode->GetName());
 			if (node)
 			{
 				return node;
@@ -176,8 +177,10 @@ namespace fbxconv {
 		{
 			node->setId(id);
 		}
-		if(isRoot)
+		if(isRoot) // add to hierarchy
 			g3djFile->addNode(node);
+		// always add node to flatlist
+		g3djFile->addNodeFlatList(node);
 
 		transformNode(fbxNode, node);
     
@@ -1019,7 +1022,7 @@ namespace fbxconv {
 				FbxNode* fbxNode = pose->GetNode(0);
 				if (fbxNode->GetMesh() != NULL)
 				{
-					Node* node = g3djFile->getNode(fbxNode->GetName());
+					Node* node = g3djFile->getNodeFlatList(fbxNode->GetName());
 					assert(node && node->getModel());
 
 					Model* model = node->getModel();
@@ -1031,6 +1034,393 @@ namespace fbxconv {
 					}
 				}
 			}
+		}
+	}
+
+	void FbxConverter::loadAnimations(FbxScene* fbxScene){
+		FbxAnimEvaluator* evaluator = fbxScene->GetEvaluator();
+		if (!evaluator)
+			return;
+		FbxAnimStack* animStack = evaluator->GetContext();
+		if (!animStack)
+			return;
+
+		for (int i = 0; i < fbxScene->GetSrcObjectCount(FBX_TYPE(FbxAnimStack)); ++i)
+		{
+			FbxAnimStack* animStack = FbxCast<FbxAnimStack>(fbxScene->GetSrcObject(FBX_TYPE(FbxAnimStack), i));
+			int nbAnimLayers = animStack->GetMemberCount(FBX_TYPE(FbxAnimLayer));
+			for (int l = 0; l < nbAnimLayers; ++l)
+			{
+				FbxAnimLayer* animLayer = animStack->GetMember(FBX_TYPE(FbxAnimLayer), l);
+				loadAnimationLayer(animLayer, fbxScene->GetRootNode());
+			}
+		}
+	}
+
+	void FbxConverter::loadAnimationLayer(FbxAnimLayer* fbxAnimLayer, FbxNode* fbxNode)
+	{
+		bool animationGroupId = false;
+		const char* name = fbxNode->GetName();
+		// Check if this node's animations are supposed to be grouped
+		// TODO: See if we want to group stuff or not
+		/*if (name && arguments.containsGroupNodeId(name))
+		{
+			animationGroupId = true;
+			_groupAnimation = new Animation();
+			_groupAnimation->setId(arguments.getAnimationId(name));
+		}*/
+		Animation* animation = groupAnimation;
+		if (!animation)
+		{
+			animation = new Animation();
+			animation->setId(name);
+		}
+		loadAnimationChannels(fbxAnimLayer, fbxNode, animation);
+
+		const int childCount = fbxNode->GetChildCount();
+		for (int modelCount = 0; modelCount < childCount; ++modelCount)
+		{
+			loadAnimationLayer(fbxAnimLayer, fbxNode->GetChild(modelCount));
+		}
+		if (animationGroupId)
+		{
+			g3djFile->addAnimation(groupAnimation);
+			groupAnimation = NULL;
+		}
+	}
+
+	void FbxConverter::loadAnimationChannels(FbxAnimLayer* animLayer, FbxNode* fbxNode, Animation* animation)
+	{
+		const char* name = fbxNode->GetName();
+		//Node* node = _gamePlayFile.getNode(name);
+
+		// Determine which properties are animated on this node
+		// Find the transform at each key frame
+		// TODO: Ignore properties that are not animated (scale, rotation, translation)
+		// This should result in only one animation channel per animated node.
+
+		float startTime = FLT_MAX, stopTime = -1.0f, frameRate = -FLT_MAX;
+		bool tx = false, ty = false, tz = false, rx = false, ry = false, rz = false, sx = false, sy = false, sz = false;
+		FbxAnimCurve* animCurve = NULL;
+		animCurve = getCurve(fbxNode->LclTranslation, animLayer, FBXSDK_CURVENODE_COMPONENT_X);
+		if (animCurve)
+		{
+			tx = true;
+			findMinMaxTime(animCurve, &startTime, &stopTime, &frameRate);
+		}
+		animCurve = getCurve(fbxNode->LclTranslation, animLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+		if (animCurve)
+		{
+			ty = true;
+			findMinMaxTime(animCurve, &startTime, &stopTime, &frameRate);
+		}
+		animCurve = getCurve(fbxNode->LclTranslation, animLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+		if (animCurve)
+		{
+			tz = true;
+			findMinMaxTime(animCurve, &startTime, &stopTime, &frameRate);
+		}
+		animCurve = getCurve(fbxNode->LclRotation, animLayer, FBXSDK_CURVENODE_COMPONENT_X);
+		if (animCurve)
+		{
+			rx = true;
+			findMinMaxTime(animCurve, &startTime, &stopTime, &frameRate);
+		}
+		animCurve = getCurve(fbxNode->LclRotation, animLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+		if (animCurve)
+		{
+			ry = true;
+			findMinMaxTime(animCurve, &startTime, &stopTime, &frameRate);
+		}
+		animCurve = getCurve(fbxNode->LclRotation, animLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+		if (animCurve)
+		{
+			rz = true;
+			findMinMaxTime(animCurve, &startTime, &stopTime, &frameRate);
+		}
+		animCurve = getCurve(fbxNode->LclScaling, animLayer, FBXSDK_CURVENODE_COMPONENT_X);
+		if (animCurve)
+		{
+			sx = true;
+			findMinMaxTime(animCurve, &startTime, &stopTime, &frameRate);
+		}
+		animCurve = getCurve(fbxNode->LclScaling, animLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+		if (animCurve)
+		{
+			sy = true;
+			findMinMaxTime(animCurve, &startTime, &stopTime, &frameRate);
+		}
+		animCurve = getCurve(fbxNode->LclScaling, animLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+		if (animCurve)
+		{
+			sz = true;
+			findMinMaxTime(animCurve, &startTime, &stopTime, &frameRate);
+		}
+
+		if (!(sx || sy || sz || rx || ry || rz || tx || ty || tz))
+			return; // no animation channels
+
+		assert(startTime != FLT_MAX);
+		assert(stopTime >= 0.0f);
+
+		// Determine which animation channels to create
+		std::vector<unsigned int> channelAttribs;
+		if (sx && sy && sz)
+		{
+			if (rx || ry || rz)
+			{
+				if (tx && ty && tz)
+				{
+					channelAttribs.push_back(Transform::ANIMATE_SCALE_ROTATE_TRANSLATE);
+				}
+				else
+				{
+					channelAttribs.push_back(Transform::ANIMATE_SCALE_ROTATE);
+					if (tx)
+						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_X);
+					if (ty)
+						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_Y);
+					if (tz)
+						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_Z);
+				}
+			}
+			else
+			{
+				if (tx && ty && tz)
+				{
+					channelAttribs.push_back(Transform::ANIMATE_SCALE_TRANSLATE);
+				}
+				else
+				{
+					channelAttribs.push_back(Transform::ANIMATE_SCALE);
+					if (tx)
+						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_X);
+					if (ty)
+						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_Y);
+					if (tz)
+						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_Z);
+				}
+			}
+		}
+		else
+		{
+			if (rx || ry || rz)
+			{
+				if (tx && ty && tz)
+				{
+					channelAttribs.push_back(Transform::ANIMATE_ROTATE_TRANSLATE);
+				}
+				else
+				{
+					channelAttribs.push_back(Transform::ANIMATE_ROTATE);
+					if (tx)
+						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_X);
+					if (ty)
+						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_Y);
+					if (tz)
+						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_Z);
+				}
+			}
+			else
+			{
+				if (tx && ty && tz)
+				{
+					channelAttribs.push_back(Transform::ANIMATE_TRANSLATE);
+				}
+				else
+				{
+					if (tx)
+						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_X);
+					if (ty)
+						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_Y);
+					if (tz)
+						channelAttribs.push_back(Transform::ANIMATE_TRANSLATE_Z);
+				}
+			}
+
+			if (sx)
+				channelAttribs.push_back(Transform::ANIMATE_SCALE_X);
+			if (sy)
+				channelAttribs.push_back(Transform::ANIMATE_SCALE_Y);
+			if (sz)
+				channelAttribs.push_back(Transform::ANIMATE_SCALE_Z);
+		}
+		unsigned int channelCount = channelAttribs.size();
+		assert(channelCount > 0);
+
+		// Allocate channel list
+		int channelStart = animation->getAnimationChannelCount();
+		for (unsigned int i = 0; i < channelCount; ++i)
+		{
+			AnimationChannel* channel = new AnimationChannel();
+			channel->setTargetId(name);
+			channel->setInterpolation(AnimationChannel::LINEAR);
+			channel->setTargetAttribute(channelAttribs[i]);
+			animation->add(channel);
+		}
+
+		// Evaulate animation curve in increments of frameRate and populate channel data.
+		FbxAMatrix fbxMatrix;
+		Matrix matrix;
+		float increment = 1000.0f / frameRate;
+		for (float time = startTime; time <= stopTime; time += increment)
+		{
+			// Clamp time to stopTime
+			time = std::min(time, stopTime);
+
+			// Evalulate the animation at this time
+			FbxTime kTime;
+			kTime.SetMilliSeconds((FbxLongLong)time);
+			fbxMatrix = fbxNode->EvaluateLocalTransform(kTime);
+			copyMatrix(fbxMatrix, matrix);
+
+			// Decompose the evalulated transformation matrix into separate
+			// scale, rotation and translation.
+			Vector3 scale;
+			Quaternion rotation;
+			Vector3 translation;
+			matrix.decompose(&scale, &rotation, &translation);
+			rotation.normalize();
+
+			// Append keyframe data to all channels
+			for (unsigned int i = channelStart, channelEnd = channelStart + channelCount; i < channelEnd; ++i)
+			{
+				appendKeyFrame(fbxNode, animation->getAnimationChannel(i), time, scale, rotation, translation);
+			}
+		}
+
+		if (groupAnimation != animation)
+		{
+			// TODO explain
+			g3djFile->addAnimation(animation);
+		}
+	}
+
+	void FbxConverter::appendKeyFrame(FbxNode* fbxNode, AnimationChannel* channel, float time, const Vector3& scale, const Quaternion& rotation, const Vector3& translation)
+	{
+		// Write key time
+		channel->getKeyTimes().push_back(time);
+
+		// Write key values
+		std::vector<float>& keyValues = channel->getKeyValues();
+		switch (channel->getTargetAttribute())
+		{
+			case Transform::ANIMATE_SCALE:
+			{
+				keyValues.push_back(scale.x);
+				keyValues.push_back(scale.y);
+				keyValues.push_back(scale.z);
+			}
+			break;
+
+			case Transform::ANIMATE_SCALE_X:
+			{
+				keyValues.push_back(scale.x);
+			}
+			break;
+
+			case Transform::ANIMATE_SCALE_Y:
+			{
+				keyValues.push_back(scale.y);
+			}
+			break;
+
+			case Transform::ANIMATE_SCALE_Z:
+			{
+				keyValues.push_back(scale.z);
+			}
+			break;
+
+			case Transform::ANIMATE_ROTATE:
+			{
+				keyValues.push_back(rotation.x);
+				keyValues.push_back(rotation.y);
+				keyValues.push_back(rotation.z);
+				keyValues.push_back(rotation.w);
+			}
+			break;
+
+			case Transform::ANIMATE_TRANSLATE:
+			{
+				keyValues.push_back(translation.x);
+				keyValues.push_back(translation.y);
+				keyValues.push_back(translation.z);
+			}
+			break;
+
+			case Transform::ANIMATE_TRANSLATE_X:
+			{
+				keyValues.push_back(translation.x);
+			}
+			break;
+
+			case Transform::ANIMATE_TRANSLATE_Y:
+			{
+				keyValues.push_back(translation.y);
+			}
+			break;
+
+			case Transform::ANIMATE_TRANSLATE_Z:
+			{
+				keyValues.push_back(translation.z);
+			}
+			break;
+
+			case Transform::ANIMATE_ROTATE_TRANSLATE:
+			{
+				keyValues.push_back(rotation.x);
+				keyValues.push_back(rotation.y);
+				keyValues.push_back(rotation.z);
+				keyValues.push_back(rotation.w);
+				keyValues.push_back(translation.x);
+				keyValues.push_back(translation.y);
+				keyValues.push_back(translation.z);
+			}
+			break;
+
+			case Transform::ANIMATE_SCALE_ROTATE_TRANSLATE:
+			{
+				keyValues.push_back(scale.x);
+				keyValues.push_back(scale.y);
+				keyValues.push_back(scale.z);
+				keyValues.push_back(rotation.x);
+				keyValues.push_back(rotation.y);
+				keyValues.push_back(rotation.z);
+				keyValues.push_back(rotation.w);
+				keyValues.push_back(translation.x);
+				keyValues.push_back(translation.y);
+				keyValues.push_back(translation.z);
+			}
+			break;
+
+			case Transform::ANIMATE_SCALE_TRANSLATE:
+			{
+				keyValues.push_back(scale.x);
+				keyValues.push_back(scale.y);
+				keyValues.push_back(scale.z);
+				keyValues.push_back(translation.x);
+				keyValues.push_back(translation.y);
+				keyValues.push_back(translation.z);
+			}
+			break;
+
+			case Transform::ANIMATE_SCALE_ROTATE:
+			{
+				keyValues.push_back(scale.x);
+				keyValues.push_back(scale.y);
+				keyValues.push_back(scale.z);
+				keyValues.push_back(rotation.x);
+				keyValues.push_back(rotation.y);
+				keyValues.push_back(rotation.z);
+				keyValues.push_back(rotation.w);
+			}
+			break;
+
+			default:
+			{
+				LOG(1, "Warning: Invalid animatoin target (%d) attribute for node: %s.\n", channel->getTargetAttribute(), fbxNode->GetName());
+			}
+			return;
 		}
 	}
 
@@ -1056,6 +1446,76 @@ namespace fbxconv {
 				matrix.m[i++] = (float)fbxMatrix.Get(row, col);
 			}
 		}
+	}
+
+	bool FbxConverter::isGroupAnimationPossible(FbxScene* fbxScene)
+	{
+		FbxNode* rootNode = fbxScene->GetRootNode();
+		if (rootNode)
+		{
+			if (isGroupAnimationPossible(rootNode))
+				return true;
+		}
+		return false;
+	}
+
+	bool FbxConverter::isGroupAnimationPossible(FbxNode* fbxNode)
+	{
+		if (fbxNode)
+		{
+			FbxMesh* fbxMesh = fbxNode->GetMesh();
+			if (isGroupAnimationPossible(fbxMesh))
+				return true;
+			const int childCount = fbxNode->GetChildCount();
+			for (int i = 0; i < childCount; ++i)
+			{
+				if (isGroupAnimationPossible(fbxNode->GetChild(i)))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	bool FbxConverter::isGroupAnimationPossible(FbxMesh* fbxMesh)
+	{
+		if (fbxMesh)
+		{
+			const int deformerCount = fbxMesh->GetDeformerCount();
+			for (int i = 0; i < deformerCount; ++i)
+			{
+				FbxDeformer* deformer = fbxMesh->GetDeformer(i);
+				if (deformer->GetDeformerType() == FbxDeformer::eSkin)
+				{
+					FbxSkin* fbxSkin = static_cast<FbxSkin*>(deformer);
+					if (fbxSkin)
+					{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	FbxAnimCurve* FbxConverter::getCurve(FbxPropertyT<FbxDouble3>& prop, FbxAnimLayer* animLayer, const char* pChannel)
+	{
+	#if FBXSDK_VERSION_MAJOR == 2013 && FBXSDK_VERSION_MINOR == 1
+		return prop.GetCurve<FbxAnimCurve>(animLayer, pChannel);
+	#else
+		return prop.GetCurve(animLayer, pChannel);
+	#endif
+	}
+
+	void FbxConverter::findMinMaxTime(FbxAnimCurve* animCurve, float* startTime, float* stopTime, float* frameRate)
+	{
+		FbxTime start, stop;
+		FbxTimeSpan timeSpan;
+		animCurve->GetTimeInterval(timeSpan);
+		start = timeSpan.GetStart();
+		stop = timeSpan.GetStop();
+		*startTime = std::min(*startTime, (float)start.GetMilliSeconds());
+		*stopTime = std::max(*stopTime, (float)stop.GetMilliSeconds());
+		*frameRate = std::max(*frameRate, (float)stop.GetFrameRate(FbxTime::eDefaultMode));
 	}
 };
 

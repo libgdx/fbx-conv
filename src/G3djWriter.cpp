@@ -389,7 +389,7 @@ namespace fbxconv {
 			writer->openArray("children", true);
 
 			// children
-			for (G3djNode* cnode = dynamic_cast<G3djNode*>(node->getFirstChild()); cnode != NULL; cnode = dynamic_cast<G3djNode*>(node->getNextSibling()))
+			for (G3djNode* cnode = dynamic_cast<G3djNode*>(node->getFirstChild()); cnode != NULL; cnode = dynamic_cast<G3djNode*>(cnode->getNextSibling()))
 			{
 				writeNodeRecursive(cnode);
 			}

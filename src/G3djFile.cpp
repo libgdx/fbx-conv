@@ -17,12 +17,29 @@ namespace fbxconv {
 		nodes[node->getId()] = node;
 	}
 
+	void G3djFile::addNodeFlatList(G3djNode* node){
+		nodesFlatList[node->getId()] = node;
+	}
+
 	void G3djFile::addMesh(Mesh* mesh){
 		meshes[mesh->getId()] = mesh;
 	}
 
 	void G3djFile::addMaterial(G3djMaterial* material){
 		materials[material->getId()] = material;
+	}
+
+	void G3djFile::addAnimation(Animation* animation){
+		animations[animation->getId()] = animation;
+	}
+
+	G3djNode* G3djFile::getNodeFlatList(const char* nodeId){
+		std::map<std::string, G3djNode*>::iterator it = nodesFlatList.find(nodeId);
+		if (it != nodesFlatList.end())
+		{
+			return it->second;
+		}
+		return NULL;
 	}
 
 	G3djNode* G3djFile::getNode(const char* nodeId){
@@ -82,6 +99,25 @@ namespace fbxconv {
 		return i->second;
 	}
 
+	Animation* G3djFile::getAnimation(const char* animationId){
+		std::map<std::string, Animation*>::iterator it = animations.find(animationId);
+		if (it != animations.end())
+		{
+			return it->second;
+		}
+		return NULL;
+	}
+
+	Animation* G3djFile::getAnimation(unsigned int animationIndex){
+		// Ugh, this seems ugly. But without having a second flat list I don't see a better way right now.
+		if(animationIndex >= animations.size())
+			return NULL;
+		std::map<std::string, Animation*>::iterator i( animations.begin() );
+		std::advance(i, animationIndex);
+
+		return i->second;
+	}
+
 	unsigned int G3djFile::getNodeCount(){
 		return nodes.size();
 	}
@@ -92,5 +128,9 @@ namespace fbxconv {
 
 	unsigned int G3djFile::getMaterialCount(){
 		return materials.size();
+	}
+
+	unsigned int G3djFile::getAnimationCount(){
+		return animations.size();
 	}
 };
