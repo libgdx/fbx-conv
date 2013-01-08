@@ -5,7 +5,7 @@ using namespace fbxconv;
 using namespace gameplay;
 
 int main(int argc, const char** argv) {
-	const char* file = "samples/softimage/cube_anim.fbx";
+	const char* file = "samples/softimage/cube_anim_2clips_ascii.fbx";
 
 	FbxConverterConfig config = FbxConverterConfig();
 	config.flipV = false;
