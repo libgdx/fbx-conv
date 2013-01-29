@@ -1,0 +1,9 @@
+#!/bin/sh
+cd "$(dirname "$0")"
+type premake4 >/dev/null 2>&1 ||
+{
+	echo >&2 "'premake4' not found in your path.";
+	echo >&2 "Premake can be downloaded from http://industriousone.com/premake/";
+	exit 1;
+}
+premake4 --file=premake.lua gmake
