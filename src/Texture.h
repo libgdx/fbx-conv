@@ -1,7 +1,7 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "gameplay\Vector2.h"
+#include "gameplay/Vector2.h"
 
 using namespace gameplay;
 

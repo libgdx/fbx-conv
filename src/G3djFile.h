@@ -1,7 +1,7 @@
 #ifndef JFBXFILE_H
 #define JFBXFILE_H
 
-#include "gameplay\Scene.h"
+#include "gameplay/Scene.h"
 #include "G3djNode.h"
 #include "G3djMaterial.h"
 #include "AnimationClip.h"

@@ -1,9 +1,9 @@
 #ifndef G3DJNODE_H
 #define G3DJNODE_H
 
-#include "gameplay\Node.h"
-#include "gameplay\Vector3.h"
-#include "gameplay\Vector4.h"
+#include "gameplay/Node.h"
+#include "gameplay/Vector3.h"
+#include "gameplay/Vector4.h"
 
 using namespace gameplay;
 

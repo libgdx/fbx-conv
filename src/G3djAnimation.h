@@ -1,7 +1,7 @@
 #ifndef G3DJANIMATION_H
 #define G3DJANIMATION_H
 
-#include "gameplay\Animation.h"
+#include "gameplay/Animation.h"
 #include "Keyframe.h"
 
 using namespace gameplay;

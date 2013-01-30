@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <map>
 
-#include "gameplay\Vector3.h"
-#include "gameplay\Vector4.h"
+#include "gameplay/Vector3.h"
+#include "gameplay/Vector4.h"
 #include "Texture.h"
 
 using namespace gameplay;

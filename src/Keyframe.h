@@ -1,8 +1,8 @@
 #ifndef KEYFRAME_H
 #define KEYFRAME_H
 
-#include "gameplay\Vector3.h"
-#include "gameplay\Quaternion.h"
+#include "gameplay/Vector3.h"
+#include "gameplay/Quaternion.h"
 
 using namespace gameplay;
 
