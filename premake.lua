@@ -1,9 +1,8 @@
 -- TODO: Because there is plenty ...
---    1. What about other IDE's that Premake supports? e.g. codeblocks, xcode
---    2. x86/x64 switching
---    3. get macosx library for zlib
---    4. actually test linux/mac build configurations
---    5. clean this file up because I'm sure it could be organized better
+--    1. x86/x64 switching
+--    2. actually test linux build configuration
+--    3. clean this file up because I'm sure it could be organized better
+--    4. consider maybe switching to CMake because of the ugly hack below
 --
 -- NOTE: I am intentionally leaving out a "windows+gmake" configuration
 --       as trying to compile against the FBX SDK using MinGW results in
@@ -12,13 +11,27 @@
 --       If you try to use this script to build with MinGW you will end
 --       up with a Makefile that has god knows what in it
 
-
 FBX_SDK_ROOT = os.getenv("FBX_SDK_ROOT")
 if not FBX_SDK_ROOT then
 	printf("ERROR: Environment variable FBX_SDK_ROOT is not set.")
 	printf("Set it to something like: C:\\Program Files\\Autodesk\\FBX\\FBX SDK\\2013.3")
 	os.exit()
 end
+
+-- avert your eyes children!
+if string.find(_ACTION, "xcode") then
+	-- TODO: i'm sure we could do some string search+replace trickery to make 
+	--       this more general-purpose
+	-- take care of the most common case where the FBX SDK is installed to the
+	-- default location and part of the path contains a space
+	-- god help you if you install the FBX SDK using a totally different path
+	-- that contains a space AND you want to use Xcode
+	-- Premake + Xcode combined fuck this up so badly making it nigh-impossible
+	-- to do any kind of _proper_ path escaping here (I wasted an hour on this)
+	-- (maybe I should have used CMake ....)
+	FBX_SDK_ROOT = string.gsub(FBX_SDK_ROOT, "FBX SDK", "'FBX SDK'")
+end
+-- ok, you can look again
 
 BUILD_DIR = "build"
 if _ACTION == "clean" then
@@ -129,7 +142,7 @@ project "fbx-conv"
 			"z",
 			"CoreFoundation.framework",
 		}
-		
+
 	configuration { "macosx", "Debug" }
 		links {
 			"fbxsdk-2013.3-staticd",
