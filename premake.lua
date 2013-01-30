@@ -92,7 +92,7 @@ project "fbx-conv"
 		}
 
 	--- LINUX (GCC+MAKE) -----------------------------------------------
-	configuration { "linux", "gmake" }
+	configuration { "linux" }
 		kind "ConsoleApp"
 		buildoptions { "-Wall" }
 		libdirs {
@@ -105,18 +105,18 @@ project "fbx-conv"
 			"libz",
 		}
 
-	configuration { "linux", "gmake", "Debug" }
+	configuration { "linux", "Debug" }
 		links {
 			"fbxsdk-2013-staticd",
 		}
 		
-	configuration { "linux", "gmake", "Release" }
+	configuration { "linux", "Release" }
 		links {
 			"fbxsdk-2013-static",
 		}
 
 	--- MAC (GCC+MAKE) -------------------------------------------------
-	configuration { "macosx", "gmake" }
+	configuration { "macosx" }
 		kind "ConsoleApp"
 		buildoptions { "-Wall" }
 		libdirs {
@@ -129,12 +129,12 @@ project "fbx-conv"
 			"libz",
 		}
 
-	configuration { "macosx", "gmake", "Debug" }
+	configuration { "macosx", "Debug" }
 		links {
 			"fbxsdk-2013-staticd",
 		}
 		
-	configuration { "macosx", "gmake", "Release" }
+	configuration { "macosx", "Release" }
 		links {
 			"fbxsdk-2013-static",
 		}
