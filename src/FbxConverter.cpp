@@ -320,7 +320,7 @@ namespace fbxconv {
 				}
 				else if(fbxMaterial->GetClassId().Is(FbxSurfacePhong::ClassId)) {
 					
-					material = new G3djMaterial(id, MATERIALTYPE::PHONG);
+					material = new G3djMaterial(id, PHONG);
 
 					// cast to phong
 					FbxSurfacePhong *phongMaterial = ((FbxSurfacePhong *)fbxMaterial);
@@ -349,7 +349,7 @@ namespace fbxconv {
 					g3djFile->addMaterial(material);
 				}
 				else if(fbxMaterial->GetClassId().Is(FbxSurfaceLambert::ClassId)) {
-					material = new G3djMaterial(id, MATERIALTYPE::LAMBERT);
+					material = new G3djMaterial(id, LAMBERT);
 
 					// cast to phong
 					FbxSurfaceLambert *lambertMaterial = ((FbxSurfaceLambert *)fbxMaterial);

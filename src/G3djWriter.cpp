@@ -269,7 +269,7 @@ namespace fbxconv {
 
 		writer->writeFloatPair("opacity", material->getOpacity());
 
-		if(material->getMaterialType() == MATERIALTYPE::PHONG){
+		if(material->getMaterialType() == PHONG){
 			writer->nextValue(true);
 
 			writer->openArray("specular", false);
