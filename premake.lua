@@ -114,18 +114,18 @@ project "fbx-conv"
 			"./libs/zlib/lib/linux/x86",
 		}
 		links {
-			"libpng",
-			"libz",
+			"png",
+			"z",
 		}
 
 	configuration { "linux", "Debug" }
 		links {
-			"fbxsdk-2013-staticd",
+			"fbxsdk-2013.3-staticd",
 		}
 		
 	configuration { "linux", "Release" }
 		links {
-			"fbxsdk-2013-static",
+			"fbxsdk-2013.3-static",
 		}
 
 	--- MAC (GCC+MAKE) -------------------------------------------------
