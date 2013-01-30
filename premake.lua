@@ -43,6 +43,9 @@ project "fbx-conv"
 		"./libs/libpng/include",
 		"./libs/zlib/include",
 	}
+	defines {
+		"FBXSDK_NEW_API",
+	}
 	debugdir "."
 
 	configuration "Debug"
