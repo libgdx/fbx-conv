@@ -10,3 +10,4 @@ build/
 /*.idb
 /*.ilk
 /*.pdb
+/fbx-conv
