@@ -104,7 +104,7 @@ project "fbx-conv"
 			"fbxsdk-2013.3-md",
 		}
 
-	--- LINUX (GCC+MAKE) -----------------------------------------------
+	--- LINUX ----------------------------------------------------------
 	configuration { "linux" }
 		kind "ConsoleApp"
 		buildoptions { "-Wall" }
@@ -128,7 +128,7 @@ project "fbx-conv"
 			"fbxsdk-2013.3-static",
 		}
 
-	--- MAC (GCC+MAKE) -------------------------------------------------
+	--- MAC ------------------------------------------------------------
 	configuration { "macosx" }
 		kind "ConsoleApp"
 		buildoptions { "-Wall" }
