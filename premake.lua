@@ -121,20 +121,21 @@ project "fbx-conv"
 		buildoptions { "-Wall" }
 		libdirs {
 			(FBX_SDK_ROOT .. "/lib/gcc4/ub"),
-			"./libs/libpng/lib/macosx/x86",
-			"./libs/zlib/lib/macosx/x86",
+			"./libs/libpng/lib/macosx",
+			"./libs/zlib/lib/macosx",
 		}
 		links {
-			"libpng",
-			"libz",
+			"png",
+			"z",
+			"CoreFoundation.framework",
 		}
-
+		
 	configuration { "macosx", "Debug" }
 		links {
-			"fbxsdk-2013-staticd",
+			"fbxsdk-2013.3-staticd",
 		}
 		
 	configuration { "macosx", "Release" }
 		links {
-			"fbxsdk-2013-static",
+			"fbxsdk-2013.3-static",
 		}
