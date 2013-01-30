@@ -8,7 +8,7 @@ using namespace gameplay;
 int main(int argc, const char** argv) {
 	if (argc == 1)
 	{
-		printf("Missing: file to convert\n\n");
+		printf("Missing: file to convert\n");
 		return 1;
 	}
 	std::string file = argv[1];
