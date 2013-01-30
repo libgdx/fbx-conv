@@ -1,6 +1,6 @@
 #include "Texture.h"
 #include <stdio.h>
-#include <string>
+#include <string.h>
 
 namespace fbxconv {
 	Texture::Texture(){
