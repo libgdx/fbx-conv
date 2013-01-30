@@ -1,8 +1,7 @@
--- TODO: Because there is plenty ...
+-- TODO: Because there are a few remaining things ...
 --    1. x86/x64 switching
---    2. actually test linux build configuration
---    3. clean this file up because I'm sure it could be organized better
---    4. consider maybe switching to CMake because of the ugly hack below
+--    2. clean this file up because I'm sure it could be organized better
+--    3. consider maybe switching to CMake because of the ugly hack below
 --
 -- NOTE: I am intentionally leaving out a "windows+gmake" configuration
 --       as trying to compile against the FBX SDK using MinGW results in
