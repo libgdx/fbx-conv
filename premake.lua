@@ -108,14 +108,18 @@ project "fbx-conv"
 	configuration { "linux" }
 		kind "ConsoleApp"
 		buildoptions { "-Wall" }
+		-- TODO: while using x64 will likely be fine for most people nowadays,
+		--       we still need to make this configurable
 		libdirs {
-			(FBX_SDK_ROOT .. "/lib/gcc4/x86"),
-			"./libs/libpng/lib/linux/x86",
-			"./libs/zlib/lib/linux/x86",
+			(FBX_SDK_ROOT .. "/lib/gcc4/x64"),
+			"./libs/libpng/lib/linux/x64",
+			"./libs/zlib/lib/linux/x64",
 		}
 		links {
 			"png",
 			"z",
+			"pthread",
+			"dl",
 		}
 
 	configuration { "linux", "Debug" }
