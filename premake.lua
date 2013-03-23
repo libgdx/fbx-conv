@@ -58,7 +58,7 @@ project "fbx-conv"
 	defines {
 		"FBXSDK_NEW_API",
 	}
-	debugdir "."
+	--- debugdir "."
 
 	configuration "Debug"
 		defines {
