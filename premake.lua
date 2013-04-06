@@ -118,17 +118,18 @@ project "fbx-conv"
 			"png",
 			"z",
 			"pthread",
-			"dl",
 		}
 
 	configuration { "linux", "Debug" }
 		links {
 			"fbxsdk-2013.3-staticd",
+			"dl",
 		}
 		
 	configuration { "linux", "Release" }
 		links {
 			"fbxsdk-2013.3-static",
+			"dl",
 		}
 
 	--- MAC ------------------------------------------------------------
