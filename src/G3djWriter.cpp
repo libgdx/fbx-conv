@@ -331,6 +331,9 @@ namespace fbxconv {
 
 		writer->writeStringPair("id", node->getId().c_str());
 		writer->nextValue(true);
+        
+        writer->writeStringPair("isBone", node->isJoint()?"true":"false");
+        writer->nextValue(true);
 		
 		writer->openArray("translation", false);
 			Vector3 translation = node->getTranslation();
