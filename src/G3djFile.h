@@ -35,10 +35,10 @@ namespace fbxconv {
 
 		AnimationClip* getAnimationClip(unsigned int clipIndex);
 
-		unsigned int getMeshCount();
-		unsigned int getNodeCount();
-		unsigned int getMaterialCount();
-		unsigned int getAnimationClipCount();
+		unsigned int getMeshCount() const;
+		unsigned int getNodeCount() const;
+		unsigned int getMaterialCount() const;
+		unsigned int getAnimationClipCount() const;
 	private:
 		Scene* scene;
 
