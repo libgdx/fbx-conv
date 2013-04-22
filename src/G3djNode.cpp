@@ -13,15 +13,15 @@ namespace fbxconv {
 		scale.set(x, y, z);
 	}
 
-	Vector3 G3djNode::getTranslation(){
+	Vector3 G3djNode::getTranslation() const {
 		return translation;
 	}
 
-	Quaternion G3djNode::getRotation(){
+	Quaternion G3djNode::getRotation() const {
 		return rotation;
 	}
 
-	Vector3 G3djNode::getScale(){
+	Vector3 G3djNode::getScale() const {
 		return scale;
 	}
 }

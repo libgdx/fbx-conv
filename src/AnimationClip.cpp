@@ -5,11 +5,11 @@ namespace fbxconv {
 		animations.push_back(animation);
 	}
 
-	G3djAnimation* AnimationClip::getAnimation(unsigned int index){
+	G3djAnimation* AnimationClip::getAnimation(unsigned int index) const {
 		return animations[index];
 	}
 
-	unsigned int AnimationClip::getAnimationCount(){
+	unsigned int AnimationClip::getAnimationCount() const {
 		return animations.size();
 	}
 
@@ -18,9 +18,7 @@ namespace fbxconv {
 		strcpy(this->clipId, clipId);
 	}
 
-	char* AnimationClip::getClipId(){
+	char* AnimationClip::getClipId() const {
 		return clipId;
 	}
-
-
 };

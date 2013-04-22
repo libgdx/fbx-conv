@@ -103,19 +103,19 @@ namespace fbxconv {
 		return animationClips[clipIndex];
 	}
 
-	unsigned int G3djFile::getNodeCount(){
+	unsigned int G3djFile::getNodeCount() const {
 		return nodes.size();
 	}
 
-	unsigned int G3djFile::getMeshCount(){
+	unsigned int G3djFile::getMeshCount() const {
 		return meshes.size();
 	}
 
-	unsigned int G3djFile::getMaterialCount(){
+	unsigned int G3djFile::getMaterialCount() const {
 		return materials.size();
 	}
 
-	unsigned int G3djFile::getAnimationClipCount(){
+	unsigned int G3djFile::getAnimationClipCount() const {
 		return animationClips.size();
 	}
 };
