@@ -206,7 +206,7 @@ namespace fbxconv {
 	void G3djWriter::writeMeshParts(Mesh* mesh){
 		int partNumber = 0;
 
-		for (std::vector<MeshPart*>::iterator i = mesh->parts.begin(); i != mesh->parts.end(); ++i)
+		for (std::vector<MeshPart*>::iterator i = mesh->parts.begin(); i != mesh->parts.end(); ++i, ++partNumber)
 		{
 			MeshPart *meshPart = (*i);
 
