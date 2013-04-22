@@ -21,9 +21,9 @@ namespace fbxconv {
 		G3djMaterial(const char* pId, unsigned int pMaterialType);
 		~G3djMaterial();
 
-		std::string getId();
+		std::string getId() const;
 
-		unsigned int getMaterialType();
+		unsigned int getMaterialType() const;
 
 		void setDiffuse(float r, float g, float b);
 		void setAmbient(float r, float g, float b);
@@ -32,19 +32,19 @@ namespace fbxconv {
 		void setOpacity(float a);
 		void setShininess(float shininess);
 
-		Vector3 getDiffuse();
-		Vector3 getAmbient();
-		Vector3 getEmissive();
-		Vector3 getSpecular();
-		float getOpacity();
-		float getShininess();
+		Vector3 getDiffuse() const;
+		Vector3 getAmbient() const;
+		Vector3 getEmissive() const;
+		Vector3 getSpecular() const;
+		float getOpacity() const;
+		float getShininess() const;
 
 		void addTexture(Texture *texture);
 
 		Texture* getTexture(const char* id);
 		Texture* getTexture(unsigned int index);
 
-		unsigned int getTextureCount();
+		unsigned int getTextureCount() const;
 
 	private:
 		std::string id;
