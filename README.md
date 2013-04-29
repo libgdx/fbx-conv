@@ -13,6 +13,12 @@ back-port any bug fixes or improvements.
 
 Hangout notes https://docs.google.com/document/d/1nz-RexbymNtA4pW1B5tXays0tjByBvO8BJSKrWeU69g/edit#
 
+Precompiled Binaries
+====================
+You can download the precompiled binaries from http://libgdx.badlogicgames.com/downloads/fbx-conv
+
+On Windows you'll need to install VC 2010 Redistributable Package http://www.microsoft.com/en-us/download/confirmation.aspx?id=5555
+
 Building
 ========
 You'll need premake and an installation of the FBX SDK. Once installed/downloaded, set the
