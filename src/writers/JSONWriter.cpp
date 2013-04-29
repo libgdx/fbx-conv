@@ -1,6 +1,7 @@
 #include "JSONWriter.h"
 
 namespace fbxconv {
+namespace writers {
 	JSONWriter::JSONWriter(const char* fileName) {
 		currentIndention = 0;
 
@@ -100,4 +101,4 @@ namespace fbxconv {
 		for(int i = 0; i < currentIndention; i++)
 			fprintf(file, "\t");
 	}
-};
+} }

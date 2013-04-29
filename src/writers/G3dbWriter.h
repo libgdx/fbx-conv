@@ -8,14 +8,17 @@
  * 1 byte: SSTTTTTT: 
  * - SS: the size of the next value (00 = 1 byte, 01 = 2 bytes, 10 = 4 bytes, 11 = 8 bytes)
  * - TTTTTT: the block type
- * SS bytes: the size of the (rest of the) block in bytes
+ * 2^SS bytes: the size of the (rest of the) block in bytes
  */
 #ifndef G3DBWRITER_H
 #define G3DBWRITER_H
 
 #include <stdio.h>
-#include "G3djFile.h"
-#include "G3djMeshPart.h"
+#include "../modeldata/Model.h"
+#include "../modeldata/Mesh.h"
+#include "../modeldata/Material.h"
+#include "../modeldata/Node.h"
+#include "../modeldata/Animation.h"
 
 #define G3DB_TAG			"G3DB"
 #define G3DB_VERSION_HI		0
@@ -41,25 +44,29 @@
 #define G3DB_TAG_MATERIAL		0x08
 #define G3DB_TAG_DIFFUSE		0x09
 #define G3DB_TAG_AMBIENT		0x0A
-#define G3DB_TAG_EMMISIVE		0x0B
+#define G3DB_TAG_EMISSIVE		0x0B
 #define G3DB_TAG_OPACITY		0x0C
 #define G3DB_TAG_SPECULAR		0x0D
 #define G3DB_TAG_SHININESS		0x0E
 #define G3DB_TAG_NODE			0x0F
-#define G3DB_TAG_TRANSLATE		0x10
-#define G3DB_TAG_ROTATE			0x11
-#define G3DB_TAG_SCALE			0x12
-#define G3DB_TAG_PARTMATERIAL	0x13
+#define G3DB_TAG_NODEPART		0x10
+#define G3DB_TAG_TRANSLATE		0x11
+#define G3DB_TAG_ROTATE			0x12
+#define G3DB_TAG_SCALE			0x13
 #define G3DB_TAG_TEXTURE		0x14
 #define G3DB_TAG_FILENAME		0x15
-#define G3DB_TAG_ANIMATIONCLIP	0x16
-#define G3DB_TAG_BONE			0x17
+#define G3DB_TAG_ANIMATION		0x16
+#define G3DB_TAG_NODEANIMATION	0x17
 #define G3DB_TAG_KEYFRAME		0x18
 #define G3DB_TAG_TIME			0x19
+#define G3DB_TAG_LINK			0x20
 
 #define SWAP(X,Y,T) {T=X; X=Y; Y=T;}
 
+using namespace fbxconv::modeldata;
+
 namespace fbxconv {
+namespace writers {
 	typedef union {
 		short s;
 		float f;
@@ -95,33 +102,30 @@ namespace fbxconv {
 		void writeTag();
 		void writeVersion();
 		void writeNull(const int &size);
-		void writeMesh(const Mesh &mesh);
-		void writeMaterial(G3djMaterial &material);
-		void writeNode(const G3djNode &node);
-		void writeAnimationClip(const AnimationClip &clip);
+		void writeMesh(const Mesh *mesh);
+		void writeMaterial(const Material *material);
+		void writeNode(const Node *node);
+		void writeAnimation(const Animation *animation);
 		void writeFloat(const float &value);
+		void writeFloat(const float *arr, const unsigned int &size);
+		void writeFloat(const double *arr, const unsigned int &size);
 		void writeLong(const long &value);
 		void writeInt(const int &value);
 		void writeShort(const short &value);
 		void writeByte(const unsigned char &value);
 		void writeString(const char *value);
-		void writeVector(const gameplay::Vector2 &value);
-		void writeVector(const gameplay::Vector3 &value);
-		void writeVector(const gameplay::Vector4 &value);
-		void writeQuaternion(const gameplay::Quaternion &value);
 		int writeSize(const unsigned char &tag, const long &size);
 		int writeTag(unsigned char tag, const long &size);
 		void writeString(const unsigned char &tag, const char *value);
-		void writeVector(const unsigned char &tag, const gameplay::Vector2 &value);
-		void writeVector(const unsigned char &tag, const gameplay::Vector3 &value);
-		void writeQuaternion(const unsigned char &tag, const gameplay::Quaternion &value);
 		void writeFloat(const unsigned char &tag, const float &value);
+		void writeFloat(const unsigned char &tag, const float *arr, const unsigned int &size);
+		void writeFloat(const unsigned char &tag, const double *arr, const unsigned int &size);
 		void writeByte(const unsigned char &tag, const unsigned char &value);
 		long *beginBlock(const unsigned char &tag, const long &maxSize);
 		void endBlock(const long *block);
 	public:
-		bool exportG3db(G3djFile &g3dj, const char *fileName);
+		bool exportG3db(Model *model, const char *fileName);
 	};
-}
+} }
 
 #endif // G3DBWRITER_H
