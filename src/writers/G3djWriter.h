@@ -280,11 +280,11 @@ namespace writers {
 					writer->writeStringPair("meshpartid", (*itr)->meshPart == NULL ? "" : (*itr)->meshPart->id.c_str());
 					writer->nextValue(true);
 					writer->writeStringPair("materialid", (*itr)->material == NULL ? "" : (*itr)->material->id.c_str());
-					if (!(*itr)->links.empty()) {
+					if (!(*itr)->bones.empty()) {
 						writer->nextValue(true);
-						writer->openArray("links", false);
-						for (std::vector<const modeldata::Node *>::const_iterator ntr = (*itr)->links.begin(); ntr != (*itr)->links.end(); ++ntr) {
-							if (ntr != (*itr)->links.begin())
+						writer->openArray("bones", false);
+						for (std::vector<const modeldata::Node *>::const_iterator ntr = (*itr)->bones.begin(); ntr != (*itr)->bones.end(); ++ntr) {
+							if (ntr != (*itr)->bones.begin())
 								writer->nextValue(false);
 							writer->writeString((*ntr)==0?"":(*ntr)->id.c_str());
 						}
@@ -298,10 +298,8 @@ namespace writers {
 				writer->nextValue(true);
 				writer->openArray("children");
 				for (std::vector<modeldata::Node *>::const_iterator itr = node->children.begin(); itr != node->children.end(); ++itr) {
-					//if ((*itr)->hasPartsRecursive()) {
-						writer->nextValue(true);
-						exportNode(*itr, writer);
-					//}
+					writer->nextValue(true);
+					exportNode(*itr, writer);
 				}
 				writer->closeArray(true);
 			}

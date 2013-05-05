@@ -15,12 +15,12 @@ namespace modeldata {
 	struct NodePart {
 		const MeshPart *meshPart;
 		const Material *material;
-		std::vector<const Node *> links;
+		std::vector<const Node *> bones;
 
 		NodePart() : meshPart(0), material(0) {}
 
 		NodePart(const NodePart &copyFrom) : meshPart(copyFrom.meshPart), material(copyFrom.material) {
-			links.insert(links.end(), copyFrom.links.begin(), copyFrom.links.end());
+			bones.insert(bones.end(), copyFrom.bones.begin(), copyFrom.bones.end());
 		}
 	};
 }

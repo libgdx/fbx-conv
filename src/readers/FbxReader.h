@@ -1,56 +1,21 @@
 #ifdef _MSC_VER
 #pragma once
 #endif //_MSC_VER
-#ifndef MODELDATA_TMPCONVERTER_H
-#define MODELDATA_TMPCONVERTER_H
+#ifndef FBXCONV_READERS_FBXREADER_H
+#define FBXCONV_READERS_FBXREADER_H
 
 #include <fbxsdk.h>
 #include "../modeldata/Model.h"
 #include <sstream>
 #include <map>
 #include <algorithm>
+#include <assert.h>
+#include "util.h"
 
 using namespace fbxconv::modeldata;
 
 namespace fbxconv {
 namespace readers {
-	struct BlendWeight {
-		float weight;
-		int index;
-		BlendWeight() : weight(0.f), index(-1) {}
-		BlendWeight(float w, int i) : weight(w), index(i) {}
-		inline bool operator<(const BlendWeight& v) const {
-			return weight < v.weight;
-		}
-		inline bool operator>(const BlendWeight& v) const {
-			return weight > v.weight;
-		}
-		inline bool operator==(const BlendWeight& v) const {
-			return weight == v.weight;
-		}
-	};
-
-	struct AnimInfo {
-		float start;
-		float stop;
-		float framerate;
-		bool translate;
-		bool rotate;
-		bool scale;
-
-		AnimInfo() : start(FLT_MAX), stop(-1.f), framerate(0.f), translate(false), rotate(false), scale(false) {}
-
-		inline AnimInfo& operator+=(const AnimInfo& rhs) {
-			start = std::min(rhs.start, start);
-			stop = std::max(rhs.stop, stop);
-			framerate = std::max(rhs.framerate, framerate);
-			translate = translate || rhs.translate;
-			rotate = rotate || rhs.rotate;
-			scale = scale || rhs.scale;
-			return *this;
-		}
-	};
-
 	struct FbxReader {
 		typedef void (*TextureCallback)(Material::Texture *texture);
 		TextureCallback textureCallback;
@@ -58,22 +23,43 @@ namespace readers {
 		const char * error;
 		/** The maximum allowed amount of vertices in one mesh, only used when deciding to merge meshes. */
 		unsigned int maxVertexCount;
+		/** The maximum allowed amount of bone weights in one vertex, if a vertex exceeds this amount it will clipped on importance. */
+		unsigned int maxVertexBoneCount;
+		/** Always use maxVertexBoneCount for blendWeights, this might help merging meshes. */
+		bool forceMaxVertexBoneCount;
+		/** The maximum allowed amount of bones in one nodepart, if a meshpart exceeds this amount it will be split up in parts. */
+		unsigned int maxNodePartBoneCount;
 		/** Whether to flip the y-component of textures coordinates. */
 		bool flipV;
+		/** Whether to print (debug) progress information. */
+		bool verbose;
+#define DBGLOG(...)					\
+	if (verbose) {					\
+		printf("FBXREADER: ");		\
+		printf(__VA_ARGS__);		\
+		printf("\n");				\
+	}
 		
-		std::map<NodePart *, const FbxSkin *> links;
+		std::map<NodePart *, std::pair<const FbxSkin *, BlendBones>> nodePartBones;
 
 		FbxReader() {
+			flipV = false;
 			error = 0;
 			textureCallback = 0;
 			maxVertexCount = (1 << 15) - 1;
+			maxVertexBoneCount = 4;
+			maxNodePartBoneCount = (1 << 15) - 1;
+			forceMaxVertexBoneCount = false;
 		}
 
 		FbxScene *openFbxFile(const char *filename) {
+			DBGLOG("Creating FbxManager");
 			FbxManager *fbxManager = FbxManager::Create();
 			fbxManager->SetIOSettings(FbxIOSettings::Create(fbxManager, IOSROOT));
+			DBGLOG("Creating FbxImporter");
 			FbxImporter* importer = FbxImporter::Create(fbxManager, "");
-    
+
+			DBGLOG("Initializing importer for file '%s'", filename);
 			if (!importer->Initialize(filename, -1, fbxManager->GetIOSettings())) {
 				setError(importer->GetLastErrorString());
 				importer->Destroy();
@@ -81,13 +67,16 @@ namespace readers {
 				return 0;
 			}
 
+			DBGLOG("Creating FbxScene");
 			FbxScene* fbxScene = FbxScene::Create(fbxManager,"__FBX_SCENE__");
+			DBGLOG("Importing FbxScene");
 			importer->Import(fbxScene);
 			importer->Destroy();
 			return fbxScene;
 		}
 
 		void closeFbxFile(FbxScene *fbxScene) {
+			DBGLOG("Destroying FbxManager");
 			fbxScene->GetFbxManager()->Destroy();
 		}
 
@@ -144,25 +133,27 @@ namespace readers {
 			if (model->id.empty())
 				model->id = fbxScene->GetName();
 			FbxNode *root = fbxScene->GetRootNode();
-			links.clear();
+			nodePartBones.clear();
 			const int n = root->GetChildCount();
 			for (int i = 0; i < n; i++)
 				if (!addNode(model, root->GetChild(i), parent))
 					return false;
-			for (std::map<NodePart *, const FbxSkin *>::iterator itr = links.begin(); itr != links.end(); ++itr) {
-				const int n = (*itr).second->GetClusterCount();
-				for (int i = 0; i < n; i++)
-					(*itr).first->links.push_back(parent == 0 ? model->getNode((*itr).second->GetCluster(i)->GetLink()->GetName()): 
-															parent->getChild((*itr).second->GetCluster(i)->GetLink()->GetName()));
+			for (std::map<NodePart *, std::pair<const FbxSkin *, BlendBones>>::iterator itr = nodePartBones.begin(); itr != nodePartBones.end(); ++itr) {
+				const unsigned int n = (*itr).second.second.size();
+				for (unsigned int i = 0; i < n; i++) {
+					const int blendIndex = (*itr).second.second[i];
+					(*itr).first->bones.push_back(parent == 0 ? model->getNode((*itr).second.first->GetCluster(blendIndex)->GetLink()->GetName()) : 
+															parent->getChild((*itr).second.first->GetCluster(blendIndex)->GetLink()->GetName()));
+				}
 			}
 			addAnimations(model, fbxScene);
-			links.clear();
 			return true;
 		}
 
 		/** Add a FBX node as a child node of the parent model node (or as root node if parent is null) */
 		bool addNode(Model *model, FbxNode *source, Node *parent = 0) {
 			const char *id = source->GetName();
+			DBGLOG("Add node '%s'",id);
 			// If the model already contains a node with the same name, simply copy that node.
 			const Node *existing = id ? model->getNode(id) : 0;
 			Node *node = existing ? new Node(*existing) : new Node(id);
@@ -196,6 +187,7 @@ namespace readers {
 			const FbxNodeAttribute* attribute = source->GetNodeAttribute();
 			const FbxNodeAttribute::EType type = attribute ? attribute->GetAttributeType() : FbxNodeAttribute::eNull;
 			if (type == FbxNodeAttribute::eMesh || type == FbxNodeAttribute::eNurbs || type  == FbxNodeAttribute::eNurbsSurface || type  == FbxNodeAttribute::ePatch) {
+				DBGLOG("Triangulating node '%s'",source->GetName());
 				FbxGeometryConverter converter(source->GetFbxManager());
 				converter.TriangulateInPlace(source);
 			}
@@ -227,34 +219,53 @@ namespace readers {
 			// Meshes must be triangulated, this implies that the polygons below always contain three points
 			if (!source->IsTriangleMesh())
 				return setError("Mesh is not triangulated");
+			if (maxVertexBoneCount > 8)
+				return setError("Maximum bones per vertex must be less than or equal to 8");
+
+			bool result = true;
 
 			// Mesh parts must have an unique id
 			static unsigned long meshPartCounter = 0;
-			// Node instances are reused
-			static std::map<const FbxUInt64, const Node *> cache;
+			
 
-			// If a node with the same mesh is cached, simply copy it's parts to this node
-			const FbxUInt64 id = source->GetUniqueID();
-			std::map<const FbxUInt64, const Node *>::iterator it = cache.find(id);
-			if (it != cache.end()) {
-				for (std::vector<NodePart *>::const_iterator itr = it->second->parts.begin(); itr != it->second->parts.end(); ++itr)
-					node->parts.push_back(new NodePart(*(*itr)));
-				return true;
+			{// Cache node and reuse if possible
+				// Node instances are reused
+				static std::map<const FbxUInt64, const Node *> cache;
+				// If a node with the same mesh is cached, simply copy it's parts to this node
+				const FbxUInt64 id = source->GetUniqueID();
+				std::map<const FbxUInt64, const Node *>::iterator it = cache.find(id);
+				if (it != cache.end()) {
+					DBGLOG("A node with the same ID %d already exists, reusing that node", id);
+					for (std::vector<NodePart *>::const_iterator itr = it->second->parts.begin(); itr != it->second->parts.end(); ++itr)
+						node->parts.push_back(new NodePart(*(*itr)));
+					return true;
+				}
+				// otherwise add this node to the cache
+				cache[id] = node;
 			}
-			// otherwise add this node to the cache
-			cache[id] = node;
 
 			const unsigned int vertexCount = source->GetControlPointsCount();
 			const unsigned int polyCount = source->GetPolygonCount();
 			const FbxVector4 *points = source->GetControlPoints();
 			const unsigned int uvCount = (unsigned int)(source->GetElementUVCount() > 8 ? 8 : source->GetElementUVCount());
+			const int materialCount = source->GetNode()->GetMaterialCount();
+			const int meshPartCount = materialCount == 0 ? 1 : materialCount; // Always add at least one mesh part, even if the mesh doesn't contain one
+			const unsigned int elementMaterialCount = source->GetElementMaterialCount() == 0 ? 1 : source->GetElementMaterialCount();
 
 			// Check if the mesh is skinned and if so fetch the first skin (restricted to one skin)
 			const FbxSkin *skin = ((unsigned int)source->GetDeformerCount(FbxDeformer::eSkin) > 0) ? static_cast<FbxSkin*>(source->GetDeformer(0, FbxDeformer::eSkin)) : 0;
 
-			// Fetch the blend weights per control point
+			std::vector<BlendBonesCollection> partBones(meshPartCount, BlendBonesCollection(maxNodePartBoneCount));
 			std::vector<BlendWeight> *weights = 0;
+			// map polygons to mesh parts
+			unsigned int *polyPartMap = new unsigned int[polyCount];
+			memset(polyPartMap, -1, sizeof(unsigned int) * polyCount);
+			unsigned int *polySubpartMap = new unsigned int[polyCount];
+			memset(polySubpartMap, 0, sizeof(unsigned int) * polyCount);
+			unsigned int blendWeightCount = 0;
+
 			if (skin) {
+				// Fetch the blend weights per control point
 				weights = new std::vector<BlendWeight>[vertexCount];
 				const int clusterCount = skin->GetClusterCount();
 				for (int i = 0; i < clusterCount; i++) {
@@ -265,25 +276,69 @@ namespace readers {
 					for (int j = 0; j < indexCount; j++) {
 						if (clusterIndices[j] < 0 || clusterIndices[j] >= (int)vertexCount || clusterWeights[j] == 0.0)
 							continue;
-						weights[clusterIndices[j]].push_back(BlendWeight((float)clusterWeights[j], j));
+						weights[clusterIndices[j]].push_back(BlendWeight((float)clusterWeights[j], i));
 					}
 				}
-				// Sort the weights, so the most significant weights are first
-				for (unsigned int i = 0; i < vertexCount; i++)
+				// Sort the weights, so the most significant weights are first, remove unneeded weights and normalize the remaining
+				for (unsigned int i = 0; i < vertexCount; i++) {
 					std::sort(weights[i].begin(), weights[i].end(), std::greater<BlendWeight>());
+					if (weights[i].size() > maxVertexBoneCount)
+						weights[i].resize(maxVertexBoneCount);
+					float len = 0.f;
+					for (std::vector<BlendWeight>::const_iterator itr = weights[i].begin(); itr != weights[i].end(); ++itr)
+						len += (*itr).weight;
+					for (std::vector<BlendWeight>::iterator itr = weights[i].begin(); itr != weights[i].end(); ++itr)
+						(*itr).weight /= len;
+					if (weights[i].size() > blendWeightCount)
+						blendWeightCount = weights[i].size();
+				}
+				// Get the bones per polygon and divide the meshpart into subparts if needed
+				std::vector<std::vector<BlendWeight>*> polyWeights;
+				for (unsigned int poly = 0; poly < polyCount; poly++) {
+					int mp = -1;
+					for (unsigned int i = 0; i < elementMaterialCount && mp < 0; i++)
+						mp = source->GetElementMaterial(i)->GetIndexArray()[poly];
+					if (mp < 0 || mp >= meshPartCount)
+						polyPartMap[poly] = -1;
+					else {
+						polyPartMap[poly] = mp;
+						const unsigned int polySize = source->GetPolygonSize(poly);
+						polyWeights.clear();
+						for (unsigned int i = 0; i < polySize; i++)
+							polyWeights.push_back(&weights[source->GetPolygonVertex(poly, i)]);
+						const int sp = partBones[mp].add(polyWeights);
+						polySubpartMap[poly] = sp < 0 ? 0 : (unsigned int)sp;
+						if (sp < 0)
+							result = setError("Too many bones per polygon, incease maxNodePartBoneCount to resolve.");
+					}
+				}
+			} else {
+				int mp;
+				for (unsigned int poly = 0; poly < polyCount; poly++) {
+					mp = -1;
+					for (unsigned int i = 0; i < elementMaterialCount && mp < 0; i++)
+						mp = source->GetElementMaterial(i)->GetIndexArray()[poly];
+					if (mp < 0 || mp >= meshPartCount)
+						polyPartMap[poly] = -1;
+					else
+						polyPartMap[poly] = mp;
+				}
 			}
+
+			if (blendWeightCount > 0 && forceMaxVertexBoneCount)
+				blendWeightCount = maxVertexBoneCount;
 
 			// Check which vertex attributes the mesh contains
 			Attributes attributes;
 			attributes.hasPosition(true);
 			attributes.hasNormal(source->GetElementNormalCount() > 0);
+			attributes.hasColor(source->GetElementVertexColorCount() > 0);
 			attributes.hasTangent(source->GetElementTangentCount() > 0);
 			attributes.hasBinormal(source->GetElementBinormalCount() > 0);
 			for (unsigned int i = 0; i < 8; i++)
 				attributes.hasUV(i, i < uvCount);
-			attributes.hasColor(source->GetElementVertexColorCount() > 0);
-			attributes.hasBlendWeights(skin != 0);
-			attributes.hasBlendIndices(skin != 0);
+			for (unsigned int i = 0; i < 8; i++)
+				attributes.hasBlendWeight(i, i < blendWeightCount);
 
 			unsigned int vertexSize = attributes.size();
 
@@ -294,34 +349,35 @@ namespace readers {
 				model->meshes.push_back(mesh = new Mesh());
 				mesh->attributes = attributes;
 				mesh->vertexSize = vertexSize;
-			}
-
-			const int materialCount = source->GetNode()->GetMaterialCount();
-			// Always add at least one mesh part, even if the mesh doesn't contain one
-			const int meshPartCount = materialCount == 0 ? 1 : materialCount;
+			} else
+				DBGLOG("Merging mesh with previous created mesh");
 
 			// The parts and materials this mesh contains
-			MeshPart **parts = new MeshPart*[meshPartCount];
+			MeshPart ***parts = new MeshPart**[meshPartCount];
 			Material **materials = new Material*[materialCount];
+
 			// Add the mesh parts and materials to the model and create node parts for each pair
 			for (int i = 0; i < meshPartCount; i++) {
-				parts[i] = new MeshPart();
-				std::stringstream ss;
-				ss << "mpart" << ++meshPartCounter;
-				parts[i]->id = ss.str();
-				parts[i]->primitiveType = primitiveType;
-				mesh->parts.push_back(parts[i]);
+				const unsigned int n = partBones[i].size();
+				const unsigned int m = n < 1 ? 1 : n;
+				parts[i] = new MeshPart*[m];
+				for (int j = 0; j < m; j++) {
+					parts[i][j] = new MeshPart();
+					std::stringstream ss;
+					ss << "mpart" << ++meshPartCounter;
+					parts[i][j]->id = ss.str();
+					parts[i][j]->primitiveType = primitiveType;
+					mesh->parts.push_back(parts[i][j]);
 
-				NodePart *npart = new NodePart();
-				npart->material = i < materialCount ? materials[i] = addMaterial(model, source->GetNode()->GetMaterial(i)) : 0;
-				npart->meshPart = parts[i];
-				node->parts.push_back(npart);
+					NodePart *npart = new NodePart();
+					npart->material = i < materialCount ? materials[i] = addMaterial(model, source->GetNode()->GetMaterial(i)) : 0;
+					npart->meshPart = parts[i][j];
+					node->parts.push_back(npart);
 
-				if (skin!=0)
-					links[npart] = skin;
+					if (j < n)
+						this->nodePartBones[npart] = std::pair<const FbxSkin *, BlendBones>(skin, partBones[i][j]);
+				}
 			}
-
-			const unsigned int elementMaterialCount = source->GetElementMaterialCount() == 0 ? 1 : source->GetElementMaterialCount();
 
 			// Cache normals, whether they are indexed and if they are located on control points or polygon points.
 			const FbxLayerElementArrayTemplate<FbxVector4> *normals = attributes.hasNormal() ? &(source->GetElementNormal()->GetDirectArray()) : 0;
@@ -359,27 +415,22 @@ namespace readers {
 
 			// reserve at least the minimum size of the mesh
 			mesh->vertices.reserve(mesh->vertices.size() + vertexSize * vertexCount);
-			// if a mesh contains only one part, that part will contain all indices, so allocate the memory upfront
-			if (meshPartCount == 1)
-				parts[0]->indices.reserve(polyCount * 3);
 
 			float *vertex = new float[vertexSize];
 			const FbxVector4 *normal, *tangent, *binormal;
 			const FbxColor *color;
 			const FbxVector2 *uv[8];
 			unsigned int pidx = 0;
-			int mp;
+			int mp, sp;
 			MeshPart *meshpart;
 			Material *material;
 			for (unsigned int poly = 0; poly < polyCount; poly++) {
 				// find the mesh part this triangle belongs to
-				mp = -1;
-				for (unsigned int i = 0; i < elementMaterialCount && mp < 0; i++)
-					mp = source->GetElementMaterial(i)->GetIndexArray()[poly];
-				if (mp < 0 || mp >= meshPartCount)
+				if ((mp = polyPartMap[poly]) < 0)
 					continue;
-				meshpart = parts[mp];
-				material = mp < materialCount ? materials[mp] : 0;
+				sp = polySubpartMap[poly];
+				meshpart = parts[mp][sp];
+				material = mp < materialCount ? materials[mp] : 0;  
 
 				// Add the three points of this triangle
 				const unsigned int polySize = source->GetPolygonSize(poly); // always 3
@@ -419,21 +470,6 @@ namespace readers {
 						vertex[idx++] = (float)(*binormal)[1];
 						vertex[idx++] = (float)(*binormal)[2];
 					}
-					if (attributes.hasBlendWeights() || attributes.hasBlendIndices()) {
-						unsigned int s = weights[v].size();
-						if (attributes.hasBlendWeights()) {
-							vertex[idx++] = s < 1 ? 0.f : weights[v][0].weight;
-							vertex[idx++] = s < 2 ? 0.f : weights[v][1].weight;
-							vertex[idx++] = s < 3 ? 0.f : weights[v][2].weight;
-							vertex[idx++] = s < 4 ? 0.f : weights[v][3].weight;
-						}
-						if (attributes.hasBlendIndices()) {
-							vertex[idx++] = s < 1 ? 0.f : weights[v][0].index;
-							vertex[idx++] = s < 2 ? 0.f : weights[v][1].index;
-							vertex[idx++] = s < 3 ? 0.f : weights[v][2].index;
-							vertex[idx++] = s < 4 ? 0.f : weights[v][3].index;
-						}
-					}
 					for (unsigned int j = 0; j < uvCount; j++) {
 						uv[j] = uvVertex[j] ? &((*uvs[j]).GetAt(uvIndices[j] ? (*uvIndices[j])[v] : v)) : &((*uvs[j]).GetAt(uvIndices[j] ? (*uvIndices[j])[pidx] : pidx));
 						vertex[idx++] = (float)(*uv[j]).mData[0];
@@ -441,6 +477,14 @@ namespace readers {
 						if (material != 0 && j < material->textures.size()) {
 							vertex[idx-2] = material->textures[j]->bakeUvTranslation[0] + material->textures[j]->bakeUvScale[0] * (material->textures[j]->bakeUvRotate ? vertex[idx-1] : vertex[idx-2]);
 							vertex[idx-1] = material->textures[j]->bakeUvTranslation[1] + material->textures[j]->bakeUvScale[1] * (material->textures[j]->bakeUvRotate ? vertex[idx-2] : vertex[idx-1]);
+						}
+					}
+					if (blendWeightCount > 0) {
+						unsigned int s = weights[v].size();
+						BlendBones *bones = &partBones[mp][sp];
+						for (unsigned int j = 0; j < blendWeightCount; j++) {
+							vertex[idx++] = j < s ? bones->idx(weights[v][j].index) : 0.f;
+							vertex[idx++] = j < s ? weights[v][j].weight : 0.f;
 						}
 					}
 					// Check if a vertex with the same values already exists in the mesh, otherwise add it.
@@ -452,11 +496,15 @@ namespace readers {
 			}
 
 			delete[] vertex;
+			for (unsigned int i = 0; i < meshPartCount; i++)
+				delete[] parts[i];
 			delete[] parts;
+			delete[] polyPartMap;
+			delete[] polySubpartMap;
 			delete[] materials;
 			if (weights)
 				delete[] weights;
-			return true;
+			return result;
 		}
 
 		/** Add the FBX material to the model and returns it. */
@@ -471,9 +519,12 @@ namespace readers {
 			} else {
 				// Check if a material with same name already exists
 				Material *existing = model->getMaterial(id.c_str());
-				if (existing)
+				if (existing) {
+					DBGLOG("Reusing existing material '%s'",id.c_str());
 					return existing;
+				}
 			}
+			DBGLOG("Adding material '%s'",id.c_str());
 
 			// Create a new material, model is responsable for destroying it
 			Material *material = new Material();
@@ -539,7 +590,8 @@ namespace readers {
 		}
 
 		/** Add the specified animation to the model */
-		void addAnimation(Model *model, const FbxAnimStack *animStack) {
+		void addAnimation(Model *model, FbxAnimStack *animStack) {
+			DBGLOG("Add animation '%s'",animStack->GetName());
 			static std::vector<Keyframe *> frames;
 			static std::map<FbxNode *, AnimInfo> affectedNodes;
 			affectedNodes.clear();
@@ -573,7 +625,7 @@ namespace readers {
 								updateAnimTime(curve, ts);
 							if (curve = prop->GetCurve(layer, FBXSDK_CURVENODE_COMPONENT_Z))
 								updateAnimTime(curve, ts);
-							if (ts.start < ts.stop)
+							//if (ts.start < ts.stop)
 								affectedNodes[node] += ts;
 						}
 					}
@@ -586,6 +638,7 @@ namespace readers {
 			Animation *animation = new Animation();
 			model->animations.push_back(animation);
 			animation->id = animStack->GetName();
+			animStack->GetScene()->GetEvaluator()->SetContext(animStack);
 
 			// Add the NodeAnimations to the Animation
 			for (std::map<FbxNode *, AnimInfo>::const_iterator itr = affectedNodes.begin(); itr != affectedNodes.end(); itr++) {
@@ -633,7 +686,7 @@ namespace readers {
 			curve->GetTimeInterval(fts);
 			const FbxTime start = fts.GetStart();
 			const FbxTime stop = fts.GetStop();
-			ts.start = std::min(ts.start, (float)start.GetMilliSeconds());
+			ts.start = std::min(ts.start, (float)(start.GetMilliSeconds()));
 			ts.stop = std::max(ts.stop, (float)stop.GetMilliSeconds());
 			// Could check the nunber and type of keys (ie curve->KeyGetInterpolation) to lower the framerate
 			ts.framerate = std::max(ts.framerate, (float)stop.GetFrameRate(FbxTime::eDefaultMode));
@@ -654,22 +707,25 @@ namespace readers {
 			anim->translate = translate;
 			anim->rotate = rotate;
 			anim->scale = scale;
-			anim->keyframes.push_back(keyframes[0]);
-			const int last = keyframes.size()-1;
-			Keyframe *k1 = keyframes[0], *k2, *k3;
-			for (int i = 1; i < last; i++) {
-				k2 = keyframes[i];
-				k3 = keyframes[i+1];
-				// Check if the middle keyframe can be calculated by information, if so dont add it
-				if ((translate && !isLerp(k1->translation, k1->time, k2->translation, k2->time, k3->translation, k3->time, 3)) ||
-					(rotate && !isLerp(k1->rotation, k1->time, k2->rotation, k2->time, k3->rotation, k3->time, 3)) || // FIXME use slerp for quaternions
-					(scale && !isLerp(k1->scale, k1->time, k2->scale, k2->time, k3->scale, k3->time, 3))) {
-						anim->keyframes.push_back(k2);
-						k1 = k2;
-				} else
-					delete k2;
+			if (!keyframes.empty()) {
+				anim->keyframes.push_back(keyframes[0]);
+				const int last = keyframes.size()-1;
+				Keyframe *k1 = keyframes[0], *k2, *k3;
+				for (int i = 1; i < last; i++) {
+					k2 = keyframes[i];
+					k3 = keyframes[i+1];
+					// Check if the middle keyframe can be calculated by information, if so dont add it
+					if ((translate && !isLerp(k1->translation, k1->time, k2->translation, k2->time, k3->translation, k3->time, 3)) ||
+						(rotate && !isLerp(k1->rotation, k1->time, k2->rotation, k2->time, k3->rotation, k3->time, 3)) || // FIXME use slerp for quaternions
+						(scale && !isLerp(k1->scale, k1->time, k2->scale, k2->time, k3->scale, k3->time, 3))) {
+							anim->keyframes.push_back(k2);
+							k1 = k2;
+					} else
+						delete k2;
+				}
+				if (last > 0)
+					anim->keyframes.push_back(keyframes[last]);
 			}
-			anim->keyframes.push_back(keyframes[last]);
 		}
 
 		inline bool cmp(const double &v1, const double &v2, const double &epsilon = 0.000001) {
@@ -694,4 +750,4 @@ namespace readers {
 	};
 } }
 
-#endif //MODELDATA_TMPCONVERTER_H
+#endif //FBXCONV_READERS_FBXREADER_H

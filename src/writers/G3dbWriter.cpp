@@ -115,8 +115,8 @@ namespace writers {
 			long *partMaterialBlock = beginBlock(G3DB_TAG_NODEPART, MEDIUM_MAX);
 			writeString(G3DB_TAG_MESHPART, (*itr)->meshPart->id.c_str());
 			writeString(G3DB_TAG_MATERIAL, (*itr)->material->id.c_str());
-			for (std::vector<const Node *>::const_iterator ntr = (*itr)->links.begin(); ntr != (*itr)->links.end(); ++ntr)
-				writeString(G3DB_TAG_LINK, (*ntr)->id.c_str());
+			for (std::vector<const Node *>::const_iterator ntr = (*itr)->bones.begin(); ntr != (*itr)->bones.end(); ++ntr)
+				writeString(G3DB_TAG_BONE, (*ntr)->id.c_str());
 			endBlock(partMaterialBlock);
 		}
 
@@ -135,7 +135,7 @@ namespace writers {
 			writeString(G3DB_TAG_NODE, (*itr)->node->id.c_str());
 			for (std::vector<Keyframe *>::const_iterator ktr = (*itr)->keyframes.begin(); ktr != (*itr)->keyframes.end(); ++ktr) {
 				long *keyframeBlock = beginBlock(G3DB_TAG_KEYFRAME, SMALL_MAX);
-				writeFloat(G3DB_TAG_TIME, (*ktr)->time);
+				writeFloat(G3DB_TAG_TIME, (float)((*ktr)->time));
 				if ((*itr)->translate)
 					writeFloat(G3DB_TAG_TRANSLATE, (*ktr)->translation, 3);
 				if ((*itr)->rotate)

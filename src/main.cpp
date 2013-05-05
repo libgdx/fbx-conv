@@ -33,6 +33,7 @@ int process(int argc, const char** argv) {
 	}
 	if (command.error.length() > 0)
 	{
+		command.printCommand();
 		printf("ERROR: %s\n\n", command.error.c_str());
 		command.printHelp();
 		return 1;
@@ -42,8 +43,11 @@ int process(int argc, const char** argv) {
 		return 1;
 	}
 
-	modeldata::Model *model = new modeldata::Model();
 	fbxconv::readers::FbxReader reader;
+	reader.verbose = command.verbose;
+	reader.flipV = command.flipV;
+	reader.maxNodePartBoneCount = command.maxNodePartBonesCount;
+	reader.maxVertexBoneCount = command.maxVertexBonesCount;
 
 	printf("Loading source file...\n");
 	FbxScene *scene = reader.openFbxFile(command.inFile.c_str());
@@ -62,29 +66,29 @@ int process(int argc, const char** argv) {
 #endif
 
 	printf("Converting source file...\n");
+	modeldata::Model *model = new modeldata::Model();
 	reader.textureCallback = textureCallback;
 	if (!reader.load(model, scene)) {
 		printf("ERROR: %s\n", reader.error);
-		return 1;
+		delete model;
+		model = 0;
 	}
+	printf("Closing source file...\n");
 	reader.closeFbxFile(scene);
 
-	if (command.outType == FILETYPE_G3DB) {
-		printf("Exporting to g3db...\n");
-		G3dbWriter writer;
-		writer.exportG3db(model, command.outFile.c_str());
-	} else{
-		printf("Exporting to g3dj...\n");
-		JSONWriter writer(command.outFile.c_str());
-		G3djWriter exporter;
-		exporter.exportModel(model, &writer);
+	if (model != 0) {
+		if (command.outType == FILETYPE_G3DB) {
+			printf("Exporting to g3db...\n");
+			G3dbWriter writer;
+			writer.exportG3db(model, command.outFile.c_str());
+		} else{
+			printf("Exporting to g3dj...\n");
+			JSONWriter writer(command.outFile.c_str());
+			G3djWriter exporter;
+			exporter.exportModel(model, &writer);
+		}
+		delete model;
 	}
-	delete model;
-
-#ifdef _DEBUG
-	std::cout << "Press ENTER to continue...";
-	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-#endif
 
 	return 0;
 }
@@ -95,5 +99,12 @@ int main(int argc, const char** argv) {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-	return process(argc, argv);
+	int result = process(argc, argv);
+
+#ifdef _DEBUG
+	std::cout << "Press ENTER to continue...";
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+#endif
+
+	return result;
 }

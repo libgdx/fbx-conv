@@ -59,7 +59,7 @@
 #define G3DB_TAG_NODEANIMATION	0x17
 #define G3DB_TAG_KEYFRAME		0x18
 #define G3DB_TAG_TIME			0x19
-#define G3DB_TAG_LINK			0x20
+#define G3DB_TAG_BONE			0x20
 
 #define SWAP(X,Y,T) {T=X; X=Y; Y=T;}
 

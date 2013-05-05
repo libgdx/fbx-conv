@@ -10,25 +10,32 @@
 #define ATTRIBUTE_COLOR			3
 #define ATTRIBUTE_TANGENT		4
 #define ATTRIBUTE_BINORMAL		5
-#define ATTRIBUTE_BLENDWEIGHTS	6
-#define ATTRIBUTE_BLENDINDICES	7
-#define ATTRIBUTE_TEXCOORD0		8
-#define ATTRIBUTE_TEXCOORD1		9
-#define ATTRIBUTE_TEXCOORD2		10
-#define ATTRIBUTE_TEXCOORD3		11
-#define ATTRIBUTE_TEXCOORD4		12
-#define ATTRIBUTE_TEXCOORD5		13
-#define ATTRIBUTE_TEXCOORD6		14
-#define ATTRIBUTE_TEXCOORD7		15
-#define ATTRIBUTE_COUNT			16
+#define ATTRIBUTE_TEXCOORD0		6
+#define ATTRIBUTE_TEXCOORD1		7
+#define ATTRIBUTE_TEXCOORD2		8
+#define ATTRIBUTE_TEXCOORD3		9
+#define ATTRIBUTE_TEXCOORD4		10
+#define ATTRIBUTE_TEXCOORD5		11
+#define ATTRIBUTE_TEXCOORD6		12
+#define ATTRIBUTE_TEXCOORD7		13
+#define ATTRIBUTE_BLENDWEIGHT0	14
+#define ATTRIBUTE_BLENDWEIGHT1	15
+#define ATTRIBUTE_BLENDWEIGHT2	16
+#define ATTRIBUTE_BLENDWEIGHT3	17
+#define ATTRIBUTE_BLENDWEIGHT4	18
+#define ATTRIBUTE_BLENDWEIGHT5	19
+#define ATTRIBUTE_BLENDWEIGHT6	20
+#define ATTRIBUTE_BLENDWEIGHT7	21
+#define ATTRIBUTE_COUNT			22
 
 namespace fbxconv {
 namespace modeldata {
 	static const char * AttributeNames[] = {
-		"UNKNOWN", "POSITION", "NORMAL", "COLOR", "TANGENT", "BINORMAL", "BLENDWEIGHTS", "BLENDINDICES", 
-		"TEXCOORD0", "TEXCOORD1", "TEXCOORD2", "TEXCOORD3", "TEXCOORD4", "TEXCOORD5", "TEXCOORD6", "TEXCOORD7"
+		"UNKNOWN", "POSITION", "NORMAL", "COLOR", "TANGENT", "BINORMAL",
+		"TEXCOORD0", "TEXCOORD1", "TEXCOORD2", "TEXCOORD3", "TEXCOORD4", "TEXCOORD5", "TEXCOORD6", "TEXCOORD7",
+		"BLENDWEIGHT0", "BLENDWEIGHT1", "BLENDWEIGHT2", "BLENDWEIGHT3", "BLENDWEIGHT4", "BLENDWEIGHT5", "BLENDWEIGHT6", "BLENDWEIGHT7"
 	};
-	static const unsigned short AttributeSizes[] = { 4, 3, 3, 4, 3, 3, 4, 4, 2, 2, 2, 2, 2, 2, 2, 2 };
+	static const unsigned short AttributeSizes[] = { 4, 3, 3, 4, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 };
 
 	struct Attributes {
 		unsigned long value;
@@ -130,28 +137,20 @@ namespace modeldata {
 			set(ATTRIBUTE_BINORMAL, v);
 		}
 
-		inline bool hasBlendWeights() const {
-			return has(ATTRIBUTE_BLENDWEIGHTS);
-		}
-
-		void hasBlendWeights(const bool &v) {
-			set(ATTRIBUTE_BLENDWEIGHTS, v);
-		}
-
-		inline bool hasBlendIndices() const {
-			return has(ATTRIBUTE_BLENDINDICES);
-		}
-
-		void hasBlendIndices(const bool &v) {
-			set(ATTRIBUTE_BLENDINDICES, v);
-		}
-
 		inline bool hasUV(const unsigned short &uv) const {
 			return has(ATTRIBUTE_TEXCOORD0 + uv);
 		}
 
 		void hasUV(const unsigned short &uv, const bool &v) {
 			set(ATTRIBUTE_TEXCOORD0 + uv, v);
+		}
+
+		inline bool hasBlendWeight(const unsigned short &index) const {
+			return has(ATTRIBUTE_BLENDWEIGHT0 + index);
+		}
+
+		void hasBlendWeight(const unsigned short &index, const bool &v) {
+			set(ATTRIBUTE_BLENDWEIGHT0 + index, v);
 		}
 	};
 } }
