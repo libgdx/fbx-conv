@@ -63,6 +63,8 @@ public:
     unsigned int getIndex(unsigned int i) const;
 
 	unsigned int _primitiveType;
+
+    std::vector<unsigned int> _indices;
 private:
 
     /**
@@ -88,7 +90,6 @@ private:
 
 private:
     IndexFormat _indexFormat;
-    std::vector<unsigned int> _indices;
 };
 
 }

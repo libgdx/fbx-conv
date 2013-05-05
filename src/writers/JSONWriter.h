@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 namespace fbxconv {
+namespace writers {
 
 	class JSONWriter{
 	public:
@@ -22,10 +23,16 @@ namespace fbxconv {
 
 		void writeStringPair(const char* key, const char* value);
 		void writeFloatPair(const char* key, float value);
+		void writeFloatPair(const char* key, double value) {
+			writeFloatPair(key, (float)value);
+		}
 
 		void writeRawString(const char* value);
 		void writeString(const char* value);
 		void writeFloat(float value);
+		void writeFloat(double value) {
+			writeFloat((float)value);
+		}
 		void writeInteger(int value);
 
 		void printTabs();
@@ -37,6 +44,6 @@ namespace fbxconv {
 		void indent() { currentIndention++; }
 		void dedent() { currentIndention--; if(currentIndention < 0) currentIndention = 0; }
 	};
-}
+} }
 
 #endif

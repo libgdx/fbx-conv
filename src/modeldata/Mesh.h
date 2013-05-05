@@ -1,0 +1,79 @@
+#ifdef _MSC_VER 
+#pragma once
+#endif
+#ifndef MODELDATA_MESH_H
+#define MODELDATA_MESH_H
+
+#include <vector>
+#include "meshpart.h"
+#include "Attributes.h"
+
+namespace fbxconv {
+namespace modeldata {
+	/** A mesh is responsable for freeing all parts and vertices it contains. */
+	struct Mesh {
+		/** the attributes the vertices in this mesh describe */
+		Attributes attributes;
+		/** the size (in number of floats) of each vertex */
+		unsigned int vertexSize;
+		/** the number of vertices this mesh contains */
+		std::vector<float> vertices;
+		/** hash lookup table for faster duplicate vertex checking */
+		std::vector<unsigned int> hashes;
+		/** the indexed parts of this mesh */
+		std::vector<MeshPart *> parts;
+
+		/** ctor */
+		Mesh() : attributes(0), vertexSize(0) {}
+
+		/** copy constructor */
+		Mesh(const Mesh &copyFrom) {
+			attributes = copyFrom.attributes;
+			vertexSize = copyFrom.vertexSize;
+			vertices.insert(vertices.end(), copyFrom.vertices.begin(), copyFrom.vertices.end());
+			for (std::vector<MeshPart *>::const_iterator itr = copyFrom.parts.begin(); itr != copyFrom.parts.end(); ++itr)
+				parts.push_back(new MeshPart(**itr));
+		}
+
+		~Mesh() {
+			clear();
+		}
+
+		void clear() {
+			vertices.clear();
+			hashes.clear();
+			attributes = vertexSize = 0;
+			for (std::vector<MeshPart *>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
+				delete (*itr);
+			parts.clear();
+		}
+
+		inline unsigned int add(const float *vertex) {
+			const unsigned int hash = calcHash(vertex, vertexSize);
+			const unsigned int n = hashes.size();
+			for (unsigned int i = 0; i < n; i++)
+				if (hashes[i] == hash && compare(&vertices[i*vertexSize], vertex, vertexSize))
+					return i;
+			hashes.push_back(hash);
+			vertices.insert(vertices.end(), &vertex[0], &vertex[vertexSize]);
+			return hashes.size() - 1;
+		}
+
+		inline unsigned int calcHash(const float *vertex, const unsigned int size) {
+			unsigned int result = 0;
+			for (unsigned int i = 0; i < size; i++)
+				result += (*((unsigned long *)&vertex[i]) & 0xffffff00) >> 8;
+			return result;
+		}
+
+		inline bool compare(const float* lhs, const float* rhs, const unsigned int &n) {
+			for (unsigned int i = 0; i < n; i++)
+				if (lhs[i] != rhs[i])
+					return false;
+			return true;
+		}
+	};
+}
+}
+
+#endif //MODELDATA_MESH_H
