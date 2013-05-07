@@ -26,7 +26,7 @@
 #define LARGE	0x80
 #define XLARGE	0xC0
 
-#define SMALL_MAX	(((unsigned long)1 << 8) - 1)
+#define SMALL_MAX	(((unsigned long)1 << 7) - 1)
 #define MEDIUM_MAX	(((unsigned long)1 << 15) - 1)
 #define LARGE_MAX	(((unsigned long)1 << 31) - 1)
 #define XLARGE_MAX	(((unsigned long long)1 << 63) - 1)

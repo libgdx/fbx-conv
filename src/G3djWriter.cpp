@@ -376,7 +376,7 @@ namespace fbxconv {
 			if(node->getModel()->getMesh()->parts.size() > 0){
 				writer->nextValue(true);
 
-				writer->openArray("materials", true);
+				writer->openArray("parts", true);
 
 				Mesh* mesh = node->getModel()->getMesh();
 				for (std::vector<MeshPart*>::iterator i = mesh->parts.begin(); i != mesh->parts.end(); ++i)
