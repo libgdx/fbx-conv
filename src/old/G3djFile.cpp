@@ -7,6 +7,7 @@ namespace fbxconv {
 	}
 
 	G3djFile::~G3djFile(){
+		// FIXME where is memory free'd?
 	}
 
 	void G3djFile::addScene(Scene* scene){
