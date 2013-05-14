@@ -5,28 +5,42 @@
 #define MODELDATA_MATERIAL_H
 
 #include <vector>
+#include <fbxsdk.h>
+#include "../readers/matrix3.h"
 
 namespace fbxconv {
 namespace modeldata {
 	struct Material {
 		struct Texture {
+			enum Usage {
+				Unknown = 0,
+				None = 1,
+				Diffuse = 2, 
+				Emissive = 3,
+				Ambient = 4,
+				Specular = 5,
+				Shininess = 6,
+				Normal = 7,
+				Bump = 8,
+				Transparency = 9,
+				Reflection = 10
+			};
+
+			FbxFileTexture *source;
 			std::string id;
 			std::string path;
 			float uvTranslation[2];
 			float uvScale[2];
-			float bakeUvTranslation[2];
-			float bakeUvScale[2];
-			bool bakeUvRotate;
-			unsigned int usage;
+			// FIXME add Matrix3<float> uvTransform;
+			Usage usage;
 
-			Texture() {
-				uvTranslation[0] = uvTranslation[1] = bakeUvTranslation[0] = bakeUvTranslation[1] = 0.f;
-				uvScale[0] = uvScale[1] = bakeUvScale[0] = bakeUvScale[1] = 1.f;
-				bakeUvRotate = false;
-				usage = 0;
+			Texture() : usage(Unknown), source(0) {
+				uvTranslation[0] = uvTranslation[1] = 0.f;
+				uvScale[0] = uvScale[1] = 1.f;
 			}
 		};
 
+		FbxSurfaceMaterial *source;
 		std::string id;
 		float diffuse[3];
 		float ambient[3];
@@ -36,7 +50,7 @@ namespace modeldata {
 		float opacity;
 		std::vector<Texture *> textures;
 		
-		Material() {
+		Material() : source(0) {
 			memset(diffuse,  0, sizeof(diffuse));
 			memset(ambient,  0, sizeof(ambient));
 			memset(emissive, 0, sizeof(emissive));
@@ -52,6 +66,7 @@ namespace modeldata {
 			memcpy(specular, copyFrom.specular, sizeof(diffuse));
 			shininess = copyFrom.shininess;
 			opacity = copyFrom.opacity;
+			source = copyFrom.source;
 		}
 
 		~Material() {
@@ -64,6 +79,14 @@ namespace modeldata {
 				if ((*itr)->id.compare(id)==0)
 					return (*itr);
 			return NULL;
+		}
+
+		int getTextureIndex(const Texture * const &texture) const {
+			int n = textures.size();
+			for (int i = 0; i < n; i++)
+				if (textures[i] == texture)
+					return i;
+			return -1;
 		}
 	};
 }

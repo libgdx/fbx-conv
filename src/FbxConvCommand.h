@@ -23,6 +23,7 @@ struct FbxConvCommand {
 	std::string outFile;
 	int outType;
 	bool flipV;
+	bool packColors;
 	bool help;
 	bool verbose;
 	int maxNodePartBonesCount;
@@ -31,6 +32,7 @@ struct FbxConvCommand {
 	FbxConvCommand(const int &argc, const char** argv) : argc(argc), argv(argv) {
 		help = (argc <= 1);
 		flipV = false;
+		packColors = false;
 		verbose = false;
 		maxNodePartBonesCount = (1<<15)-1;
 		maxVertexBonesCount = 4;
@@ -45,6 +47,8 @@ struct FbxConvCommand {
 					flipV = true;
 				else if (arg[1] == 'v')
 					verbose = true;
+				else if (arg[1] == 'p')
+					packColors = true;
 				else if ((arg[1] == 'i') && (i + 1 < argc))
 					inType = parseType(argv[++i]);
 				else if ((arg[1] == 'o') && (i + 1 < argc))
@@ -88,6 +92,7 @@ struct FbxConvCommand {
 #endif
 		printf("-o <type>: Set the type of the output file to <type>\n");
 		printf("-f       : Flip the V texture coordinates.\n");
+		printf("-p       : Pack vertex colors to one float.\n");
 		printf("-m <size>: Merge meshes with the same attributes, up to <size> bytes\n");
 		printf("-b <size>: The maximum amount of bones a nodepart can contain\n");
 		printf("-w <size>: The maximum amount of bone weights per vertex\n");

@@ -64,7 +64,7 @@ namespace readers {
 				for (std::vector<BlendWeight>::const_iterator jtr = (*itr)->begin(); jtr != (*itr)->end(); ++jtr)
 					if (!has((*jtr).index))
 						result++;
-			return (result > available()) ? -1 : result;
+			return (result > (int)available()) ? -1 : result;
 		}
 		inline void sort() {
 			std::sort(bones, bones + size());
@@ -111,10 +111,17 @@ namespace readers {
 	// Collection of group of indices for vertex blending
 	struct BlendBonesCollection {
 		std::vector<BlendBones> bones;
-		const unsigned int bonesCapacity;
+		unsigned int bonesCapacity;
 		BlendBonesCollection(const unsigned int &bonesCapacity) : bonesCapacity(bonesCapacity) { }
 		BlendBonesCollection(const BlendBonesCollection &rhs) : bonesCapacity(rhs.bonesCapacity) {
 			bones.insert(bones.begin(), rhs.bones.begin(), rhs.bones.end());
+		}
+		inline BlendBonesCollection &operator=(const BlendBonesCollection &rhs) {
+			if (&rhs == this)
+				return (*this);
+			bones = rhs.bones;
+			bonesCapacity = rhs.bonesCapacity;
+			return (*this);
 		}
 		inline unsigned int size() const {
 			return bones.size();

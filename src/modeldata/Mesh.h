@@ -48,11 +48,18 @@ namespace modeldata {
 			parts.clear();
 		}
 
+		inline unsigned int indexCount() {
+			unsigned int result = 0;
+			for (std::vector<MeshPart *>::const_iterator itr = parts.begin(); itr != parts.end(); ++itr)
+				result += (*itr)->indices.size();
+			return result;
+		}
+
 		inline unsigned int add(const float *vertex) {
 			const unsigned int hash = calcHash(vertex, vertexSize);
 			const unsigned int n = hashes.size();
 			for (unsigned int i = 0; i < n; i++)
-				if (hashes[i] == hash && compare(&vertices[i*vertexSize], vertex, vertexSize))
+				if ((hashes[i] == hash) && compare(&vertices[i*vertexSize], vertex, vertexSize))
 					return i;
 			hashes.push_back(hash);
 			vertices.insert(vertices.end(), &vertex[0], &vertex[vertexSize]);
@@ -62,13 +69,13 @@ namespace modeldata {
 		inline unsigned int calcHash(const float *vertex, const unsigned int size) {
 			unsigned int result = 0;
 			for (unsigned int i = 0; i < size; i++)
-				result += (*((unsigned long *)&vertex[i]) & 0xffffff00) >> 8;
+				result += ((*((unsigned int *)&vertex[i])) & 0xffffff00) >> 8;
 			return result;
 		}
 
 		inline bool compare(const float* lhs, const float* rhs, const unsigned int &n) {
 			for (unsigned int i = 0; i < n; i++)
-				if (lhs[i] != rhs[i])
+				if ((*(unsigned int*)&lhs[i] != *(unsigned int*)&rhs[i]) && lhs[i] != rhs[i])
 					return false;
 			return true;
 		}
