@@ -6,6 +6,7 @@
 
 #include <vector>
 #include "NodePart.h"
+#include <fbxsdk.h>
 
 namespace fbxconv {
 namespace modeldata {
@@ -19,8 +20,9 @@ namespace modeldata {
 		std::string id;
 		std::vector<NodePart *> parts;
 		std::vector<Node *> children;
+		FbxNode *source;
 
-		Node(const char *id = NULL) {
+		Node(const char *id = NULL) : source(0) {
 			memset(&transform, 0, sizeof(transform));
 			transform.scale[0] = transform.scale[1] = transform.scale[2] = 1.f;
 			if (id != NULL)
@@ -29,6 +31,7 @@ namespace modeldata {
 
 		Node(const Node &copyFrom) {
 			id = copyFrom.id;
+			source = copyFrom.source;
 			memcpy(&transform, &(copyFrom.transform), sizeof(transform));
 			for (std::vector<NodePart *>::const_iterator itr = copyFrom.parts.begin(); itr != copyFrom.parts.end(); ++itr)
 				parts.push_back(new NodePart(**itr));

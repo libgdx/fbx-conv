@@ -11,6 +11,7 @@
 #define PRIMITIVETYPE_TRIANGLESTRIP	5
 
 #include <string>
+#include <fbxsdk.h>
 
 namespace fbxconv {
 namespace modeldata {
@@ -18,6 +19,7 @@ namespace modeldata {
 		std::string id;
 		std::vector<unsigned short> indices;
 		unsigned int primitiveType;
+		std::vector<const FbxNode *> sourceBones;
 
 		MeshPart() : primitiveType(0) {}
 

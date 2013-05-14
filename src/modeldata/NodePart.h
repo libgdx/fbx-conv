@@ -16,11 +16,15 @@ namespace modeldata {
 		const MeshPart *meshPart;
 		const Material *material;
 		std::vector<const Node *> bones;
+		std::vector<std::vector<const Material::Texture *>> uvMapping;
 
 		NodePart() : meshPart(0), material(0) {}
 
 		NodePart(const NodePart &copyFrom) : meshPart(copyFrom.meshPart), material(copyFrom.material) {
 			bones.insert(bones.end(), copyFrom.bones.begin(), copyFrom.bones.end());
+			uvMapping.resize(copyFrom.uvMapping.size());
+			for (unsigned int i = 0; i < uvMapping.size(); i++)
+				uvMapping[i].insert(uvMapping[i].begin(), copyFrom.uvMapping[i].begin(), copyFrom.uvMapping[i].end());
 		}
 	};
 }

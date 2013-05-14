@@ -32,11 +32,22 @@ namespace writers {
 				writer->closeArray(false);
 				writer->nextValue(true);
 				writer->openArray("vertices");
+				unsigned short *atypes = new unsigned short[(*itr)->vertexSize];
+				for (unsigned int i = 0; i < (*itr)->vertexSize; i++) 
+					atypes[i] = (*itr)->attributes.getType(i);
 				for (unsigned int v = 0; v < (*itr)->vertices.size(); v++) {
+					const unsigned int t = v%(*itr)->vertexSize;
 					if (v != 0)
-						writer->nextValue(v%(*itr)->vertexSize==0);
-					writer->writeFloat((*itr)->vertices[v]);
+						writer->nextValue(t==0);
+					if (atypes[t] == ATTRIBUTE_TYPE_INT)
+						writer->writeInteger((int)(*itr)->vertices[v]);
+					else if (atypes[t] == ATTRIBUTE_TYPE_UINT_HEX) {
+						const unsigned int tmp = (*(unsigned int*)&(*itr)->vertices[v]) & 0xfeffffff;
+						writer->writeFloat(*(float*)&tmp);
+					} else
+						writer->writeFloat((*itr)->vertices[v]);
 				}
+				delete[] atypes;
 				writer->closeArray();
 				if (!(*itr)->parts.empty()) {
 					writer->nextValue(true);
@@ -184,7 +195,7 @@ namespace writers {
 						writer->openObject();
 						writer->writeStringPair("boneId", (*ntr)->node->id.c_str());
 						writer->nextValue(true);
-						writer->openArray("keyframe", true);
+						writer->openArray("keyframes", true);
 						for (std::vector<modeldata::Keyframe *>::const_iterator ktr = (*ntr)->keyframes.begin(); ktr != (*ntr)->keyframes.end(); ++ktr) {
 							if (ktr != (*ntr)->keyframes.begin())
 								writer->nextValue(true);
@@ -290,6 +301,29 @@ namespace writers {
 						}
 						writer->closeArray(false);
 					}
+					if (!(*itr)->uvMapping.empty()) {
+						writer->nextValue(true);
+						writer->openArray("uvMapping", false);
+						for (std::vector<std::vector<const modeldata::Material::Texture *>>::const_iterator ntr = (*itr)->uvMapping.begin(); ntr != (*itr)->uvMapping.end(); ++ntr) {
+							if (ntr != (*itr)->uvMapping.begin())
+								writer->nextValue(false);
+							writer->openArray(false);
+							bool first = true;
+							for (std::vector<const modeldata::Material::Texture *>::const_iterator ttr = (*ntr).begin(); ttr != (*ntr).end(); ++ttr) {
+								if (!first)
+									writer->nextValue(false);
+								if (*ttr) {
+									int idx = (*itr)->material->getTextureIndex(*ttr);
+									if (idx >= 0) {
+										writer->writeInteger(idx);
+										first = false;
+									}
+								}
+							}
+							writer->closeArray(false);
+						}
+						writer->closeArray(false);
+					}
 					writer->closeObject();
 				}
 				writer->closeArray(true);
@@ -306,7 +340,7 @@ namespace writers {
 			writer->closeObject();
 		}
 
-		const char* getPrimitiveTypeString(const int &primitiveTypeId) const {
+		static const char* getPrimitiveTypeString(const int &primitiveTypeId) {
 			switch(primitiveTypeId){
 			case 0:
 				return "POINTS";
@@ -323,20 +357,28 @@ namespace writers {
 			}
 		}
 
-		const char* getTextureUseString(const int &textureUse) const {
+		static const char* getTextureUseString(const Material::Texture::Usage &textureUse) {
 			switch(textureUse){
-			case 0:
-				return "STANDARD";
-			case 1:
-				return "SHADOWMAP";
-			case 2:
-				return "LIGHTMAP";
-			case 3:
-				return "SPHERICAL_REFLEXION";
-			case 4:
-				return "SPHERE_REFLEXION";
-			case 5:
-				return "BUMPMAP";
+			case Material::Texture::Ambient:
+				return "AMBIENT";
+			case Material::Texture::Bump:
+				return "BUMP";
+			case Material::Texture::Diffuse:
+				return "DIFFUSE";
+			case Material::Texture::Emissive:
+				return "EMISSIVE";
+			case Material::Texture::None:
+				return "NONE";
+			case Material::Texture::Normal:
+				return "NORMAL";
+			case Material::Texture::Reflection:
+				return "REFLECTION";
+			case Material::Texture::Shininess:
+				return "SHININESS";
+			case Material::Texture::Specular:
+				return "SPECULAR";
+			case Material::Texture::Transparency:
+				return "TRANSPARENCY";
 			default:
 				return "UNKNOWN";
 			}

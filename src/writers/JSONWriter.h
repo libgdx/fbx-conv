@@ -2,6 +2,8 @@
 #define JSONWRITER_H
 
 #include <stdio.h>
+#include <cmath>
+#include <fbxsdk/core/math/fbxmath.h>
 
 namespace fbxconv {
 namespace writers {
@@ -11,8 +13,8 @@ namespace writers {
 		JSONWriter(const char* filePath);
 		~JSONWriter();
 
-		void openArray(const char* key);
-		void openArray(const char* key, bool newLine);
+		void JSONWriter::openArray(bool newLine = true);
+		void openArray(const char* key, bool newLine = true);
 		void closeArray();
 		void closeArray(bool newLine);
 
@@ -22,6 +24,7 @@ namespace writers {
 		void nextValue(bool newLine);
 
 		void writeStringPair(const char* key, const char* value);
+		void writeIntegerPair(const char* key, const long long &value);
 		void writeFloatPair(const char* key, float value);
 		void writeFloatPair(const char* key, double value) {
 			writeFloatPair(key, (float)value);
@@ -29,12 +32,27 @@ namespace writers {
 
 		void writeRawString(const char* value);
 		void writeString(const char* value);
-		void writeFloat(float value);
-		void writeFloat(double value) {
-			writeFloat((float)value);
+		void writeFloat(const float &value) {
+			writeFloat((double)value);
 		}
-		void writeInteger(int value);
-
+		void writeFloat(const double &value);
+		void writeInteger(const long long &value);
+		void writeInteger(const long &value) {
+			writeInteger((long long)value); 
+		}
+		void writeInteger(const int &value) {
+			writeInteger((long long)value); 
+		}
+		void writeInteger(const unsigned long &value) {
+			writeInteger((long long)value); 
+		}
+		void writeInteger(const unsigned int &value) {
+			writeInteger((long long)value); 
+		}
+		void writeHex(const unsigned long &value);
+		void writeHex(const unsigned int &value) {
+			writeHex((unsigned long)value); 
+		}
 		void printTabs();
 	private:
 		FILE* file;
