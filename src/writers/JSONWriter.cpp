@@ -41,12 +41,15 @@ namespace writers {
 		fprintf(file, "}");
 	}
 
-	void JSONWriter::openArray(const char* key){
-		openArray(key, true);
+	void JSONWriter::openArray(bool newLine) {
+		openArray(0, newLine);
 	}
 
 	void JSONWriter::openArray(const char* key, bool newLine){
-		fprintf(file, "\"%s\" : [", key);
+		if (key)
+			fprintf(file, "\"%s\" : [", key);
+		else
+			fprintf(file, "[");
 		if(newLine)
 		{
 			indent();
@@ -70,23 +73,31 @@ namespace writers {
 		fprintf(file, "\"%s\" : \"%s\"", key, value);
 	}
 
+	void JSONWriter::writeIntegerPair(const char* key, const long long &value){
+		fprintf(file, "\"%s\" : %d", key, value);
+	}
+
 	void JSONWriter::writeFloatPair(const char* key, float value){
 		fprintf(file, "\"%s\" : %f", key, value);
 	}
 
-	void JSONWriter::writeFloat(float value){
-		if(value == 1.0f)
+	void JSONWriter::writeFloat(const double &value){
+		/* if(value == 1.0f)
 			fprintf(file, "%s", "1.0");
 		else if(value == -1.0f)
 			fprintf(file, "%s", "-1.0");
 		else if(value == 0.0f)
 			fprintf(file, "%s", "0.0");
-		else
-			fprintf(file, "%f", value);
+		else */
+			fprintf(file, "% 8f", value);
 	}
 
-	void JSONWriter::writeInteger(int value){
-		fprintf(file, "%i", value);
+	void JSONWriter::writeInteger(const long long &value){
+		fprintf(file, "% 3i", value);
+	}
+
+	void JSONWriter::writeHex(const unsigned long &value) {
+		fprintf(file, "\"0x%08X\"", value);
 	}
 
 	void JSONWriter::writeString(const char* value){

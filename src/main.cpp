@@ -6,7 +6,7 @@
 
 #include <fbxsdk.h>
 #include "FbxConvCommand.h"
-#include "readers/FbxReader.h"
+#include "readers/FbxConverter.h"
 #include "writers/G3djWriter.h"
 #include "writers/G3dbWriter.h"
 #include <string>
@@ -20,12 +20,38 @@ using namespace fbxconv::modeldata;
 using namespace fbxconv::writers;
 using namespace fbxconv::readers;
 
+void printModelInfo(const Model *model) {
+	printf("Model ID             : %s\n", model->id.c_str());
+	printf("Number of meshes     : %d\n", model->meshes.size());
+	printf("Number of materials  : %d\n", model->materials.size());
+	printf("Number of root nodes : %d\n", model->nodes.size());
+	printf("Number of animations : %d\n", model->animations.size());
+	printf("\n");
+	printf("Listing meshes       :\n");
+	for (int i = 0; i < model->meshes.size(); i++) {
+		printf("- Mesh %d\n", i);
+		printf("  - Attributes       : ");
+		for (int j = 0; j < model->meshes[i]->attributes.length(); j++)
+			printf("%s%s", (j == 0) ? "" : ", ", model->meshes[i]->attributes.name(j));
+		printf("\n");
+		printf("  - VertexSize       : %d (%d bytes)\n", model->meshes[i]->vertexSize, model->meshes[i]->vertexSize * 4);
+		printf("  - VertexCount      : %d (%d bytes)\n", model->meshes[i]->vertices.size() / model->meshes[i]->vertexSize, model->meshes[i]->vertices.size());
+		unsigned long indexCount = model->meshes[i]->indexCount();
+		printf("  - IndexCount       : %d (%d bytes)\n", indexCount, indexCount * 2);
+		printf("  - Numder of parts  : %d\n", model->meshes[i]->parts.size());
+		for (int j = 0; j < model->meshes[i]->parts.size(); j++)
+			printf("    - Part %-5d     : '%s' of %s with %d indices.\n", j, model->meshes[i]->parts[j]->id.c_str(),
+				G3djWriter::getPrimitiveTypeString(model->meshes[i]->parts[j]->primitiveType), model->meshes[i]->parts[j]->indices.size());
+	}
+	printf("\n");
+}
+
 void textureCallback(Material::Texture *texture) {
 	texture->path = texture->path.substr(texture->path.find_last_of("/\\")+1);
 }
 
 int process(int argc, const char** argv) {
-	printf("FBX to G3DJ converter, version %d.%d\n\n", VERSION_HI, VERSION_LO);
+	printf("FBX to G3Dx converter, version %d.%d\n\n", VERSION_HI, VERSION_LO);
 	FbxConvCommand command(argc, argv);
 	if (command.help) {
 		command.printHelp();
@@ -43,40 +69,18 @@ int process(int argc, const char** argv) {
 		return 1;
 	}
 
-	fbxconv::readers::FbxReader reader;
-	reader.verbose = command.verbose;
-	reader.flipV = command.flipV;
-	reader.maxNodePartBoneCount = command.maxNodePartBonesCount;
-	reader.maxVertexBoneCount = command.maxVertexBonesCount;
-
 	printf("Loading source file...\n");
-	FbxScene *scene = reader.openFbxFile(command.inFile.c_str());
-	if (scene == NULL) {
-		printf("ERROR: %s\n", reader.error);
-		return 1;
-	}
-
-#ifdef _DEBUG
-	std::vector<std::string> textures;
-	if (reader.listTextures(scene, textures)) {
-		printf("Textures within this file\n");
-		for (std::vector<std::string>::const_iterator itr = textures.begin(); itr != textures.end(); ++itr)
-			printf("%s\n", (*itr).c_str());
-	}
-#endif
+	FbxConverter reader(command.inFile.c_str(), command.packColors, ((1<<15)-1), ((1<<15)-1), command.maxVertexBonesCount, true, command.maxNodePartBonesCount);
+	modeldata::Model *model = new modeldata::Model();
 
 	printf("Converting source file...\n");
-	modeldata::Model *model = new modeldata::Model();
-	reader.textureCallback = textureCallback;
-	if (!reader.load(model, scene)) {
-		printf("ERROR: %s\n", reader.error);
+	if (!reader.convert(model, command.flipV)) {
 		delete model;
 		model = 0;
 	}
-	printf("Closing source file...\n");
-	reader.closeFbxFile(scene);
-
 	if (model != 0) {
+		if (command.verbose)
+			printModelInfo(model);
 		if (command.outType == FILETYPE_G3DB) {
 			printf("Exporting to g3db...\n");
 			G3dbWriter writer;
