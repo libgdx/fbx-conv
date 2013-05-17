@@ -7,11 +7,12 @@
 #include <vector>
 #include "meshpart.h"
 #include "Attributes.h"
+#include "../json/BaseJSONWriter.h"
 
 namespace fbxconv {
 namespace modeldata {
 	/** A mesh is responsable for freeing all parts and vertices it contains. */
-	struct Mesh {
+	struct Mesh : public json::Serializable {
 		/** the attributes the vertices in this mesh describe */
 		Attributes attributes;
 		/** the size (in number of floats) of each vertex */
@@ -79,6 +80,8 @@ namespace modeldata {
 					return false;
 			return true;
 		}
+
+		virtual void serialize(json::BaseJSONWriter &writer) const;
 	};
 }
 }

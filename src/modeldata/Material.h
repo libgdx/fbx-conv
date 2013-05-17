@@ -7,11 +7,12 @@
 #include <vector>
 #include <fbxsdk.h>
 #include "../readers/matrix3.h"
+#include "../json/BaseJSONWriter.h"
 
 namespace fbxconv {
 namespace modeldata {
-	struct Material {
-		struct Texture {
+	struct Material : public json::Serializable {
+		struct Texture : public json::Serializable {
 			enum Usage {
 				Unknown = 0,
 				None = 1,
@@ -38,6 +39,8 @@ namespace modeldata {
 				uvTranslation[0] = uvTranslation[1] = 0.f;
 				uvScale[0] = uvScale[1] = 1.f;
 			}
+
+			virtual void serialize(json::BaseJSONWriter &writer) const;
 		};
 
 		FbxSurfaceMaterial *source;
@@ -88,6 +91,8 @@ namespace modeldata {
 					return i;
 			return -1;
 		}
+
+		virtual void serialize(json::BaseJSONWriter &writer) const;
 	};
 }
 }

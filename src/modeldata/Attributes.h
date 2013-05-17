@@ -4,6 +4,8 @@
 #ifndef MODELDATA_ATTRIBUTES_H
 #define MODELDATA_ATTRIBUTES_H
 
+#include "../json/BaseJSONWriter.h"
+
 #define ATTRIBUTE_UNKNOWN		0
 #define ATTRIBUTE_POSITION		1
 #define ATTRIBUTE_NORMAL		2
@@ -81,7 +83,7 @@ namespace modeldata {
 
 	#define ATTRIBUTE_SIZE(idx) (AttributeTypes[idx].size())
 
-	struct Attributes {
+	struct Attributes : public json::Serializable {
 		unsigned long value;
 
 		Attributes() : value(0) {}
@@ -220,6 +222,8 @@ namespace modeldata {
 		void hasBlendWeight(const unsigned short &index, const bool &v) {
 			set(ATTRIBUTE_BLENDWEIGHT0 + index, v);
 		}
+
+		virtual void serialize(json::BaseJSONWriter &writer) const;
 	};
 } }
 
