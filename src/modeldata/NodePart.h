@@ -7,12 +7,13 @@
 #include <vector>
 #include "MeshPart.h"
 #include "Material.h"
+#include "../json/BaseJSONWriter.h"
 
 namespace fbxconv {
 namespace modeldata {
 	struct Node;
 	/** A nodepart references (but not owns) a meshpart and a material */
-	struct NodePart {
+	struct NodePart : public json::Serializable {
 		const MeshPart *meshPart;
 		const Material *material;
 		std::vector<const Node *> bones;
@@ -26,6 +27,8 @@ namespace modeldata {
 			for (unsigned int i = 0; i < uvMapping.size(); i++)
 				uvMapping[i].insert(uvMapping[i].begin(), copyFrom.uvMapping[i].begin(), copyFrom.uvMapping[i].end());
 		}
+
+		virtual void serialize(json::BaseJSONWriter &writer) const;
 	};
 }
 }

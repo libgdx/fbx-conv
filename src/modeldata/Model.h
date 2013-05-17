@@ -10,20 +10,27 @@
 #include "material.h"
 #include "mesh.h"
 #include "node.h"
+#include "../json/BaseJSONWriter.h"
 
 namespace fbxconv {
 namespace modeldata {
+	const short VERSION_HI = 0;
+	const short VERSION_LO = 1;
+
 	/** A model is responsable for freeing all animations, materials, meshes and nodes it contains */
-	struct Model {
+	struct Model : public json::Serializable {
+		short version[2];
 		std::string id;
 		std::vector<Animation *> animations;
 		std::vector<Material *> materials;
 		std::vector<Mesh *> meshes;
 		std::vector<Node *> nodes;
 
-		Model() {}
+		Model() { version[0] = VERSION_HI; version[1] = VERSION_LO; }
 
 		Model(const Model &copyFrom) {
+			version[0] = copyFrom.version[0];
+			version[1] = copyFrom.version[1];
 			id = copyFrom.id;
 			for (std::vector<Animation *>::const_iterator itr = copyFrom.animations.begin(); itr != copyFrom.animations.end(); ++itr)
 				animations.push_back(new Animation(**itr));
@@ -71,6 +78,8 @@ namespace modeldata {
 					return *itr;
 			return NULL;
 		}
+
+		virtual void serialize(json::BaseJSONWriter &writer) const;
 	};
 }
 }

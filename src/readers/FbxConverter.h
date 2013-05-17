@@ -17,6 +17,7 @@ using namespace fbxconv::modeldata;
 namespace fbxconv {
 namespace readers {
 	struct TextureFileInfo {
+		std::string path;
 		// The uv bounds of this texture that are actually used (x1, y1, x2, y2)
 		float bounds[4];
 		// The number of nodes that use this texture
@@ -94,8 +95,11 @@ namespace readers {
 					uvTransforms[i].translate(0.f, 1.f).scale(1.f, -1.f);
 			}
 
-			for (std::map<FbxSurfaceMaterial *, Material *>::iterator it = materialsMap.begin(); it != materialsMap.end(); ++it)
+			for (std::map<FbxSurfaceMaterial *, Material *>::iterator it = materialsMap.begin(); it != materialsMap.end(); ++it) {
 				model->materials.push_back(it->second);
+				for (std::vector<Material::Texture *>::iterator tt = it->second->textures.begin(); tt != it->second->textures.end(); ++tt)
+					(*tt)->path = textureFiles[(*tt)->path].path;
+			}
 			addMesh(model);
 			addNode(model);
 			for (std::vector<Node *>::iterator itr = model->nodes.begin(); itr != model->nodes.end(); ++itr)
@@ -354,6 +358,8 @@ namespace readers {
 			set<2>(result->uvTranslation, texture->GetUVTranslation().mData);
 			set<2>(result->uvScale, texture->GetUVScaling().mData);
 			result->usage = usage;
+			if (textureFiles.find(result->path) == textureFiles.end())
+				textureFiles[result->path].path = result->path;
 			textureFiles[result->path].textures.push_back(result);
 			return result;
 		}
@@ -485,6 +491,12 @@ namespace readers {
 			anim->translate = translate;
 			anim->rotate = rotate;
 			anim->scale = scale;
+			for (std::vector<Keyframe *>::const_iterator itr = keyframes.begin(); itr != keyframes.end(); ++itr) {
+				(*itr)->hasRotation = rotate;
+				(*itr)->hasScale = scale;
+				(*itr)->hasTranslation = translate;
+			}
+
 			if (!keyframes.empty()) {
 				anim->keyframes.push_back(keyframes[0]);
 				const int last = keyframes.size()-1;

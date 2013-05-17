@@ -7,12 +7,13 @@
 #include <vector>
 #include "Node.h"
 #include "NodeAnimation.h"
+#include "../json/BaseJSONWriter.h"
 
 namespace fbxconv {
 namespace modeldata {
 	struct Node;
 
-	struct Animation {
+	struct Animation : public json::Serializable {
 		std::string id;
 		std::vector<NodeAnimation *> nodeAnimations;
 
@@ -29,6 +30,8 @@ namespace modeldata {
 				if ((*itr)!=0)
 					delete *itr;
 		}
+
+		virtual void serialize(json::BaseJSONWriter &writer) const;
 	};
 } }
 
