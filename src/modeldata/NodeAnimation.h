@@ -6,12 +6,13 @@
 
 #include <vector>
 #include "Keyframe.h"
+#include "../json/BaseJSONWriter.h"
 
 namespace fbxconv {
 namespace modeldata {
 	struct Node;
 
-	struct NodeAnimation {
+	struct NodeAnimation : public json::Serializable {
 		const Node *node;
 		std::vector<Keyframe *> keyframes;
 		bool translate, rotate, scale;
@@ -32,6 +33,8 @@ namespace modeldata {
 				if ((*itr)!=0)
 					delete *itr;
 		}
+
+		virtual void serialize(json::BaseJSONWriter &writer) const;
 	};
 } }
 

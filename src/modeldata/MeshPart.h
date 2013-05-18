@@ -12,10 +12,11 @@
 
 #include <string>
 #include <fbxsdk.h>
+#include "../json/BaseJSONWriter.h"
 
 namespace fbxconv {
 namespace modeldata {
-	struct MeshPart {
+	struct MeshPart : public json::Serializable {
 		std::string id;
 		std::vector<unsigned short> indices;
 		unsigned int primitiveType;
@@ -43,6 +44,8 @@ namespace modeldata {
 			this->indices.clear();
 			this->indices.insert(this->indices.end(), indices.begin(), indices.end());
 		}
+
+		virtual void serialize(json::BaseJSONWriter &writer) const;
 	};
 }
 }

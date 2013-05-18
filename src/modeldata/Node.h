@@ -5,13 +5,14 @@
 #define MODELDATA_NODE_H
 
 #include <vector>
-#include "NodePart.h"
 #include <fbxsdk.h>
+#include "NodePart.h"
+#include "../json/BaseJSONWriter.h"
 
 namespace fbxconv {
 namespace modeldata {
 	/** A node is responsable for destroying its parts and children */
-	struct Node {
+	struct Node : public json::Serializable {
 		struct {
 			double translation[3];
 			double rotation[4];
@@ -65,6 +66,8 @@ namespace modeldata {
 					return true;
 			return false;
 		}
+
+		virtual void serialize(json::BaseJSONWriter &writer) const;
 	};
 }
 }
