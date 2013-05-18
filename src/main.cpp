@@ -9,15 +9,12 @@
 #include "readers/FbxConverter.h"
 #include "json/JSONWriter.h"
 #include "json/UBJSONWriter.h"
-#include "writers/G3dbWriter.h"
-#include "writers/G3dWriter.h"
 #include <string>
 #include <iostream>
 #include <fstream>
 
 using namespace fbxconv;
 using namespace fbxconv::modeldata;
-using namespace fbxconv::writers;
 using namespace fbxconv::readers;
 
 int process(int argc, const char** argv) {
