@@ -5,7 +5,7 @@
 #define MODELDATA_MESH_H
 
 #include <vector>
-#include "meshpart.h"
+#include "MeshPart.h"
 #include "Attributes.h"
 #include "../json/BaseJSONWriter.h"
 

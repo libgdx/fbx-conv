@@ -6,10 +6,10 @@
 
 #include <vector>
 #include <string>
-#include "animation.h"
-#include "material.h"
-#include "mesh.h"
-#include "node.h"
+#include "Animation.h"
+#include "Material.h"
+#include "Mesh.h"
+#include "Node.h"
 #include "../json/BaseJSONWriter.h"
 
 namespace fbxconv {
