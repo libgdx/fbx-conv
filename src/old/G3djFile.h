@@ -35,10 +35,12 @@ namespace fbxconv {
 
 		AnimationClip* getAnimationClip(unsigned int clipIndex);
 
-		unsigned int getMeshCount();
-		unsigned int getNodeCount();
-		unsigned int getMaterialCount();
-		unsigned int getAnimationClipCount();
+		unsigned int getMeshCount() const;
+		unsigned int getNodeCount() const;
+		unsigned int getMaterialCount() const;
+		unsigned int getAnimationClipCount() const;
+
+		std::map<std::string, Mesh*> meshes;
 	private:
 		Scene* scene;
 
@@ -46,7 +48,6 @@ namespace fbxconv {
 		std::map<std::string, G3djNode*> nodesFlatList;
 		// This is the actual node hierarchy
 		std::map<std::string, G3djNode*> nodes;
-		std::map<std::string, Mesh*> meshes;
 		std::map<std::string, G3djMaterial*> materials;
 		std::vector<AnimationClip*> animationClips;
 	};

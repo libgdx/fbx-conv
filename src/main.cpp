@@ -1,49 +1,89 @@
-#include "FbxConverter.h"
-#include "G3djWriter.h"
+#if defined(_MSC_VER) && defined(_DEBUG)
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
+#include <fbxsdk.h>
+#include "FbxConvCommand.h"
+#include "readers/FbxConverter.h"
+#include "json/JSONWriter.h"
+#include "json/UBJSONWriter.h"
 #include <string>
+#include <iostream>
+#include <fstream>
 
 using namespace fbxconv;
-using namespace gameplay;
+using namespace fbxconv::modeldata;
+using namespace fbxconv::readers;
 
-int main(int argc, const char** argv) {
-	if (argc == 1)
-	{
-		printf("Missing: file to convert\n");
+int process(int argc, const char** argv) {
+	printf("FBX to G3Dx converter, version %d.%d\n\n", VERSION_HI, VERSION_LO);
+	FbxConvCommand command(argc, argv);
+	if (command.help) {
+		command.printHelp();
 		return 1;
 	}
-	std::string file = argv[1];
-
-	FbxConverterConfig config = FbxConverterConfig();
-	config.flipV = false;
-
-	FbxConverter converter(config);
-	G3djFile *g3djFile = converter.load(file.c_str());
-
-	printf("Exporting to json.\n");
-	G3djWriter *writer = new G3djWriter();
-
-	// either use the second parameter as output filename, or if there is no
-	// second parameter, then use the file/path of the input file with a new
-	// "g3dj" extension
-	std::string outputFile;
-	if (argc == 3)
-		outputFile = argv[2];
-	else
+	if (command.error.length() > 0)
 	{
-		size_t extensionStartPos = file.find_last_of('.');
-		outputFile = file;
-		if (extensionStartPos != std::string::npos)
-		{
-			outputFile.erase(extensionStartPos, std::string::npos);
-			outputFile.append(".g3dj");
-		}
-		else
-			outputFile.append(".g3dj");
+		command.printCommand();
+		printf("ERROR: %s\n\n", command.error.c_str());
+		command.printHelp();
+		return 1;
 	}
-	
-	writer->exportG3dj(g3djFile, outputFile.c_str());
+	if (command.inType != FILETYPE_FBX) {
+		printf("ERROR: incorrect input filetype\n");
+		return 1;
+	}
 
-	printf("Done.\n");
+	printf("Loading source file...\n");
+	FbxConverter reader(command.inFile.c_str(), command.packColors, ((1<<15)-1), ((1<<15)-1), command.maxVertexBonesCount, true, command.maxNodePartBonesCount);
+	modeldata::Model *model = new modeldata::Model();
+
+	for (std::map<std::string, TextureFileInfo>::iterator it = reader.textureFiles.begin(); it != reader.textureFiles.end(); ++it)
+		it->second.path = it->first.substr(it->first.find_last_of("/\\")+1);
+
+	printf("Converting source file...\n");
+	if (!reader.convert(model, command.flipV)) {
+		delete model;
+		model = 0;
+	}
+	if (model != 0) {
+		std::ofstream myfile;
+		myfile.open (command.outFile.c_str(), std::ios::binary);
+
+		json::BaseJSONWriter *jsonWriter = 0;
+		if (command.outType == FILETYPE_G3DB) {
+			printf("Exporting to g3db...\n");
+			jsonWriter = new json::UBJSONWriter(myfile);
+		} else{
+			printf("Exporting to g3dj...\n");
+			jsonWriter = new json::JSONWriter(myfile);
+		}
+
+		if (jsonWriter) {
+			(*jsonWriter) << model;
+			delete jsonWriter;
+		}
+		myfile.close();
+		delete model;
+	}
 
 	return 0;
+}
+
+int main(int argc, const char** argv) {
+
+#if defined(_MSC_VER) && defined(_DEBUG)
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+
+	int result = process(argc, argv);
+
+#ifdef _DEBUG
+	std::cout << "Press ENTER to continue...";
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+#endif
+
+	return result;
 }

@@ -14,9 +14,9 @@ namespace fbxconv {
 		void setRotation(float x, float y, float z, float w);
 		void setScale(float x, float y, float z);
 
-		Vector3 getTranslation();
-		Quaternion getRotation();
-		Vector3 getScale();
+		Vector3 getTranslation() const;
+		Quaternion getRotation() const;
+		Vector3 getScale() const;
 
 	private:
 		Vector3 translation;

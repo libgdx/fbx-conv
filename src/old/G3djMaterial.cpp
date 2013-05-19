@@ -10,11 +10,11 @@ namespace fbxconv {
 	
 	}
 
-	unsigned int G3djMaterial::getMaterialType(){
+	unsigned int G3djMaterial::getMaterialType() const {
 		return materialType;
 	}
 
-	std::string G3djMaterial::getId(){
+	std::string G3djMaterial::getId() const {
 		return id;
 	}
 
@@ -22,7 +22,7 @@ namespace fbxconv {
 		diffuse.set(r, g, b);
 	}
 
-	Vector3 G3djMaterial::getDiffuse(){
+	Vector3 G3djMaterial::getDiffuse() const {
 		return diffuse;
 	}
 
@@ -30,7 +30,7 @@ namespace fbxconv {
 		ambient.set(r, g, b);
 	}
 
-	Vector3 G3djMaterial::getAmbient(){
+	Vector3 G3djMaterial::getAmbient() const {
 		return ambient;
 	}
 
@@ -38,7 +38,7 @@ namespace fbxconv {
 		emissive.set(r, g, b);
 	}
 
-	Vector3 G3djMaterial::getEmissive(){
+	Vector3 G3djMaterial::getEmissive() const {
 		return emissive;
 	}
 
@@ -46,7 +46,7 @@ namespace fbxconv {
 		specular.set(r, g, b);
 	}
 
-	Vector3 G3djMaterial::getSpecular(){
+	Vector3 G3djMaterial::getSpecular() const {
 		return specular;
 	}
 
@@ -54,7 +54,7 @@ namespace fbxconv {
 		opacity = a;
 	}
 
-	float G3djMaterial::getOpacity(){
+	float G3djMaterial::getOpacity() const {
 		return opacity;
 	}
 
@@ -62,7 +62,7 @@ namespace fbxconv {
 		this->shininess = shininess;
 	}
 
-	float G3djMaterial::getShininess(){
+	float G3djMaterial::getShininess() const {
 		return shininess;
 	}
 
@@ -70,11 +70,11 @@ namespace fbxconv {
 		textures[texture->getId()] = texture;
 	}
 
-	unsigned int G3djMaterial::getTextureCount(){
+	unsigned int G3djMaterial::getTextureCount() const {
 		return textures.size();
 	}
 
-	Texture* G3djMaterial::getTexture(const char* id){
+	Texture* G3djMaterial::getTexture(const char* id) {
 		std::map<std::string, Texture*>::iterator it = textures.find(id);
 		if (it != textures.end())
 		{
@@ -83,7 +83,7 @@ namespace fbxconv {
 		return NULL;
 	}
 
-	Texture* G3djMaterial::getTexture(unsigned int index){
+	Texture* G3djMaterial::getTexture(unsigned int index) {
 		// Ugh, this seems ugly. But without having a second flat list I don't see a better way right now.
 		if(index >= textures.size())
 			return NULL;
