@@ -121,7 +121,7 @@ private:
 		assert(("Can only write key-value pairs within an object", !((ispair && (block.type != Block::OBJECT)) || (!ispair && (block.type == Block::OBJECT)))));
 		assert(("Must start with an array or an object", isblock || block.type != Block::ROOT));
 		assert(("Can only write one object or array per instance", block.size == 0 || block.type != Block::ROOT));
-		assert(("Block capacity exceeded", block.capacity < 0 || block.size < block.capacity));
+		//assert(("Block capacity exceeded", block.capacity < 0 || block.size < block.capacity));
 
 		writeNextValue(block.size++ == 0, ++block.lineSize > block.maxLineSize);
 		if (block.lineSize > block.maxLineSize)
@@ -147,7 +147,7 @@ private:
 
 	BaseJSONWriter &closeBlock() {
 		assert(("Unmatched blocks", block.type != Block::ROOT && !blocks.empty()));
-		assert(("Reserved capacity not reached yet", block.capacity < 0 || block.size == block.capacity));
+		//assert(("Reserved capacity not reached yet", block.capacity < 0 || block.size == block.capacity));
 		assert(("Key written without value", !block.wroteKey));
 		assert(("Unknown block type", block.type == Block::OBJECT || block.type == Block::ARRAY));
 
