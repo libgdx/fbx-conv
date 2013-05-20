@@ -11,9 +11,36 @@
 #include <string>
 #include <cassert>
 #include <stdio.h>
-#include <type_traits>
 
 namespace json {
+
+template <typename T> struct remove_const { typedef T type; };
+template <typename T> struct remove_const<const T> { typedef T type; };
+template <typename T> struct remove_volatile { typedef T type; };
+template <typename T> struct remove_volatile<volatile T> { typedef T type; };
+template <typename T> struct remove_cv : remove_const<typename remove_volatile<T>::type> {};
+template <typename T> struct is_unqualified_pointer { enum { value = false }; };
+template <typename T> struct is_unqualified_pointer<T*> { enum { value = true }; };
+template <typename T> struct is_pointer : is_unqualified_pointer<typename remove_cv<T>::type> {};
+template<bool _Test, class _Type = void> struct enable_if { };
+template<class _Type> struct enable_if<true, _Type> { typedef _Type type; };
+
+typedef char (&yes)[1];
+typedef char (&no)[2];
+
+template <typename B, typename D> struct Host
+{
+  operator B*() const;
+  operator D*();
+};
+
+template <typename B, typename D> struct is_base_of
+{
+  template <typename T> static yes check(D*, T);
+  static no check(B*, int);
+  static const bool value = sizeof(check(Host<B,D>(), int())) == sizeof(yes);
+};
+
 
 class BaseJSONWriter;
 
@@ -217,14 +244,15 @@ private:
 	template<class V, class N> inline void value(const V &value, const N &name, const bool &iskey = false) { assert(("Not implemented", false)); }
 
 private:
+	// Quick workaround because visual studio doesnt always deduct pointer correctly
 	template<class T> void _val(const T *v) { __ptr(v); }
-	template<class T> typename std::enable_if<!std::is_pointer<T>::value>::type _val(const T &v) { __val(v); }
+	template<class T> typename enable_if<!is_pointer<T>::value>::type _val(const T &v) { __val(v); }
 
-	template<class T> typename std::enable_if<!std::is_base_of<Serializable, T>::value, void>::type __val(const T &v) {
+	template<class T> typename enable_if<!is_base_of<Serializable, T>::value, void>::type __val(const T &v) {
 		if (!checkKey()) nextValue(inObject(), false);
 		value(v, block.wroteKey);
 	}
-	template<class T> typename std::enable_if<!std::is_base_of<Serializable, T>::value, void>::type __ptr(const T *v) { 
+	template<class T> typename enable_if<!is_base_of<Serializable, T>::value, void>::type __ptr(const T *v) { 
 		if (!checkKey()) nextValue(inObject(), false);
 		value(v, block.wroteKey);
 	}
