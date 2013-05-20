@@ -64,7 +64,9 @@ static const char op_nul = '0';
 
 static const unsigned int useDefaultSize = ((1 << 16) - 1);
 
-template<const char T> struct JSONOp { };
+template<const char T> struct JSONOp { 
+	JSONOp() {}
+};
 template<const char T> struct JSONBlockOp : public JSONOp<T> {
 	const long &capacity;
 	JSONBlockOp(const long &capacity = -1) : capacity(capacity) {}
