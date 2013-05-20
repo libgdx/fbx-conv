@@ -40,7 +40,7 @@ namespace readers {
 		std::map<FbxGeometry *, FbxMeshInfo *> fbxMeshMap;
 		std::map<FbxSurfaceMaterial *, Material *> materialsMap;
 		std::map<std::string, TextureFileInfo> textureFiles;
-		std::map<FbxMeshInfo *, std::vector<std::vector<MeshPart *>>> meshParts;
+		std::map<FbxMeshInfo *, std::vector<std::vector<MeshPart *> > > meshParts;
 		std::map<const FbxNode *, Node *> nodeMap;
 
 		/** The maximum allowed amount of vertices in one mesh, only used when deciding to merge meshes. */
@@ -140,7 +140,7 @@ namespace readers {
 
 			if (fbxMeshMap.find(node->source->GetGeometry()) != fbxMeshMap.end()) {
 				FbxMeshInfo *meshInfo = fbxMeshMap[node->source->GetGeometry()];
-				std::vector<std::vector<MeshPart *>> &parts = meshParts[meshInfo];
+				std::vector<std::vector<MeshPart *> > &parts = meshParts[meshInfo];
 				const int matCount = node->source->GetMaterialCount();
 				for (int i = 0; i < matCount && i < parts.size(); i++) {
 					Material *material = materialsMap[node->source->GetMaterial(i)];
@@ -195,7 +195,7 @@ namespace readers {
 				mesh->vertexSize = mesh->attributes.size();
 			}
 
-			std::vector<std::vector<MeshPart *>> &parts = meshParts[meshInfo];
+			std::vector<std::vector<MeshPart *> > &parts = meshParts[meshInfo];
 			parts.resize(meshInfo->meshPartCount);
 			static unsigned int meshPartCounter = 0;
 			for (int i = 0; i < meshInfo->meshPartCount; i++) {
@@ -391,10 +391,10 @@ namespace readers {
 					// Check which properties on this curve are changed
 					const int nc = curveNode->GetDstPropertyCount();
 					for (int o = 0; o < nc; o++) {
-						FbxProperty *prop = &curveNode->GetDstProperty(o);
-						FbxNode *node = static_cast<FbxNode *>(prop->GetFbxObject());
+						FbxProperty prop = curveNode->GetDstProperty(o);
+						FbxNode *node = static_cast<FbxNode *>(prop.GetFbxObject());
 						if (node) {
-							FbxString propName = prop->GetName();
+							FbxString propName = prop.GetName();
 							// Only add translation, scaling or rotation
 							if (propName != node->LclTranslation.GetName() && propName != node->LclScaling.GetName() && propName != node->LclRotation.GetName())
 								continue;
@@ -403,11 +403,11 @@ namespace readers {
 							ts.translate = propName == node->LclTranslation.GetName();
 							ts.rotate = propName == node->LclRotation.GetName();
 							ts.scale = propName == node->LclScaling.GetName();
-							if (curve = prop->GetCurve(layer, FBXSDK_CURVENODE_COMPONENT_X))
+							if (curve = prop.GetCurve(layer, FBXSDK_CURVENODE_COMPONENT_X))
 								updateAnimTime(curve, ts);
-							if (curve = prop->GetCurve(layer, FBXSDK_CURVENODE_COMPONENT_Y))
+							if (curve = prop.GetCurve(layer, FBXSDK_CURVENODE_COMPONENT_Y))
 								updateAnimTime(curve, ts);
-							if (curve = prop->GetCurve(layer, FBXSDK_CURVENODE_COMPONENT_Z))
+							if (curve = prop.GetCurve(layer, FBXSDK_CURVENODE_COMPONENT_Z))
 								updateAnimTime(curve, ts);
 							//if (ts.start < ts.stop)
 								affectedNodes[node] += ts;
@@ -444,19 +444,19 @@ namespace readers {
 					Keyframe *kf = new Keyframe();
 					kf->time = time;
 					FbxAMatrix *m = &(*itr).first->EvaluateLocalTransform(fbxTime);
-					FbxVector4 *v = &m->GetT();
-					kf->translation[0] = (float)v->mData[0];
-					kf->translation[1] = (float)v->mData[1];
-					kf->translation[2] = (float)v->mData[2];
-					FbxQuaternion *q = &m->GetQ();
-					kf->rotation[0] = (float)q->mData[0];
-					kf->rotation[1] = (float)q->mData[1];
-					kf->rotation[2] = (float)q->mData[2];
-					kf->rotation[3] = (float)q->mData[3];
-					v = &m->GetS();
-					kf->scale[0] = (float)v->mData[0];
-					kf->scale[1] = (float)v->mData[1];
-					kf->scale[2] = (float)v->mData[2];
+					FbxVector4 v = m->GetT();
+					kf->translation[0] = (float)v.mData[0];
+					kf->translation[1] = (float)v.mData[1];
+					kf->translation[2] = (float)v.mData[2];
+					FbxQuaternion q = m->GetQ();
+					kf->rotation[0] = (float)q.mData[0];
+					kf->rotation[1] = (float)q.mData[1];
+					kf->rotation[2] = (float)q.mData[2];
+					kf->rotation[3] = (float)q.mData[3];
+					v = m->GetS();
+					kf->scale[0] = (float)v.mData[0];
+					kf->scale[1] = (float)v.mData[1];
+					kf->scale[2] = (float)v.mData[2];
 					frames.push_back(kf);
 				}
 				// Only add keyframes really needed

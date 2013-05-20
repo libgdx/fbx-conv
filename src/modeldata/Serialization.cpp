@@ -145,15 +145,15 @@ void NodePart::serialize(json::BaseJSONWriter &writer) const {
 	writer << "materialid" = material->id;
 	if (!bones.empty()) {
 		writer.val("bones").is().arr(bones.size(), 4);
-		for (std::vector<const Node *>::const_iterator it = bones.begin(); it != bones.end(); ++it)
+		for (std::vector<Node *>::const_iterator it = bones.begin(); it != bones.end(); ++it)
 			writer << (*it)->id;
 		writer.end();
 	}
 	if (!uvMapping.empty()) {
 		writer.val("uvMapping").is().arr(uvMapping.size(), 16);
-		for (std::vector<std::vector<const Material::Texture *>>::const_iterator it = uvMapping.begin(); it != uvMapping.end(); ++it) {
+		for (std::vector<std::vector<Material::Texture *>>::const_iterator it = uvMapping.begin(); it != uvMapping.end(); ++it) {
 			writer.arr((*it).size(), 16);
-			for (std::vector<const Material::Texture *>::const_iterator tt = (*it).begin(); tt != (*it).end(); ++tt)
+			for (std::vector<Material::Texture *>::const_iterator tt = (*it).begin(); tt != (*it).end(); ++tt)
 				writer << material->getTextureIndex(*tt);
 			writer.end();
 		}

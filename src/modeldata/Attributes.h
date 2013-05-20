@@ -55,30 +55,30 @@ namespace modeldata {
 	static const unsigned short AttributeTypeUIntHex[]	= {ATTRIBUTE_TYPE_UINT_HEX};
 	static const unsigned short AttributeTypeBlend[]	= {ATTRIBUTE_TYPE_INT, ATTRIBUTE_TYPE_FLOAT};
 
-	static const std::vector<const unsigned short> AttributeTypes[] = {
-		INIT_VECTOR(const unsigned short, AttributeTypeV4),		// Unknown
-		INIT_VECTOR(const unsigned short, AttributeTypeV3),		// Position
-		INIT_VECTOR(const unsigned short, AttributeTypeV3),		// Normal
-		INIT_VECTOR(const unsigned short, AttributeTypeV4),		// Color
-		INIT_VECTOR(const unsigned short, AttributeTypeUIntHex),// ColorPacked
-		INIT_VECTOR(const unsigned short, AttributeTypeV3),		// Tangent
-		INIT_VECTOR(const unsigned short, AttributeTypeV3),		// Binormal
-		INIT_VECTOR(const unsigned short, AttributeTypeV2),		// Texcoord0
-		INIT_VECTOR(const unsigned short, AttributeTypeV2),		// Texcoord1
-		INIT_VECTOR(const unsigned short, AttributeTypeV2),		// Texcoord2
-		INIT_VECTOR(const unsigned short, AttributeTypeV2),		// Texcoord3
-		INIT_VECTOR(const unsigned short, AttributeTypeV2),		// Texcoord4
-		INIT_VECTOR(const unsigned short, AttributeTypeV2),		// Texcoord5
-		INIT_VECTOR(const unsigned short, AttributeTypeV2),		// Texcoord6
-		INIT_VECTOR(const unsigned short, AttributeTypeV2),		// Texcoord7
-		INIT_VECTOR(const unsigned short, AttributeTypeBlend),	// Blendweight0
-		INIT_VECTOR(const unsigned short, AttributeTypeBlend),	// Blendweight1
-		INIT_VECTOR(const unsigned short, AttributeTypeBlend),	// Blendweight2
-		INIT_VECTOR(const unsigned short, AttributeTypeBlend),	// Blendweight3
-		INIT_VECTOR(const unsigned short, AttributeTypeBlend),	// Blendweight4
-		INIT_VECTOR(const unsigned short, AttributeTypeBlend),	// Blendweight5
-		INIT_VECTOR(const unsigned short, AttributeTypeBlend),	// Blendweight6
-		INIT_VECTOR(const unsigned short, AttributeTypeBlend)	// Blendweight7
+	static const std::vector<unsigned short> AttributeTypes[] = {
+		INIT_VECTOR(unsigned short, AttributeTypeV4),		// Unknown
+		INIT_VECTOR(unsigned short, AttributeTypeV3),		// Position
+		INIT_VECTOR(unsigned short, AttributeTypeV3),		// Normal
+		INIT_VECTOR(unsigned short, AttributeTypeV4),		// Color
+		INIT_VECTOR(unsigned short, AttributeTypeUIntHex),// ColorPacked
+		INIT_VECTOR(unsigned short, AttributeTypeV3),		// Tangent
+		INIT_VECTOR(unsigned short, AttributeTypeV3),		// Binormal
+		INIT_VECTOR(unsigned short, AttributeTypeV2),		// Texcoord0
+		INIT_VECTOR(unsigned short, AttributeTypeV2),		// Texcoord1
+		INIT_VECTOR(unsigned short, AttributeTypeV2),		// Texcoord2
+		INIT_VECTOR(unsigned short, AttributeTypeV2),		// Texcoord3
+		INIT_VECTOR(unsigned short, AttributeTypeV2),		// Texcoord4
+		INIT_VECTOR(unsigned short, AttributeTypeV2),		// Texcoord5
+		INIT_VECTOR(unsigned short, AttributeTypeV2),		// Texcoord6
+		INIT_VECTOR(unsigned short, AttributeTypeV2),		// Texcoord7
+		INIT_VECTOR(unsigned short, AttributeTypeBlend),	// Blendweight0
+		INIT_VECTOR(unsigned short, AttributeTypeBlend),	// Blendweight1
+		INIT_VECTOR(unsigned short, AttributeTypeBlend),	// Blendweight2
+		INIT_VECTOR(unsigned short, AttributeTypeBlend),	// Blendweight3
+		INIT_VECTOR(unsigned short, AttributeTypeBlend),	// Blendweight4
+		INIT_VECTOR(unsigned short, AttributeTypeBlend),	// Blendweight5
+		INIT_VECTOR(unsigned short, AttributeTypeBlend),	// Blendweight6
+		INIT_VECTOR(unsigned short, AttributeTypeBlend)	// Blendweight7
 	};
 
 	#define ATTRIBUTE_SIZE(idx) (AttributeTypes[idx].size())
