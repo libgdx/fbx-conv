@@ -38,6 +38,11 @@ int process(int argc, const char** argv) {
 
 	printf("Loading source file...\n");
 	FbxConverter reader(command.inFile.c_str(), command.packColors, ((1<<15)-1), ((1<<15)-1), command.maxVertexBonesCount, true, command.maxNodePartBonesCount);
+	if (!reader.scene) {
+		printf("Error loading source file\n");
+		return 1;
+	}
+
 	modeldata::Model *model = new modeldata::Model();
 
 	for (std::map<std::string, TextureFileInfo>::iterator it = reader.textureFiles.begin(); it != reader.textureFiles.end(); ++it)
