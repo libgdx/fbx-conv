@@ -30,26 +30,28 @@ namespace json {
 const int one = 1;
 const bool is_bigendian = ( (*(char*)&one) == 0 );
 
-typedef union {
+template<size_t n> void swap(char * const &data) {assert(("This shouldnt happen", false));}
+template<> inline void swap<2>(char * const &data) {
+	static char tmp;
+	SWAP(data[0], data[1], tmp);
+}
+template<> inline void swap<4>(char * const &data) {
+	static char tmp;
+	SWAP(data[0], data[3], tmp);
+	SWAP(data[1], data[2], tmp);
+}
+template<> inline void swap<8>(char * const &data) {
+	static char tmp;
+	SWAP(data[0], data[7], tmp);
+	SWAP(data[1], data[6], tmp);
+	SWAP(data[2], data[5], tmp);
+	SWAP(data[3], data[4], tmp);
+}
+
+union Swapper {
 	char data[8];
-	template<size_t n> void swap() { assert(("This shouldnt happen", false)); }
-	template<> void swap<2>() {
-		static char tmp;
-		SWAP(data[0], data[1], tmp);
-	}
-	template<> void swap<4>() {
-		static char tmp;
-		SWAP(data[0], data[3], tmp);
-		SWAP(data[1], data[2], tmp);
-	}
-	template<> void swap<8>() {
-		static char tmp;
-		SWAP(data[0], data[7], tmp);
-		SWAP(data[1], data[6], tmp);
-		SWAP(data[2], data[5], tmp);
-		SWAP(data[3], data[4], tmp);
-	}
-} Swapper;
+	template<size_t n> void swap() { json::swap<n>(&data[0]); }
+};
 
 class UBJSONWriter : public BaseJSONWriter {
 private:
