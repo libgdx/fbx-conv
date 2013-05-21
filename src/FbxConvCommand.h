@@ -5,7 +5,7 @@
 #define FILETYPE_FBX			0x10
 #define FILETYPE_G3DB			0x20
 #define FILETYPE_G3DJ			0x21
-#define FILETYPE_OUT_DEFAULT	FILETYPE_G3DJ
+#define FILETYPE_OUT_DEFAULT	FILETYPE_G3DB
 #define FILETYPE_IN_DEFAULT		FILETYPE_FBX
 
 //#define ALLOW_INPUT_TYPE
@@ -28,6 +28,8 @@ struct FbxConvCommand {
 	bool verbose;
 	int maxNodePartBonesCount;
 	int maxVertexBonesCount;
+	int maxVertexCount;
+	int maxIndexCount;
 
 	FbxConvCommand(const int &argc, const char** argv) : argc(argc), argv(argv) {
 		help = (argc <= 1);
@@ -36,6 +38,8 @@ struct FbxConvCommand {
 		verbose = false;
 		maxNodePartBonesCount = (1<<15)-1;
 		maxVertexBonesCount = 4;
+		maxVertexCount = (1<<15)-1;
+		maxIndexCount = (1<<15)-1;
 		outType = inType = FILETYPE_AUTO;
 		for (int i = 1; i < argc; i++) {
 			const char *arg = argv[i];
@@ -57,6 +61,8 @@ struct FbxConvCommand {
 					maxNodePartBonesCount = atoi(argv[++i]);
 				else if ((arg[1] == 'w') && (i + 1 < argc))
 					maxVertexBonesCount = atoi(argv[++i]);
+				else if ((arg[1] == 'm') && (i + 1 < argc))
+					maxVertexCount = maxIndexCount = atoi(argv[++i]);
 				else
 					((error = "Unknown commandline option '") += arg) += "'";
 			}
@@ -93,9 +99,9 @@ struct FbxConvCommand {
 		printf("-o <type>: Set the type of the output file to <type>\n");
 		printf("-f       : Flip the V texture coordinates.\n");
 		printf("-p       : Pack vertex colors to one float.\n");
-		printf("-m <size>: Merge meshes with the same attributes, up to <size> bytes\n");
-		printf("-b <size>: The maximum amount of bones a nodepart can contain\n");
-		printf("-w <size>: The maximum amount of bone weights per vertex\n");
+		printf("-m <size>: The maximum amount of vertices or indices a mesh may contain (default: 32k)\n");
+		printf("-b <size>: The maximum amount of bones a nodepart can contain (default: unlimited)\n");
+		printf("-w <size>: The maximum amount of bone weights per vertex (default: 4)\n");
 		printf("-v       : Verbose: print additional progress information\n");
 		printf("\n");
 		printf("<input>  : The filename of the file to convert.\n");
@@ -116,7 +122,7 @@ private:
 		inType = FILETYPE_IN_DEFAULT;
 #endif
 		if (outFile.empty())
-			setExtension(outFile = inFile, outType = (outType == FILETYPE_AUTO ? FILETYPE_IN_DEFAULT : outType));
+			setExtension(outFile = inFile, outType = (outType == FILETYPE_AUTO ? FILETYPE_OUT_DEFAULT : outType));
 		else if (outType == FILETYPE_AUTO)
 			outType = guessType(outFile);
 		if (maxVertexBonesCount < 0 || maxVertexBonesCount > 8) {
@@ -125,6 +131,10 @@ private:
 		}
 		if (maxNodePartBonesCount < maxVertexBonesCount) {
 			error = "Maximum bones per nodepart must be greater or equal to the maximum vertex weights";
+			return;
+		}
+		if (maxVertexCount < 0 || maxVertexCount > (1<<15)-1) {
+			error = "Maximum vertex count must be between 0 and 32k";
 			return;
 		}
 	}

@@ -37,7 +37,7 @@ int process(int argc, const char** argv) {
 	}
 
 	printf("Loading source file...\n");
-	FbxConverter reader(command.inFile.c_str(), command.packColors, ((1<<15)-1), ((1<<15)-1), command.maxVertexBonesCount, true, command.maxNodePartBonesCount);
+	FbxConverter reader(command.inFile.c_str(), command.packColors, command.maxVertexCount, command.maxIndexCount, command.maxVertexBonesCount, true, command.maxNodePartBonesCount);
 	if (!reader.scene) {
 		printf("Error loading source file\n");
 		return 1;
@@ -59,10 +59,10 @@ int process(int argc, const char** argv) {
 
 		json::BaseJSONWriter *jsonWriter = 0;
 		if (command.outType == FILETYPE_G3DB) {
-			printf("Exporting to g3db...\n");
+			printf("Exporting to g3db file %s...\n", command.outFile.c_str());
 			jsonWriter = new json::UBJSONWriter(myfile);
 		} else{
-			printf("Exporting to g3dj...\n");
+			printf("Exporting to g3dj file %s...\n", command.outFile.c_str());
 			jsonWriter = new json::JSONWriter(myfile);
 		}
 
