@@ -144,9 +144,15 @@ void NodePart::serialize(json::BaseJSONWriter &writer) const {
 	writer << "meshpartid" = meshPart->id;
 	writer << "materialid" = material->id;
 	if (!bones.empty()) {
-		writer.val("bones").is().arr(bones.size(), 4);
-		for (std::vector<Node *>::const_iterator it = bones.begin(); it != bones.end(); ++it)
-			writer << (*it)->id ;
+		writer.val("bones").is().arr();
+		for (std::vector<std::pair<Node *, FbxAMatrix> >::const_iterator it = bones.begin(); it != bones.end(); ++it) {
+			writer << json::obj;
+			writer << "node" = it->first->id;
+			writer << "translation" = it->second.GetT().mData;
+			writer << "rotation" = it->second.GetQ().mData;
+			writer << "scale" = it->second.GetS().mData;
+			writer << json::end;
+		}
 		writer.end();
 	}
 	if (!uvMapping.empty()) {

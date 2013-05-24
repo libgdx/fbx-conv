@@ -16,7 +16,7 @@ namespace modeldata {
 	struct NodePart : public json::Serializable {
 		const MeshPart *meshPart;
 		const Material *material;
-		std::vector<Node *> bones;
+		std::vector<std::pair<Node *, FbxAMatrix> > bones;
 		std::vector<std::vector<Material::Texture *> > uvMapping;
 
 		NodePart() : meshPart(0), material(0) {}
