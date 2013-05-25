@@ -59,7 +59,7 @@ namespace readers {
 		bool packColors;
 		/** Temp array for transforming uvs, needs to be better defined. */
 		Matrix3<float> uvTransforms[8];
-		
+
 		FbxConverter(const char * const &filename, const bool &packColors = false, const unsigned int &maxVertexCount = (1<<15)-1, const unsigned int &maxIndexCount = (1<<15)-1,
 			const unsigned int &maxVertexBoneCount = 8, const bool &forceMaxVertexBoneCount = false, const unsigned int &maxNodePartBoneCount = (1 << 15)-1, 
 			const bool &flipV = false) 
@@ -133,10 +133,10 @@ namespace readers {
 		}
 
 		void updateNode(Model * const &model, Node * const &node) {
-			FbxAMatrix *m = &(node->source->EvaluateLocalTransform());
-			set<3>(node->transform.translation, m->GetT().mData);
-			set<4>(node->transform.rotation, m->GetQ().mData);
-			set<3>(node->transform.scale, m->GetS().mData);
+			FbxAMatrix &m = node->source->EvaluateLocalTransform();
+			set<3>(node->transform.translation, m.GetT().mData);
+			set<4>(node->transform.rotation, m.GetQ().mData);
+			set<3>(node->transform.scale, m.GetS().mData);
 
 			if (fbxMeshMap.find(node->source->GetGeometry()) != fbxMeshMap.end()) {
 				FbxMeshInfo *meshInfo = fbxMeshMap[node->source->GetGeometry()];
@@ -149,8 +149,11 @@ namespace readers {
 						node->parts.push_back(nodePart);
 						nodePart->material = material;
 						nodePart->meshPart = parts[i][j];
-						for (int k = 0; k < nodePart->meshPart->sourceBones.size(); k++)
-							nodePart->bones.push_back(nodeMap[nodePart->meshPart->sourceBones[k]]);
+						nodePart->bones.resize(nodePart->meshPart->sourceBones.size());
+						for (int k = 0; k < nodePart->meshPart->sourceBones.size(); k++) {
+							nodePart->bones[k].first = nodeMap[nodePart->meshPart->sourceBones[k]->GetLink()];
+							nodePart->meshPart->sourceBones[k]->GetTransformLinkMatrix(nodePart->bones[k].second);
+						}
 
 						nodePart->uvMapping.resize(meshInfo->uvCount);
 						for (int k = 0; k < meshInfo->uvCount; k++) {

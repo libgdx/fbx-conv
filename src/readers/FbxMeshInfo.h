@@ -126,8 +126,8 @@ namespace readers {
 				delete[] partUVBounds;
 		}
 
-		inline const FbxNode *getBone(const unsigned int &idx) const {
-			return skin ? skin->GetCluster(idx)->GetLink() : 0;
+		inline const FbxCluster *getBone(const unsigned int &idx) const {
+			return skin ? skin->GetCluster(idx) : 0;
 		}
 
 		inline void getPosition(float * const &data, unsigned int &offset, const unsigned int &point) const {
