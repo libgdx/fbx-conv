@@ -145,14 +145,15 @@ project "fbx-conv"
 			"png",
 			"z",
 			"CoreFoundation.framework",
+			"fbxsdk",
 		}
 
 	configuration { "macosx", "Debug" }
-		links {
-			"fbxsdk-2013.3-staticd",
+		libdirs {
+			(FBX_SDK_ROOT .. "/lib/gcc4/ub/debug"),
 		}
 		
 	configuration { "macosx", "Release" }
-		links {
-			"fbxsdk-2013.3-static",
+		libdirs {
+			(FBX_SDK_ROOT .. "/lib/gcc4/ub/release"),
 		}

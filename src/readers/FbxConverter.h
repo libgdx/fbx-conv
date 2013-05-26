@@ -73,8 +73,10 @@ namespace readers {
 			if (importer->Initialize(filename, -1, manager->GetIOSettings())) {
 				scene = FbxScene::Create(manager,"__FBX_SCENE__");
 				importer->Import(scene);
-			} else
-				printf("ERROR: %s\n", importer->GetError().GetLastErrorString());
+			} else {
+				// printf("ERROR: %s\n", importer->GetLastErrorString());
+                printf("ERROR: Couldn't parse FBX file");
+            }
 
 			importer->Destroy();
 
