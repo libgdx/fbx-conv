@@ -110,7 +110,6 @@ project "fbx-conv"
 		-- TODO: while using x64 will likely be fine for most people nowadays,
 		--       we still need to make this configurable
 		libdirs {
-			(FBX_SDK_ROOT .. "/lib/gcc4/x64"),
 			"./libs/libpng/lib/linux/x64",
 			"./libs/zlib/lib/linux/x64",
 		}
@@ -118,18 +117,17 @@ project "fbx-conv"
 			"png",
 			"z",
 			"pthread",
+			"fbxsdk",
 		}
 
 	configuration { "linux", "Debug" }
-		links {
-			"fbxsdk-2013.3-staticd",
-			"dl",
+		libdirs {
+			(FBX_SDK_ROOT .. "/lib/gcc4/x64/debug"),
 		}
 		
 	configuration { "linux", "Release" }
-		links {
-			"fbxsdk-2013.3-static",
-			"dl",
+		libdirs {
+			(FBX_SDK_ROOT .. "/lib/gcc4/x64/release"),
 		}
 
 	--- MAC ------------------------------------------------------------
