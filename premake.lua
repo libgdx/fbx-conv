@@ -91,7 +91,7 @@ project "fbx-conv"
 		links {
 			"libpng14",
 			"zlib",
-			"fbxsdk-md",
+			"libfbxsdk-md",
 		}
 		
 	configuration { "vs*", "Debug" }
