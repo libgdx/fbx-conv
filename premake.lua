@@ -118,6 +118,7 @@ project "fbx-conv"
 			"z",
 			"pthread",
 			"fbxsdk",
+			"dl",
 		}
 
 	configuration { "linux", "Debug" }
