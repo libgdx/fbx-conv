@@ -91,16 +91,17 @@ project "fbx-conv"
 		links {
 			"libpng14",
 			"zlib",
+			"fbxsdk-md",
 		}
 		
 	configuration { "vs*", "Debug" }
-		links {
-			"fbxsdk-2013.3-mdd",
+		libdirs {
+			(FBX_SDK_ROOT .. "/lib/vs2010/x86/debug"),
 		}
 		
 	configuration { "vs*", "Release" }
-		links {
-			"fbxsdk-2013.3-md",
+		libdirs {
+			(FBX_SDK_ROOT .. "/lib/vs2010/x86/release"),
 		}
 
 	--- LINUX ----------------------------------------------------------
