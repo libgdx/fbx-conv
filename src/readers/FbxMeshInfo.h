@@ -45,7 +45,7 @@ namespace readers {
 		// The number of mash parts within the mesh
 		int meshPartCount;
 		// The applied skin or 0 if not available
-		const FbxSkin * const skin;
+		FbxSkin * const skin;
 		// The blendweights per control point
 		std::vector<BlendWeight> *pointBlendWeights;
 		// The collection of bones per mesh part
@@ -126,7 +126,7 @@ namespace readers {
 				delete[] partUVBounds;
 		}
 
-		inline const FbxCluster *getBone(const unsigned int &idx) const {
+		inline FbxCluster *getBone(const unsigned int &idx) {
 			return skin ? skin->GetCluster(idx) : 0;
 		}
 
@@ -212,7 +212,7 @@ namespace readers {
 
 		inline void getBlendWeight(float * const &data, unsigned int &offset, const unsigned int &weightIndex, const unsigned int &poly, const unsigned int &polyIndex, const unsigned int &point) const {
 			const std::vector<BlendWeight> &weights = pointBlendWeights[point];
-			const unsigned int s = weights.size();
+			const unsigned int s = (unsigned int)weights.size();
 			const BlendBones &bones = partBones[polyPartMap[poly]].bones[polyPartBonesMap[poly]];
 			data[offset++] = weightIndex < s ? (float)bones.idx(weights[weightIndex].index) : 0.f;
 			data[offset++] = weightIndex < s ? weights[weightIndex].weight : 0.f;
@@ -325,7 +325,7 @@ namespace readers {
 				for (std::vector<BlendWeight>::iterator itr = pointBlendWeights[i].begin(); itr != pointBlendWeights[i].end(); ++itr)
 					(*itr).weight /= len;
 				if (pointBlendWeights[i].size() > vertexBlendWeightCount)
-					vertexBlendWeightCount = pointBlendWeights[i].size();
+					vertexBlendWeightCount = (unsigned int)pointBlendWeights[i].size();
 			}
 			if (vertexBlendWeightCount > 0 && forceMaxVertexBlendWeightCount)
 				vertexBlendWeightCount = maxVertexBlendWeightCount;

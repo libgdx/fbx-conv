@@ -20,7 +20,7 @@ namespace modeldata {
 		std::string id;
 		std::vector<unsigned short> indices;
 		unsigned int primitiveType;
-		std::vector<const FbxCluster *> sourceBones;
+		std::vector<FbxCluster *> sourceBones;
 
 		MeshPart() : primitiveType(0) {}
 

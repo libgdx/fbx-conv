@@ -124,7 +124,7 @@ namespace readers {
 			return (*this);
 		}
 		inline unsigned int size() const {
-			return bones.size();
+			return (unsigned int)bones.size();
 		}
 		inline BlendBones &operator[](const unsigned int &idx) {
 			return bones[idx];
