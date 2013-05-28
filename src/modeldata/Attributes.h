@@ -100,7 +100,7 @@ namespace modeldata {
 			unsigned int result = 0;
 			for (unsigned int i = 0; i < ATTRIBUTE_COUNT; i++)
 				if (has(i))
-					result += ATTRIBUTE_SIZE(i);
+					result += (unsigned int)ATTRIBUTE_SIZE(i);
 			return result;
 		}
 
@@ -132,7 +132,7 @@ namespace modeldata {
 			for (unsigned int i = 0; i < ATTRIBUTE_COUNT; i++) {
 				if (!has(i))
 					continue;
-				const unsigned short is = ATTRIBUTE_SIZE(i);
+				const unsigned short is = (unsigned short)ATTRIBUTE_SIZE(i);
 				if ((s + is) > v)
 					return AttributeTypes[i][v-s];
 				s+=is;

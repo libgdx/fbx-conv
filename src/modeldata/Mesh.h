@@ -52,19 +52,19 @@ namespace modeldata {
 		inline unsigned int indexCount() {
 			unsigned int result = 0;
 			for (std::vector<MeshPart *>::const_iterator itr = parts.begin(); itr != parts.end(); ++itr)
-				result += (*itr)->indices.size();
+				result += (unsigned int)(*itr)->indices.size();
 			return result;
 		}
 
 		inline unsigned int add(const float *vertex) {
 			const unsigned int hash = calcHash(vertex, vertexSize);
-			const unsigned int n = hashes.size();
+			const unsigned int n = (unsigned int)hashes.size();
 			for (unsigned int i = 0; i < n; i++)
 				if ((hashes[i] == hash) && compare(&vertices[i*vertexSize], vertex, vertexSize))
 					return i;
 			hashes.push_back(hash);
 			vertices.insert(vertices.end(), &vertex[0], &vertex[vertexSize]);
-			return hashes.size() - 1;
+			return (unsigned int)hashes.size() - 1;
 		}
 
 		inline unsigned int calcHash(const float *vertex, const unsigned int size) {

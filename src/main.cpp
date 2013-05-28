@@ -42,7 +42,6 @@ int process(int argc, const char** argv) {
 		printf("Error loading source file\n");
 		return 1;
 	}
-
 	modeldata::Model *model = new modeldata::Model();
 
 	for (std::map<std::string, TextureFileInfo>::iterator it = reader.textureFiles.begin(); it != reader.textureFiles.end(); ++it)
