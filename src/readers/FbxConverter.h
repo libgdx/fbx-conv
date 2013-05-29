@@ -386,7 +386,10 @@ namespace readers {
 			addTextures(result->textures, lambert->Emissive, Material::Texture::Emissive);
 			addTextures(result->textures, lambert->Bump, Material::Texture::Bump);
 			addTextures(result->textures, lambert->NormalMap, Material::Texture::Normal);
-			result->opacity = 1.f - (float)lambert->TransparencyFactor.Get();
+			FbxDouble factor = lambert->TransparencyFactor.Get();
+			FbxDouble3 color = lambert->TransparentColor.Get();
+			FbxDouble trans = (color[0] * factor + color[1] * factor + color[2] * factor) / 3.0;
+			result->opacity = 1.f - (float)trans;
 
 			if (!material->Is<FbxSurfacePhong>())
 				return result;

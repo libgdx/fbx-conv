@@ -58,7 +58,8 @@ namespace modeldata {
 			memset(ambient,  0, sizeof(ambient));
 			memset(emissive, 0, sizeof(emissive));
 			memset(specular, 0, sizeof(specular));
-			shininess = opacity = 0.f;
+			shininess = 0.f;
+			opacity = 1.f;
 		}
 
 		Material(const Material &copyFrom) {
