@@ -94,15 +94,15 @@ void MeshPart::serialize(json::BaseJSONWriter &writer) const {
 void Material::serialize(json::BaseJSONWriter &writer) const {
 	writer << json::obj;
 	writer << "id" = id;
-	if (ambient[0] != 0.f && ambient[1] != 0.f && ambient[2] != 0.f)
+	if (ambient[0] != 0.f || ambient[1] != 0.f || ambient[2] != 0.f)
 		writer << "ambient" = ambient;
-	if (diffuse[0] != 0.f && diffuse[1] != 0.f && diffuse[2] != 0.f)
+	if (diffuse[0] != 0.f || diffuse[1] != 0.f || diffuse[2] != 0.f)
 		writer << "diffuse" = diffuse;
-	if (emissive[0] != 0.f && emissive[1] != 0.f && emissive[2] != 0.f)
+	if (emissive[0] != 0.f || emissive[1] != 0.f || emissive[2] != 0.f)
 		writer << "emissive" = emissive;
 	if (opacity != 1.f)
 		writer << "opacity" = opacity;
-	if (specular[0] != 0.f && specular[1] != 0.f && specular[2] != 0.f)
+	if (specular[0] != 0.f || specular[1] != 0.f || specular[2] != 0.f)
 		writer << "specular" = specular;
 	if (shininess != 0.f)
 		writer << "shininess" = shininess;
