@@ -36,14 +36,14 @@ struct FbxConvCommand {
 		flipV = false;
 		packColors = false;
 		verbose = false;
-		maxNodePartBonesCount = (1<<15)-1;
+		maxNodePartBonesCount = 12;
 		maxVertexBonesCount = 4;
 		maxVertexCount = (1<<15)-1;
 		maxIndexCount = (1<<15)-1;
 		outType = inType = FILETYPE_AUTO;
 		for (int i = 1; i < argc; i++) {
 			const char *arg = argv[i];
-			const int len = strlen(arg);
+			const int len = (int)strlen(arg);
 			if (len > 1 && arg[0] == '-') {
 				if (arg[1] == '?')
 					help = true;
@@ -100,7 +100,7 @@ struct FbxConvCommand {
 		printf("-f       : Flip the V texture coordinates.\n");
 		printf("-p       : Pack vertex colors to one float.\n");
 		printf("-m <size>: The maximum amount of vertices or indices a mesh may contain (default: 32k)\n");
-		printf("-b <size>: The maximum amount of bones a nodepart can contain (default: unlimited)\n");
+		printf("-b <size>: The maximum amount of bones a nodepart can contain (default: 12)\n");
 		printf("-w <size>: The maximum amount of bone weights per vertex (default: 4)\n");
 		printf("-v       : Verbose: print additional progress information\n");
 		printf("\n");
@@ -152,7 +152,7 @@ private:
 	}
 
 	int guessType(const std::string &fn, const int &def = -1) {
-		int o = fn.find_last_of('.');
+		int o = (int)fn.find_last_of('.');
 		if (o == std::string::npos)
 			return def;
 		std::string ext = fn.substr(++o, fn.length() - o);
@@ -160,7 +160,7 @@ private:
 	}
 
 	void setExtension(std::string &fn, const std::string &ext) const {
-		int o = fn.find_last_of('.');
+		int o = (int)fn.find_last_of('.');
 		if (o == std::string::npos)
 			fn += "." + ext;
 		else

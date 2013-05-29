@@ -59,6 +59,13 @@ namespace readers {
 		bool packColors;
 		/** Temp array for transforming uvs, needs to be better defined. */
 		Matrix3<float> uvTransforms[8];
+		/** The original axis system the FBX file used (always converted defaultUpAxis, defaultFrontAxis and defaultCoordSystem) */
+		FbxAxisSystem axisSystem;
+		/** The original system units the FBX file used */
+		FbxSystemUnit systemUnits;
+		static const FbxAxisSystem::EUpVector defaultUpAxis = FbxAxisSystem::eYAxis;
+		static const FbxAxisSystem::EFrontVector defaultFrontAxis = FbxAxisSystem::eParityOdd;
+		static const FbxAxisSystem::ECoordSystem defaultCoordSystem = FbxAxisSystem::eRightHanded;
 
 		FbxConverter(const char * const &filename, const bool &packColors = false, const unsigned int &maxVertexCount = (1<<15)-1, const unsigned int &maxIndexCount = (1<<15)-1,
 			const unsigned int &maxVertexBoneCount = 8, const bool &forceMaxVertexBoneCount = false, const unsigned int &maxNodePartBoneCount = (1 << 15)-1, 
@@ -69,8 +76,13 @@ namespace readers {
 			manager = FbxManager::Create();
 			manager->SetIOSettings(FbxIOSettings::Create(manager, IOSROOT));
 			FbxImporter* const &importer = FbxImporter::Create(manager, "");
+			manager->GetIOSettings()->SetBoolProp(IMP_FBX_GLOBAL_SETTINGS, true);
+
+			importer->ParseForGlobalSettings(true);
+			importer->ParseForStatistics(true);
 
 			if (importer->Initialize(filename, -1, manager->GetIOSettings())) {
+				importer->GetAxisInfo(&axisSystem, &systemUnits);
 				scene = FbxScene::Create(manager,"__FBX_SCENE__");
 				importer->Import(scene);
 			} else {
@@ -81,6 +93,8 @@ namespace readers {
 			importer->Destroy();
 
 			if (scene) {
+				FbxAxisSystem axis(defaultUpAxis, defaultFrontAxis, defaultCoordSystem);
+				axis.ConvertScene(scene);
 				prefetchMeshes();
 				fetchMaterials();
 				fetchTextureBounds();
@@ -154,11 +168,11 @@ namespace readers {
 						nodePart->bones.resize(nodePart->meshPart->sourceBones.size());
 						for (int k = 0; k < nodePart->meshPart->sourceBones.size(); k++) {
 							nodePart->bones[k].first = nodeMap[nodePart->meshPart->sourceBones[k]->GetLink()];
-							nodePart->meshPart->sourceBones[k]->GetTransformLinkMatrix(nodePart->bones[k].second);
+							getBindPose(node->source, nodePart->meshPart->sourceBones[k], nodePart->bones[k].second);
 						}
 
 						nodePart->uvMapping.resize(meshInfo->uvCount);
-						for (int k = 0; k < meshInfo->uvCount; k++) {
+						for (unsigned int k = 0; k < meshInfo->uvCount; k++) {
 							for (std::vector<Material::Texture *>::iterator it = material->textures.begin(); it != material->textures.end(); ++it) {
 								FbxFileTexture *texture = (*it)->source;
 								TextureFileInfo &info = textureFiles[texture->GetFileName()];
@@ -173,6 +187,43 @@ namespace readers {
 
 			for (std::vector<Node *>::iterator itr = node->children.begin(); itr != node->children.end(); ++itr)
 				updateNode(model, *itr);
+		}
+
+		FbxAMatrix convertMatrix(const FbxMatrix& mat)
+		{
+			FbxVector4 trans, shear, scale;
+			FbxQuaternion rot;
+			double sign;
+			mat.GetElements(trans, rot, shear, scale, sign);
+			FbxAMatrix ret;
+			ret.SetT(trans);
+			ret.SetQ(rot);
+			ret.SetS(scale);
+			return ret;
+		}
+
+		// Get the geometry offset to a node. It is never inherited by the children.
+		FbxAMatrix GetGeometry(FbxNode* pNode)
+		{
+			const FbxVector4 lT = pNode->GetGeometricTranslation(FbxNode::eSourcePivot);
+			const FbxVector4 lR = pNode->GetGeometricRotation(FbxNode::eSourcePivot);
+			const FbxVector4 lS = pNode->GetGeometricScaling(FbxNode::eSourcePivot);
+
+			return FbxAMatrix(lT, lR, lS);
+		}
+
+		void getBindPose(FbxNode * target, FbxCluster *cluster, FbxAMatrix &out) {
+			if (cluster->GetLinkMode() == FbxCluster::eAdditive)
+				printf("WARNING: Additive bones not yet supported.\n");
+
+			FbxAMatrix reference;
+			cluster->GetTransformMatrix(reference);
+			FbxAMatrix refgem = GetGeometry(target);
+			reference *= refgem;
+			FbxAMatrix init;
+			cluster->GetTransformLinkMatrix(init);
+			FbxAMatrix relinit = init.Inverse() * reference;
+			out = relinit.Inverse();
 		}
 
 		// Iterate throught the nodes (from the leaves up) and the meshes it references. This might help that meshparts that are closer together are more likely to be merged
@@ -204,8 +255,8 @@ namespace readers {
 			parts.resize(meshInfo->meshPartCount);
 			static unsigned int meshPartCounter = 0;
 			for (int i = 0; i < meshInfo->meshPartCount; i++) {
-				const unsigned int n = meshInfo->partBones[i].size();
-				const unsigned int m = n == 0 ? 1 : n;
+				const int n = meshInfo->partBones[i].size();
+				const int m = n == 0 ? 1 : n;
 				parts[i].resize(m);
 				for (int j = 0; j < m; j++) {
 					std::stringstream ss;
@@ -263,7 +314,7 @@ namespace readers {
 				for (std::vector<Material::Texture *>::iterator it = mat->textures.begin(); it != mat->textures.end(); ++it) {
 					FbxFileTexture *texture = (*it)->source;
 					TextureFileInfo &info = textureFiles[texture->GetFileName()];
-					for (int k = 0; k < meshInfo->uvCount; k++) {
+					for (unsigned int k = 0; k < meshInfo->uvCount; k++) {
 						if (meshInfo->uvMapping[k] == texture->UVSet.Get().Buffer()) {
 							const int idx = 4 * (i * meshInfo->uvCount + k);
 							if (*(int*)&info.bounds[0] == -1 || meshInfo->partUVBounds[idx] < info.bounds[0])
@@ -286,19 +337,16 @@ namespace readers {
 			int cnt = scene->GetGeometryCount();
 			FbxGeometryConverter converter(manager);
 			for (int i = 0; i < cnt; i++) {
-				FbxGeometry * const &geometry = scene->GetGeometry(i);
+				FbxGeometry * const geometry = scene->GetGeometry(i);
 				if (fbxMeshMap.find(geometry) == fbxMeshMap.end()) {
 					FbxMesh *mesh;
 					if (geometry->Is<FbxMesh>() && ((FbxMesh*)geometry)->IsTriangleMesh())
 						mesh = (FbxMesh*)geometry;
 					else {
 						printf("Triangulating %s geometry\n", geometry->GetClassId().GetName());
-						if (geometry->Is<FbxNurbs>())
-							mesh = converter.TriangulateNurbs((FbxNurbs*)geometry);
-						else if (geometry->Is<FbxPatch>())
-							mesh = converter.TriangulatePatch((FbxPatch*)geometry);
-						else if (geometry->Is<FbxMesh>())
-							mesh = converter.TriangulateMesh((FbxMesh*)geometry);
+						FbxNodeAttribute * const attr = converter.Triangulate(geometry, false);
+						if (attr->Is<FbxMesh>())
+							mesh = (FbxMesh*)attr;
 						else
 							throw "Unsupported geometry found";
 					}
@@ -507,7 +555,7 @@ namespace readers {
 
 			if (!keyframes.empty()) {
 				anim->keyframes.push_back(keyframes[0]);
-				const int last = keyframes.size()-1;
+				const int last = (int)keyframes.size()-1;
 				Keyframe *k1 = keyframes[0], *k2, *k3;
 				for (int i = 1; i < last; i++) {
 					k2 = keyframes[i];

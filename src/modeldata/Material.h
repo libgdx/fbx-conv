@@ -85,7 +85,7 @@ namespace modeldata {
 		}
 
 		int getTextureIndex(const Texture * const &texture) const {
-			int n = textures.size();
+			int n = (int)textures.size();
 			for (int i = 0; i < n; i++)
 				if (textures[i] == texture)
 					return i;
