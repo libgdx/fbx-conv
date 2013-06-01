@@ -140,6 +140,44 @@ protected:
 	virtual void writeValue(const unsigned long &value, const bool &iskey = false) {
 		writeValue(*(long*)&value, iskey);
 	}
+	bool writeOpenData(const char *type, const size_t &count) {
+		// NOTE: This breaks the current ubjson specs because we use H as a strong typed container,
+		// See: https://github.com/thebuzzmedia/universal-binary-json/issues/27
+		if (count < 255) { // 0xFF was previously reserved, so dont include it to be safe
+			stream << "h" << type;
+			const unsigned char len = (unsigned char)count;
+			write(len);
+		} else {
+			stream << "H" << type;
+			const unsigned int len = (unsigned int)count;
+			write(len);
+		}
+		return true;
+	}
+	template<class T> void writeData(const T * const &values, const size_t &count) {
+		for (size_t i = 0; i < count; i++)
+			write(values[i]);
+	}
+
+	inline virtual bool writeOpenFloatData(const size_t& count) { return writeOpenData("d", count); }
+	inline virtual bool writeOpenDoubleData(const size_t& count) { return writeOpenData("D", count); }
+	inline virtual bool writeOpenShortData(const size_t& count) { return writeOpenData("i", count); }
+	inline virtual bool writeOpenUShortData(const size_t& count) { return writeOpenData("i", count); }
+	inline virtual bool writeOpenIntData(const size_t& count) { return writeOpenData("I", count); }
+	inline virtual bool writeOpenUIntData(const size_t& count) { return writeOpenData("I", count); }
+	inline virtual bool writeOpenLongData(const size_t& count) { return writeOpenData("L", count); }
+	inline virtual bool writeOpenULongData(const size_t& count) { return writeOpenData("L", count); }
+
+	inline virtual void writeFloatData(const float * const &values, const size_t &count) { writeData(values, count); }
+	inline virtual void writeDoubleData(const double * const &values, const size_t &count) {writeData(values, count); }
+	inline virtual void writeShortData(const short * const &values, const size_t &count) {writeData(values, count); }
+	inline virtual void writeUShortData(const unsigned short * const &values, const size_t &count) {writeData(values, count); }
+	inline virtual void writeIntData(const int * const &values, const size_t &count) {writeData(values, count); }
+	inline virtual void writeUIntData(const unsigned int * const &values, const size_t &count) {writeData(values, count); }
+	inline virtual void writeLongData(const long * const &values, const size_t &count) {writeData(values, count); }
+	inline virtual void writeULongData(const unsigned long * const &values, const size_t &count) {writeData(values, count); }
+
+	virtual void writeCloseData() {}
 };
 
 }
