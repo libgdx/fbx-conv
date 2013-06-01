@@ -143,12 +143,12 @@ protected:
 	bool writeOpenData(const char *type, const size_t &count) {
 		// NOTE: This breaks the current ubjson specs because we use H as a strong typed container,
 		// See: https://github.com/thebuzzmedia/universal-binary-json/issues/27
-		if (count < 255) { // 0xFF was previously reserved, so dont include it to be safe
-			stream << "h" << type;
+		if (count < 255) {
+			stream << "a" << type;
 			const unsigned char len = (unsigned char)count;
 			write(len);
 		} else {
-			stream << "H" << type;
+			stream << "A" << type;
 			const unsigned int len = (unsigned int)count;
 			write(len);
 		}
