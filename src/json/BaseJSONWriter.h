@@ -180,10 +180,24 @@ protected:
 	virtual void writeValue(const unsigned short &value, const bool &iskey = false) = 0;
 	virtual void writeValue(const unsigned int &value, const bool &iskey = false) = 0;
 	virtual void writeValue(const unsigned long &value, const bool &iskey = false) = 0;
-	// If writeOpenData returns false, it falls back on writing out an array
-	virtual bool writeOpenData(const size_t &items, const size_t &bytes) { return false; }
-	virtual void writeDataItem(const void * const &value, const size_t &bytes) {}
-	virtual void writeCloseData(const size_t &items, const size_t &bytes) {}
+	// If writeOpenXXXData returns false, it falls back on writing out an array
+	inline virtual bool writeOpenFloatData(const size_t& count) { return false; }
+	inline virtual bool writeOpenDoubleData(const size_t& count) { return false; }
+	inline virtual bool writeOpenShortData(const size_t& count) { return false; }
+	inline virtual bool writeOpenUShortData(const size_t& count) { return false; }
+	inline virtual bool writeOpenIntData(const size_t& count) { return false; }
+	inline virtual bool writeOpenUIntData(const size_t& count) { return false; }
+	inline virtual bool writeOpenLongData(const size_t& count) { return false; }
+	inline virtual bool writeOpenULongData(const size_t& count) { return false; }
+	inline virtual void writeFloatData(const float * const &values, const size_t &count) {}
+	inline virtual void writeDoubleData(const double * const &values, const size_t &count) {}
+	inline virtual void writeShortData(const short * const &values, const size_t &count) {}
+	inline virtual void writeUShortData(const unsigned short * const &values, const size_t &count) {}
+	inline virtual void writeIntData(const int * const &values, const size_t &count) {}
+	inline virtual void writeUIntData(const unsigned int * const &values, const size_t &count) {}
+	inline virtual void writeLongData(const long * const &values, const size_t &count) {}
+	inline virtual void writeULongData(const unsigned long * const &values, const size_t &count) {}
+	inline virtual void writeCloseData() {}
 
 private:
 	bool checkKey(const bool &allowKey = true) {
@@ -196,12 +210,30 @@ private:
 		return !block.wroteKey;
 	}
 
+	template<class T> inline bool openData(const size_t &items) { return false; }
+	template<> inline bool openData<float>(const size_t &items) { return writeOpenFloatData(items); }
+	template<> inline bool openData<double>(const size_t &items) { return writeOpenDoubleData(items); }
+	template<> inline bool openData<short>(const size_t &items) { return writeOpenShortData(items); }
+	template<> inline bool openData<unsigned short>(const size_t &items) { return writeOpenUShortData(items); }
+	template<> inline bool openData<int>(const size_t &items) { return writeOpenIntData(items); }
+	template<> inline bool openData<unsigned int>(const size_t &items) { return writeOpenUIntData(items); }
+	template<> inline bool openData<long>(const size_t &items) { return writeOpenLongData(items); }
+	template<> inline bool openData<unsigned long>(const size_t &items) { return writeOpenULongData(items); }
+	template<class T> inline void dataItem(const T * const &value, const size_t &count) {}
+	template<> inline void dataItem<float>(const float * const &value, const size_t &count) { writeFloatData(value, count); }
+	template<> inline void dataItem<double>(const double * const &value, const size_t &count) { writeDoubleData(value, count); }
+	template<> inline void dataItem<short>(const short * const &value, const size_t &count) { writeShortData(value, count); }
+	template<> inline void dataItem<unsigned short>(const unsigned short * const &value, const size_t &count) { writeUShortData(value, count); }
+	template<> inline void dataItem<int>(const int * const &value, const size_t &count) { writeIntData(value, count); }
+	template<> inline void dataItem<unsigned int>(const unsigned int * const &value, const size_t &count) { writeUIntData(value, count); }
+	template<> inline void dataItem<long>(const long * const &value, const size_t &count) { writeLongData(value, count); }
+	template<> inline void dataItem<unsigned long>(const unsigned long * const &value, const size_t &count) { writeULongData(value, count); }
+	
 	template<class T, size_t n> inline void values(const T (&value)[n], const unsigned int &lineSize = 0) { values(&value[0], n, lineSize); }
 	template<class T> inline void values(const T * const &values, const size_t &count, const unsigned int &lineSize = 0) {
-		const size_t bytes = count * sizeof(T);
-		if (writeOpenData(count, bytes)) {
-			writeDataItem((void*)values, bytes);
-			writeCloseData(count, bytes);
+		if (openData<T>(count)) {
+			dataItem<T>(values, count);
+			writeCloseData();
 		} else {
 			checkKey();
 			arr(values, count, lineSize);
@@ -211,10 +243,10 @@ private:
 	template<class T> inline void values(const std::vector<T> &values, const unsigned int &lineSize = 0) {
 		const size_t count = values.size();
 		const size_t bytes = count * sizeof(T);
-		if (writeOpenData(count, bytes)) {
+		if (openData<T>(count)) {
 			for (typename std::vector<T>::const_iterator it = values.begin(); it != values.end(); ++it)
-				writeDataItem((void*)&(*it), sizeof(T));
-			writeCloseData(count, bytes);
+				dataItem(&(*it), 1);
+			writeCloseData();
 		} else {
 			checkKey();
 			arr(values, lineSize);
