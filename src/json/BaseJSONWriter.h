@@ -210,29 +210,29 @@ private:
 		return !block.wroteKey;
 	}
 
-	template<class T> inline bool openData(const size_t &items) { return false; }
-	template<> inline bool openData<float>(const size_t &items) { return writeOpenFloatData(items); }
-	template<> inline bool openData<double>(const size_t &items) { return writeOpenDoubleData(items); }
-	template<> inline bool openData<short>(const size_t &items) { return writeOpenShortData(items); }
-	template<> inline bool openData<unsigned short>(const size_t &items) { return writeOpenUShortData(items); }
-	template<> inline bool openData<int>(const size_t &items) { return writeOpenIntData(items); }
-	template<> inline bool openData<unsigned int>(const size_t &items) { return writeOpenUIntData(items); }
-	template<> inline bool openData<long>(const size_t &items) { return writeOpenLongData(items); }
-	template<> inline bool openData<unsigned long>(const size_t &items) { return writeOpenULongData(items); }
+	template<class T> inline bool openData(const T &dummy, const size_t &items) { return false; }
+	inline bool openData(const float &dummy, const size_t &items) { return writeOpenFloatData(items); }
+	inline bool openData(const double &dummy, const size_t &items) { return writeOpenDoubleData(items); }
+	inline bool openData(const short &dummy, const size_t &items) { return writeOpenShortData(items); }
+	inline bool openData(const unsigned short &dummy, const size_t &items) { return writeOpenUShortData(items); }
+	inline bool openData(const int &dummy, const size_t &items) { return writeOpenIntData(items); }
+	inline bool openData(const unsigned int &dummy, const size_t &items) { return writeOpenUIntData(items); }
+	inline bool openData(const long &dummy, const size_t &items) { return writeOpenLongData(items); }
+	inline bool openData(const unsigned long &dummy, const size_t &items) { return writeOpenULongData(items); }
 	template<class T> inline void dataItem(const T * const &value, const size_t &count) {}
-	template<> inline void dataItem<float>(const float * const &value, const size_t &count) { writeFloatData(value, count); }
-	template<> inline void dataItem<double>(const double * const &value, const size_t &count) { writeDoubleData(value, count); }
-	template<> inline void dataItem<short>(const short * const &value, const size_t &count) { writeShortData(value, count); }
-	template<> inline void dataItem<unsigned short>(const unsigned short * const &value, const size_t &count) { writeUShortData(value, count); }
-	template<> inline void dataItem<int>(const int * const &value, const size_t &count) { writeIntData(value, count); }
-	template<> inline void dataItem<unsigned int>(const unsigned int * const &value, const size_t &count) { writeUIntData(value, count); }
-	template<> inline void dataItem<long>(const long * const &value, const size_t &count) { writeLongData(value, count); }
-	template<> inline void dataItem<unsigned long>(const unsigned long * const &value, const size_t &count) { writeULongData(value, count); }
+	inline void dataItem(const float * const &value, const size_t &count) { writeFloatData(value, count); }
+	inline void dataItem(const double * const &value, const size_t &count) { writeDoubleData(value, count); }
+	inline void dataItem(const short * const &value, const size_t &count) { writeShortData(value, count); }
+	inline void dataItem(const unsigned short * const &value, const size_t &count) { writeUShortData(value, count); }
+	inline void dataItem(const int * const &value, const size_t &count) { writeIntData(value, count); }
+	inline void dataItem(const unsigned int * const &value, const size_t &count) { writeUIntData(value, count); }
+	inline void dataItem(const long * const &value, const size_t &count) { writeLongData(value, count); }
+	inline void dataItem(const unsigned long * const &value, const size_t &count) { writeULongData(value, count); }
 	
 	template<class T, size_t n> inline void values(const T (&value)[n], const unsigned int &lineSize = 0) { values(&value[0], n, lineSize); }
 	template<class T> inline void values(const T * const &values, const size_t &count, const unsigned int &lineSize = 0) {
-		if (openData<T>(count)) {
-			dataItem<T>(values, count);
+		if (openData(values[0], count)) {
+			dataItem(values, count);
 			writeCloseData();
 		} else {
 			checkKey();
@@ -243,7 +243,7 @@ private:
 	template<class T> inline void values(const std::vector<T> &values, const unsigned int &lineSize = 0) {
 		const size_t count = values.size();
 		const size_t bytes = count * sizeof(T);
-		if (openData<T>(count)) {
+		if (openData(values[0], count)) {
 			for (typename std::vector<T>::const_iterator it = values.begin(); it != values.end(); ++it)
 				dataItem(&(*it), 1);
 			writeCloseData();
