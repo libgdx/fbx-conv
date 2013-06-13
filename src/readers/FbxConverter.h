@@ -95,10 +95,13 @@ namespace readers {
 			if (scene) {
 				FbxAxisSystem axis(defaultUpAxis, defaultFrontAxis, defaultCoordSystem);
 				axis.ConvertScene(scene);
-				prefetchMeshes();
-				fetchMaterials();
-				fetchTextureBounds();
 			}
+			if (scene)
+				prefetchMeshes();
+			if (scene)
+				fetchMaterials();
+			if (scene)
+				fetchTextureBounds();
 		}
 
 		~FbxConverter() {
@@ -355,6 +358,11 @@ namespace readers {
 					fbxMeshMap[geometry] = info;
 					if (info->bonesOverflow)
 						printf("Warning: mesh contains more blendweights per polygon than the specified maximum.\n");
+					if (info->elementMaterialCount <= 0) {
+						printf("Error: No material provided for %s\n", geometry->GetNode()->GetName());
+						scene = 0;
+						break;
+					}
 				}
 			}
 		}
