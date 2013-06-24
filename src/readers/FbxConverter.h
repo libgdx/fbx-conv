@@ -97,6 +97,8 @@ namespace readers {
 				axis.ConvertScene(scene);
 			}
 			if (scene)
+				checkNodes();
+			if (scene)
 				prefetchMeshes();
 			if (scene)
 				fetchMaterials();
@@ -108,6 +110,25 @@ namespace readers {
 			for (std::vector<FbxMeshInfo *>::iterator itr = meshInfos.begin(); itr != meshInfos.end(); ++itr)
 				delete (*itr);
 			manager->Destroy();
+		}
+
+		/** Check all the nodes within the scene for any incompatibility issues. */
+		void checkNodes() {
+			FbxNode * root = scene->GetRootNode();
+			for (int i = 0; i < root->GetChildCount(); i++)
+				checkNode(root->GetChild(i));
+		}
+
+		/** Recursively check the node for any incompatibility issues. */
+		void checkNode(FbxNode * const &node) {
+			FbxTransform::EInheritType inheritType;
+			node->GetTransformationInheritType(inheritType);
+			if (inheritType == FbxTransform::eInheritRrSs) {
+				printf("WARNING: Node %s uses RrSs mode, transformation might be incorrect.\n", node->GetName());
+				node->SetTransformationInheritType(FbxTransform::eInheritRSrs);
+			}
+			for (int i = 0; i < node->GetChildCount(); i++)
+				checkNode(node->GetChild(i));
 		}
 
 		bool convert(Model * const &model, const bool &flipV) {
