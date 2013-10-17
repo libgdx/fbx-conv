@@ -13,7 +13,7 @@ namespace fbxconv {
 namespace modeldata {
 	struct Node;
 
-	struct Animation : public json::Serializable {
+	struct Animation : public json::ConstSerializable {
 		std::string id;
 		std::vector<NodeAnimation *> nodeAnimations;
 

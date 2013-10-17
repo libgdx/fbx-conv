@@ -12,7 +12,7 @@ namespace fbxconv {
 namespace modeldata {
 	struct Node;
 
-	struct NodeAnimation : public json::Serializable {
+	struct NodeAnimation : public json::ConstSerializable {
 		const Node *node;
 		std::vector<Keyframe *> keyframes;
 		bool translate, rotate, scale;

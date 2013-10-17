@@ -12,7 +12,7 @@
 namespace fbxconv {
 namespace modeldata {
 	/** A mesh is responsable for freeing all parts and vertices it contains. */
-	struct Mesh : public json::Serializable {
+	struct Mesh : public json::ConstSerializable {
 		/** the attributes the vertices in this mesh describe */
 		Attributes attributes;
 		/** the size (in number of floats) of each vertex */

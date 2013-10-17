@@ -44,7 +44,7 @@ template <typename B, typename D> struct is_base_of
 
 class BaseJSONWriter;
 
-struct Serializable {
+struct ConstSerializable {
 	virtual void serialize(BaseJSONWriter &writer) const = 0;
 };
 
@@ -280,21 +280,20 @@ private:
 	template<class T> void _val(const T *v) { __ptr(v); }
 	template<class T> typename enable_if<!is_pointer<T>::value>::type _val(const T &v) { __val(v); }
 
-	template<class T> typename enable_if<!is_base_of<Serializable, T>::value, void>::type __val(const T &v) {
+	template<class T> typename enable_if<!is_base_of<ConstSerializable, T>::value, void>::type __val(const T &v) {
 		if (!checkKey()) nextValue(inObject(), false);
 		value(v, block.wroteKey);
 	}
-	template<class T> typename enable_if<!is_base_of<Serializable, T>::value, void>::type __ptr(const T *v) { 
+	template<class T> typename enable_if<!is_base_of<ConstSerializable, T>::value, void>::type __ptr(const T *v) { 
 		if (!checkKey()) nextValue(inObject(), false);
 		value(v, block.wroteKey);
 	}
-	void __val(const Serializable &v) {
+	void __val(const ConstSerializable &v) {
 		v.serialize(*this);
 	}
-	void __ptr(const Serializable *v) {
+	void __ptr(const ConstSerializable *v) {
 		v->serialize(*this);
 	}
-
 public:
 	unsigned int defaultDataLineSize;
 

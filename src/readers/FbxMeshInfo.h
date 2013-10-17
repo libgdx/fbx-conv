@@ -20,6 +20,8 @@ namespace readers {
 	struct FbxMeshInfo {
 		// The source mesh of which the values below are extracted
 		FbxMesh * const mesh;
+		// The ID of the mesh (shape)
+		const std::string id;
 		// The maximum amount of blend weights per vertex
 		const unsigned int maxVertexBlendWeightCount;
 		// The actual amount of blend weights per vertex (<= maxVertexBlendWeightCount)
@@ -94,7 +96,8 @@ namespace readers {
 			skin((maxNodePartBoneCount > 0 && maxVertexBlendWeightCount > 0 && (unsigned int)mesh->GetDeformerCount(FbxDeformer::eSkin) > 0) ? static_cast<FbxSkin*>(mesh->GetDeformer(0, FbxDeformer::eSkin)) : 0),
 			bonesOverflow(false),
 			polyPartMap(new unsigned int[polyCount]),
-			polyPartBonesMap(new unsigned int[polyCount])
+			polyPartBonesMap(new unsigned int[polyCount]),
+			id(getID(mesh))
 		{
 			meshPartCount = calcMeshPartCount();
 			partBones = std::vector<BlendBonesCollection>(meshPartCount, BlendBonesCollection(maxNodePartBoneCount));
@@ -242,6 +245,17 @@ namespace readers {
 			getVertex(data, offset, poly, polyIndex, point, uvTransforms);
 		}
 	private:
+		static std::string getID(FbxMesh * const &mesh) {
+			static int idCounter = 0;
+			const char *name = mesh->GetName();
+			std::stringstream ss;
+			if (name != 0 && strlen(name) > 1)
+				ss << name;
+			else
+				ss << "shape" << (++idCounter);
+			return ss.str();
+		}
+		
 		unsigned int calcMeshPartCount() {
 			int mp, mpc = 0;
 			for (unsigned int poly = 0; poly < polyCount; poly++) {
