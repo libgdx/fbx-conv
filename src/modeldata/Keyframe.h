@@ -9,7 +9,7 @@
 namespace fbxconv {
 namespace modeldata {
 
-	struct Keyframe : public json::Serializable {
+	struct Keyframe : public json::ConstSerializable {
 		double time;
 		double translation[3];
 		double rotation[4];

@@ -11,8 +11,8 @@
 
 namespace fbxconv {
 namespace modeldata {
-	struct Material : public json::Serializable {
-		struct Texture : public json::Serializable {
+	struct Material : public json::ConstSerializable {
+		struct Texture : public json::ConstSerializable {
 			enum Usage {
 				Unknown = 0,
 				None = 1,

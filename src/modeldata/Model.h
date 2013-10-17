@@ -18,7 +18,7 @@ namespace modeldata {
 	const short VERSION_LO = 1;
 
 	/** A model is responsable for freeing all animations, materials, meshes and nodes it contains */
-	struct Model : public json::Serializable {
+	struct Model : public json::ConstSerializable {
 		short version[2];
 		std::string id;
 		std::vector<Animation *> animations;

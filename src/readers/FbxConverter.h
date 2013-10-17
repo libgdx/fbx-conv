@@ -5,12 +5,14 @@
 #define FBXCONV_READERS_FBXCONVERTER_H
 
 #include <fbxsdk.h>
-#include "../modeldata/Model.h"
+#include "../Settings.h"
+#include "Reader.h"
 #include <sstream>
 #include <map>
 #include <algorithm>
 #include "util.h"
 #include "FbxMeshInfo.h"
+#include "../log/log.h"
 
 using namespace fbxconv::modeldata;
 
@@ -29,7 +31,12 @@ namespace readers {
 		}
 	};
 
-	struct FbxConverter {
+	typedef void (*TextureInfoCallback)(std::map<std::string, TextureFileInfo> &textures);
+
+	bool FbxConverter_ImportCB(void *pArgs, float pPercentage, const char *pStatus);
+
+	class FbxConverter : public Reader {
+	public:
 		FbxScene *scene;
 		FbxManager *manager;
 
@@ -43,20 +50,10 @@ namespace readers {
 		std::map<FbxMeshInfo *, std::vector<std::vector<MeshPart *> > > meshParts;
 		std::map<const FbxNode *, Node *> nodeMap;
 
-		/** The maximum allowed amount of vertices in one mesh, only used when deciding to merge meshes. */
-		unsigned int maxVertexCount;
-		/** The maximum allowed amount of indices in one mesh, only used when deciding to merge meshes. */
-		unsigned int maxIndexCount;
-		/** The maximum allowed amount of bone weights in one vertex, if a vertex exceeds this amount it will clipped on importance. */
-		unsigned int maxVertexBoneCount;
-		/** Always use maxVertexBoneCount for blendWeights, this might help merging meshes. */
-		bool forceMaxVertexBoneCount;
-		/** The maximum allowed amount of bones in one nodepart, if a meshpart exceeds this amount it will be split up in parts. */
-		unsigned int maxNodePartBoneCount;
-		/** Whether to flip the y-component of textures coordinates. */
-		bool flipV;
-		/** Whether to pack colors into one float. */
-		bool packColors;
+		Settings *settings;
+		fbxconv::log::Log *log;
+		TextureInfoCallback textureCallback;
+
 		/** Temp array for transforming uvs, needs to be better defined. */
 		Matrix3<float> uvTransforms[8];
 		/** The original axis system the FBX file used (always converted defaultUpAxis, defaultFrontAxis and defaultCoordSystem) */
@@ -67,27 +64,41 @@ namespace readers {
 		static const FbxAxisSystem::EFrontVector defaultFrontAxis = FbxAxisSystem::eParityOdd;
 		static const FbxAxisSystem::ECoordSystem defaultCoordSystem = FbxAxisSystem::eRightHanded;
 
-		FbxConverter(const char * const &filename, const bool &packColors = false, const unsigned int &maxVertexCount = (1<<15)-1, const unsigned int &maxIndexCount = (1<<15)-1,
-			const unsigned int &maxVertexBoneCount = 8, const bool &forceMaxVertexBoneCount = false, const unsigned int &maxNodePartBoneCount = (1 << 15)-1, 
-			const bool &flipV = false) 
-			:	scene(0), maxVertexCount(maxVertexCount), maxIndexCount(maxIndexCount), maxVertexBoneCount(maxVertexBoneCount),  
-				maxNodePartBoneCount(maxNodePartBoneCount), forceMaxVertexBoneCount(forceMaxVertexBoneCount), flipV(flipV), packColors(packColors) {
+		//const char * const &filename, 
+		//const bool &packColors = false, const unsigned int &maxVertexCount = (1<<15)-1, const unsigned int &maxIndexCount = (1<<15)-1,
+			//const unsigned int &maxVertexBoneCount = 8, const bool &forceMaxVertexBoneCount = false, const unsigned int &maxNodePartBoneCount = (1 << 15)-1, 
+			//const bool &flipV = false
+
+		FbxConverter(fbxconv::log::Log *log, TextureInfoCallback textureCallback) 
+			:	log(log), scene(0), textureCallback(textureCallback) {
 
 			manager = FbxManager::Create();
 			manager->SetIOSettings(FbxIOSettings::Create(manager, IOSROOT));
-			FbxImporter* const &importer = FbxImporter::Create(manager, "");
 			manager->GetIOSettings()->SetBoolProp(IMP_FBX_GLOBAL_SETTINGS, true);
+		}
+
+		bool importCallback(float pPercentage, const char *pStatus) {
+			log->progress(log::pSourceLoadFbxImport, pPercentage, pStatus);
+			return true;
+		}
+
+		bool load(Settings *settings) {
+			this->settings = settings;
+
+			FbxImporter* const &importer = FbxImporter::Create(manager, "");
+
+			if (settings->verbose)
+				importer->SetProgressCallback(FbxConverter_ImportCB, this);
 
 			importer->ParseForGlobalSettings(true);
 			importer->ParseForStatistics(true);
 
-			if (importer->Initialize(filename, -1, manager->GetIOSettings())) {
+			if (importer->Initialize(settings->inFile.c_str(), -1, manager->GetIOSettings())) {
 				importer->GetAxisInfo(&axisSystem, &systemUnits);
 				scene = FbxScene::Create(manager,"__FBX_SCENE__");
 				importer->Import(scene);
 			} else {
-				// printf("ERROR: %s\n", importer->GetLastErrorString());
-                printf("ERROR: Couldn't parse FBX file");
+				log->error(fbxconv::log::eSourceLoadFbxSdk, "Unknown");
             }
 
 			importer->Destroy();
@@ -104,9 +115,10 @@ namespace readers {
 				fetchMaterials();
 			if (scene)
 				fetchTextureBounds();
+			return !(scene == 0);
 		}
 
-		~FbxConverter() {
+		virtual ~FbxConverter() {
 			for (std::vector<FbxMeshInfo *>::iterator itr = meshInfos.begin(); itr != meshInfos.end(); ++itr)
 				delete (*itr);
 			manager->Destroy();
@@ -124,17 +136,23 @@ namespace readers {
 			FbxTransform::EInheritType inheritType;
 			node->GetTransformationInheritType(inheritType);
 			if (inheritType == FbxTransform::eInheritRrSs) {
-				printf("WARNING: Node %s uses RrSs mode, transformation might be incorrect.\n", node->GetName());
+				log->warning(log::wSourceLoadFbxNodeRrSs, node->GetName());
 				node->SetTransformationInheritType(FbxTransform::eInheritRSrs);
 			}
 			for (int i = 0; i < node->GetChildCount(); i++)
 				checkNode(node->GetChild(i));
 		}
 
-		bool convert(Model * const &model, const bool &flipV) {
+		virtual bool convert(Model * const &model) {
+			if (!scene) {
+				log->error(log::eSourceLoadGeneral);
+				return false;
+			}
+			if (textureCallback)
+				textureCallback(textureFiles);
 			for (int i = 0; i < 8; i++) {
 				uvTransforms[i].idt();
-				if (flipV)
+				if (settings->flipV)
 					uvTransforms[i].translate(0.f, 1.f).scale(1.f, -1.f);
 			}
 
@@ -160,6 +178,10 @@ namespace readers {
 				return;
 			}
 
+			if (model->getNode(node->GetName())) {
+				log->warning(log::wSourceConvertFbxDuplicateNodeId, node->GetName());
+				return;
+			}
 			Node *n = new Node(node->GetName());
 			n->source = node;
 			nodeMap[node] = n;
@@ -189,10 +211,15 @@ namespace readers {
 						node->parts.push_back(nodePart);
 						nodePart->material = material;
 						nodePart->meshPart = parts[i][j];
-						nodePart->bones.resize(nodePart->meshPart->sourceBones.size());
 						for (int k = 0; k < nodePart->meshPart->sourceBones.size(); k++) {
-							nodePart->bones[k].first = nodeMap[nodePart->meshPart->sourceBones[k]->GetLink()];
-							getBindPose(node->source, nodePart->meshPart->sourceBones[k], nodePart->bones[k].second);
+							if (nodeMap.find(nodePart->meshPart->sourceBones[k]->GetLink()) != nodeMap.end()) {
+								std::pair<Node*, FbxAMatrix> p;
+								p.first = nodeMap[nodePart->meshPart->sourceBones[k]->GetLink()];
+								getBindPose(node->source, nodePart->meshPart->sourceBones[k], p.second);
+								nodePart->bones.push_back(p);
+							} else {
+								log->warning(log::wSourceConvertFbxInvalidBone, node->id.c_str(), nodePart->meshPart->sourceBones[k]->GetLink()->GetName());
+							}
 						}
 
 						nodePart->uvMapping.resize(meshInfo->uvCount);
@@ -238,7 +265,7 @@ namespace readers {
 
 		void getBindPose(FbxNode * target, FbxCluster *cluster, FbxAMatrix &out) {
 			if (cluster->GetLinkMode() == FbxCluster::eAdditive)
-				printf("WARNING: Additive bones not yet supported.\n");
+				log->warning(log::wSourceConvertFbxAdditiveBones, target->GetName());
 
 			FbxAMatrix reference;
 			cluster->GetTransformMatrix(reference);
@@ -277,14 +304,14 @@ namespace readers {
 
 			std::vector<std::vector<MeshPart *> > &parts = meshParts[meshInfo];
 			parts.resize(meshInfo->meshPartCount);
-			static unsigned int meshPartCounter = 0;
+			int idx = 0;
 			for (int i = 0; i < meshInfo->meshPartCount; i++) {
 				const int n = meshInfo->partBones[i].size();
 				const int m = n == 0 ? 1 : n;
 				parts[i].resize(m);
 				for (int j = 0; j < m; j++) {
 					std::stringstream ss;
-					ss << "mpart" << ++meshPartCounter;
+					ss << meshInfo->id.c_str() <<  "_part" << (++idx);
 					MeshPart *part = new MeshPart();
 					part->id = ss.str();
 					part->primitiveType = PRIMITIVETYPE_TRIANGLES;
@@ -315,7 +342,9 @@ namespace readers {
 
 		Mesh *findReusableMesh(Model * const &model, const Attributes &attributes, const unsigned int &vertexCount) {
 			for (std::vector<Mesh *>::iterator itr = model->meshes.begin(); itr != model->meshes.end(); ++itr)
-				if ((*itr)->attributes == attributes && ((*itr)->vertices.size() / (*itr)->vertexSize) + vertexCount <= maxVertexCount && (*itr)->indexCount() + vertexCount <= maxIndexCount)
+				if ((*itr)->attributes == attributes && 
+					((*itr)->vertices.size() / (*itr)->vertexSize) + vertexCount <= settings->maxVertexCount && 
+					(*itr)->indexCount() + vertexCount <= settings->maxIndexCount)
 					return (*itr);
 			return 0;
 		}
@@ -357,6 +386,29 @@ namespace readers {
 			}
 		}
 
+		const char *getGeometryName(const FbxGeometry * const &g) {
+			static char buff[512];
+			const char *name = g->GetName();
+			if (name && strlen(name) > 0)
+				return name;
+			int c = g->GetNodeCount();
+			strcpy(buff, "shape(");
+			int idx = strlen(buff);
+			for (int i = 0; i < c; i++) {
+				const char *v = g->GetNode(i)->GetName();
+				const int l = strlen(v);
+				if (idx + l >= sizeof(buff))
+					break;
+				if (i > 0)
+					buff[idx++] = ',';
+				strcpy(&buff[idx], v);
+				idx += l;
+			}
+			buff[idx++] = ')';
+			buff[idx] = '\0';
+			return buff;
+		}
+
 		void prefetchMeshes() {
 			int cnt = scene->GetGeometryCount();
 			FbxGeometryConverter converter(manager);
@@ -367,20 +419,27 @@ namespace readers {
 					if (geometry->Is<FbxMesh>() && ((FbxMesh*)geometry)->IsTriangleMesh())
 						mesh = (FbxMesh*)geometry;
 					else {
-						printf("Triangulating %s geometry\n", geometry->GetClassId().GetName());
+						log->status(log::sSourceConvertFbxTriangulate, getGeometryName(geometry), geometry->GetClassId().GetName());
+						//printf("Triangulating %s geometry\n", geometry->GetClassId().GetName());
 						FbxNodeAttribute * const attr = converter.Triangulate(geometry, false);
 						if (attr->Is<FbxMesh>())
 							mesh = (FbxMesh*)attr;
-						else
-							throw "Unsupported geometry found";
+						else {
+							log->warning(log::wSourceConvertFbxCantTriangulate, geometry->GetClassId().GetName());
+							continue;
+						}
 					}
-					FbxMeshInfo * const info = new FbxMeshInfo(mesh, packColors, maxVertexBoneCount, forceMaxVertexBoneCount, maxNodePartBoneCount);
+					int indexCount = (mesh->GetPolygonCount() * 3);
+					log->info(log::iSourceConvertFbxMeshInfo, getGeometryName(geometry), mesh->GetPolygonCount(), indexCount, mesh->GetControlPointsCount());
+					if (indexCount > settings->maxIndexCount)
+						log->warning(log::wSourceConvertFbxExceedsIndices, indexCount, settings->maxIndexCount);
+					FbxMeshInfo * const info = new FbxMeshInfo(mesh, settings->packColors, settings->maxVertexBonesCount, settings->forceMaxVertexBoneCount, settings->maxNodePartBonesCount);
 					meshInfos.push_back(info);
 					fbxMeshMap[geometry] = info;
 					if (info->bonesOverflow)
-						printf("Warning: mesh contains more blendweights per polygon than the specified maximum.\n");
+						log->warning(log::wSourceConvertFbxExceedsBones);
 					if (info->elementMaterialCount <= 0) {
-						printf("Error: No material provided for %s\n", geometry->GetNode()->GetName());
+						log->error(log::eSourceConvertFbxNoMaterial, getGeometryName(geometry));
 						scene = 0;
 						break;
 					}
@@ -397,13 +456,24 @@ namespace readers {
 			}
 		}
 
-		Material *createMaterial(FbxSurfaceMaterial * const &material) {
-			if ((!material->Is<FbxSurfaceLambert>()) || GetImplementation(material, FBXSDK_IMPLEMENTATION_HLSL) || GetImplementation(material, FBXSDK_IMPLEMENTATION_CGFX))
-				throw "Unsupported material type";
-			
+		Material *createMaterial(FbxSurfaceMaterial * const &material) {	
 			Material * const result = new Material();
 			result->source = material;
 			result->id = material->GetName();
+
+			if ((!material->Is<FbxSurfaceLambert>()) || GetImplementation(material, FBXSDK_IMPLEMENTATION_HLSL) || GetImplementation(material, FBXSDK_IMPLEMENTATION_CGFX)) {
+				printf("Skipping unsupported material: %s, replacing it by a red diffuse color, because:\n", result->id.c_str());
+				if (!material->Is<FbxSurfaceLambert>())
+					printf("- Material must extend FbxSurfaceLambert\n");
+				if (GetImplementation(material, FBXSDK_IMPLEMENTATION_HLSL))
+					printf("- HLSL shading implementation not supported");
+				if (GetImplementation(material, FBXSDK_IMPLEMENTATION_CGFX))
+					printf("- CgFX shading implementation not supported");
+				result->diffuse[0] = 1.f;
+				result->diffuse[1] = 0.f;
+				result->diffuse[2] = 0.f;
+				return result;
+			}
 
 			FbxSurfaceLambert * const &lambert = (FbxSurfaceLambert *)material;
 			set<3>(result->ambient, lambert->Ambient.Get().mData);
@@ -641,5 +711,9 @@ namespace readers {
 				dst.push_back(value);
 		}
 	};
+
+	bool FbxConverter_ImportCB(void *pArgs, float pPercentage, const char *pStatus) {
+		return ((FbxConverter*)pArgs)->importCallback(pPercentage, pStatus);
+	}
 } }
 #endif //FBXCONV_READERS_FBXCONVERTER_H

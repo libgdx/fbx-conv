@@ -13,7 +13,7 @@ namespace fbxconv {
 namespace modeldata {
 	struct Node;
 	/** A nodepart references (but not owns) a meshpart and a material */
-	struct NodePart : public json::Serializable {
+	struct NodePart : public json::ConstSerializable {
 		const MeshPart *meshPart;
 		const Material *material;
 		std::vector<std::pair<Node *, FbxAMatrix> > bones;
