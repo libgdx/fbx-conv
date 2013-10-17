@@ -22,12 +22,12 @@ namespace log {
 
 	class Log {
 	public:
-		static const int LOG_STATUS		= 0x1 << 0;
-		static const int LOG_PROGRESS	= 0x1 << 1;
-		static const int LOG_DEBUG		= 0x1 << 2;
-		static const int LOG_INFO		= 0x1 << 3;
-		static const int LOG_WARNING	= 0x1 << 4;
-		static const int LOG_ERROR		= 0x1 << 5;
+		static const int LOG_STATUS		= 0x01;
+		static const int LOG_PROGRESS	= 0x02;
+		static const int LOG_DEBUG		= 0x04;
+		static const int LOG_INFO		= 0x08;
+		static const int LOG_WARNING	= 0x10;
+		static const int LOG_ERROR		= 0x20;
 
 		const int filter;
 		LogMessages * const &messages;
@@ -89,11 +89,11 @@ namespace log {
 		}
 
 		virtual void status(const char *s) {
-			log(LOG_STATUS, s);
+			log(Log::LOG_STATUS, s);
 		}
 
 		virtual void status(int code, ...) {
-			va_list vl; va_start(vl, code); vlog(LOG_STATUS, code, vl); va_end(vl);
+			va_list vl; va_start(vl, code); vlog(Log::LOG_STATUS, code, vl); va_end(vl);
 		}
 
 		virtual void progress(const char *s) {
