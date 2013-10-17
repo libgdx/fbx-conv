@@ -83,7 +83,7 @@ namespace modeldata {
 
 	#define ATTRIBUTE_SIZE(idx) (AttributeTypes[idx].size())
 
-	struct Attributes : public json::Serializable {
+	struct Attributes : public json::ConstSerializable {
 		unsigned long value;
 
 		Attributes() : value(0) {}

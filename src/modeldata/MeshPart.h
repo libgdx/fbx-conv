@@ -16,7 +16,7 @@
 
 namespace fbxconv {
 namespace modeldata {
-	struct MeshPart : public json::Serializable {
+	struct MeshPart : public json::ConstSerializable {
 		std::string id;
 		std::vector<unsigned short> indices;
 		unsigned int primitiveType;

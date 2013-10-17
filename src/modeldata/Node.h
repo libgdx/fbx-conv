@@ -12,7 +12,7 @@
 namespace fbxconv {
 namespace modeldata {
 	/** A node is responsable for destroying its parts and children */
-	struct Node : public json::Serializable {
+	struct Node : public json::ConstSerializable {
 		struct {
 			double translation[3];
 			double rotation[4];
