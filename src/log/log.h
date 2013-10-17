@@ -6,6 +6,9 @@
 
 #include <vector>
 #include <stdarg.h>
+#include <string>
+#include <stdio.h>
+#include <iostream>
 #include <cassert>
 #include "codes.h"
 
