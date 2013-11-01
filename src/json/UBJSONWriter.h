@@ -18,7 +18,7 @@ public:
 private:
 	template<typename T> inline void write(const T &v) { write<T, sizeof(T)>(v); }
 	template<typename T, size_t n> void write(const T &v) {
-		stream.write(is_bigendian ? swap(v) : (const char*)&v, n);
+		stream.write(is_bigendian ? (const char*)&v : swap(v), n);
 		/*assert(("Data too big", n<=8));
 		if (!is_bigendian && n > 1) {
 			memcpy(&swapper.data[0], &v, n);
