@@ -25,9 +25,11 @@
 #include <sstream>
 #include <map>
 #include <algorithm>
+#include <functional>
 #include <assert.h>
 #include "util.h"
 #include "matrix3.h"
+#include "../log/log.h"
 
 using namespace fbxconv::modeldata;
 
@@ -97,8 +99,10 @@ namespace readers {
 		const FbxLayerElementArrayTemplate<int> *uvIndices[8];
 		bool uvOnPoint[8];
 
-		FbxMeshInfo(FbxMesh * const &mesh, const bool &usePackedColors, const unsigned int &maxVertexBlendWeightCount, const bool &forceMaxVertexBlendWeightCount, const unsigned int &maxNodePartBoneCount)
-			: mesh(mesh), 
+		fbxconv::log::Log *log;
+
+		FbxMeshInfo(fbxconv::log::Log *log, FbxMesh * const &mesh, const bool &usePackedColors, const unsigned int &maxVertexBlendWeightCount, const bool &forceMaxVertexBlendWeightCount, const unsigned int &maxNodePartBoneCount)
+			: mesh(mesh), log(log),
 			usePackedColors(usePackedColors),
 			maxVertexBlendWeightCount(maxVertexBlendWeightCount), 
 			vertexBlendWeightCount(0),
@@ -345,6 +349,7 @@ namespace readers {
 				}
 			}
 			// Sort the weights, so the most significant weights are first, remove unneeded weights and normalize the remaining
+			bool error = false;
 			for (unsigned int i = 0; i < pointCount; i++) {
 				std::sort(pointBlendWeights[i].begin(), pointBlendWeights[i].end(), std::greater<BlendWeight>());
 				if (pointBlendWeights[i].size() > maxVertexBlendWeightCount)
@@ -352,13 +357,18 @@ namespace readers {
 				float len = 0.f;
 				for (std::vector<BlendWeight>::const_iterator itr = pointBlendWeights[i].begin(); itr != pointBlendWeights[i].end(); ++itr)
 					len += (*itr).weight;
-				for (std::vector<BlendWeight>::iterator itr = pointBlendWeights[i].begin(); itr != pointBlendWeights[i].end(); ++itr)
-					(*itr).weight /= len;
+				if (len == 0.f)
+					error = true;
+				else
+					for (std::vector<BlendWeight>::iterator itr = pointBlendWeights[i].begin(); itr != pointBlendWeights[i].end(); ++itr)
+						(*itr).weight /= len;
 				if (pointBlendWeights[i].size() > vertexBlendWeightCount)
 					vertexBlendWeightCount = (unsigned int)pointBlendWeights[i].size();
 			}
 			if (vertexBlendWeightCount > 0 && forceMaxVertexBlendWeightCount)
 				vertexBlendWeightCount = maxVertexBlendWeightCount;
+			if (error)
+				log->warning(log::wSourceConvertFbxZeroWeights);
 		}
 
 		void fetchMeshPartsAndBones() {
