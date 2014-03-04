@@ -510,7 +510,10 @@ namespace readers {
 				return result;
 
 			FbxSurfacePhong * const &phong = (FbxSurfacePhong *)material;
+
 			set<3>(result->specular, phong->Specular.Get().mData);
+			result->shininess = (float)phong->Shininess.Get();
+
 			addTextures(result->textures, phong->Specular, Material::Texture::Specular);
 			addTextures(result->textures, phong->Reflection, Material::Texture::Reflection);
 			return result;
