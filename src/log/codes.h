@@ -55,6 +55,7 @@ LOG_ADD_CODE(wSourceConvertFbxAdditiveBones)
 LOG_ADD_CODE(wSourceConvertFbxCantTriangulate)
 LOG_ADD_CODE(wSourceConvertFbxExceedsIndices)
 LOG_ADD_CODE(wSourceConvertFbxExceedsBones)
+LOG_ADD_CODE(wSourceConvertFbxZeroWeights)
 LOG_ADD_CODE(eSourceConvert)
 LOG_ADD_CODE(eSourceConvertFbxNoMaterial)
 

@@ -56,6 +56,7 @@ LOG_SET_MSG(wSourceConvertFbxAdditiveBones,		"[%s] Additive bones not supported 
 LOG_SET_MSG(wSourceConvertFbxCantTriangulate,	"[%s] Skipping geometry, because it can't be triangulated")
 LOG_SET_MSG(wSourceConvertFbxExceedsIndices,	"Mesh contains more indices (%d) than the specified maximum (%d)")
 LOG_SET_MSG(wSourceConvertFbxExceedsBones,		"Mesh contains more blendweights per polygon than the specified maximum.")
+LOG_SET_MSG(wSourceConvertFbxZeroWeights,		"Mesh contains vertices with zero bone weights.")
 LOG_SET_MSG(eSourceConvert,						"Error converting source file")
 LOG_SET_MSG(eSourceConvertFbxNoMaterial,		"[%s] Geometry without material")
 

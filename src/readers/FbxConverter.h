@@ -449,7 +449,7 @@ namespace readers {
 					log->info(log::iSourceConvertFbxMeshInfo, getGeometryName(geometry), mesh->GetPolygonCount(), indexCount, mesh->GetControlPointsCount());
 					if (indexCount > settings->maxIndexCount)
 						log->warning(log::wSourceConvertFbxExceedsIndices, indexCount, settings->maxIndexCount);
-					FbxMeshInfo * const info = new FbxMeshInfo(mesh, settings->packColors, settings->maxVertexBonesCount, settings->forceMaxVertexBoneCount, settings->maxNodePartBonesCount);
+					FbxMeshInfo * const info = new FbxMeshInfo(log, mesh, settings->packColors, settings->maxVertexBonesCount, settings->forceMaxVertexBoneCount, settings->maxNodePartBonesCount);
 					meshInfos.push_back(info);
 					fbxMeshMap[geometry] = info;
 					if (info->bonesOverflow)
@@ -553,7 +553,13 @@ namespace readers {
 			static std::vector<Keyframe *> frames;
 			static std::map<FbxNode *, AnimInfo> affectedNodes;
 			affectedNodes.clear();
-			
+
+			FbxTimeSpan animTimeSpan = animStack->GetLocalTimeSpan();
+			float animStart = (float)(animTimeSpan.GetStart().GetMilliSeconds());
+			float animStop = (float)(animTimeSpan.GetStop().GetMilliSeconds());
+			if (animStop <= animStart)
+				animStop = 999999999.0f;
+
 			// Could also use animStack->GetLocalTimeSpan and animStack->BakeLayers, but its not guaranteed to be correct
 			const int layerCount = animStack->GetMemberCount<FbxAnimLayer>();
 			for (int l = 0; l < layerCount; l++) {
@@ -570,7 +576,9 @@ namespace readers {
 						if (node) {
 							FbxString propName = prop.GetName();
 							// Only add translation, scaling or rotation
-							if (propName != node->LclTranslation.GetName() && propName != node->LclScaling.GetName() && propName != node->LclRotation.GetName())
+							if ((!node->LclTranslation.IsValid() || propName != node->LclTranslation.GetName()) && 
+								(!node->LclScaling.IsValid() || propName != node->LclScaling.GetName()) &&
+								(!node->LclRotation.IsValid() || propName != node->LclRotation.GetName()))
 								continue;
 							FbxAnimCurve *curve;
 							AnimInfo ts;
@@ -578,11 +586,11 @@ namespace readers {
 							ts.rotate = propName == node->LclRotation.GetName();
 							ts.scale = propName == node->LclScaling.GetName();
 							if (curve = prop.GetCurve(layer, FBXSDK_CURVENODE_COMPONENT_X))
-								updateAnimTime(curve, ts);
+								updateAnimTime(curve, ts, animStart, animStop);
 							if (curve = prop.GetCurve(layer, FBXSDK_CURVENODE_COMPONENT_Y))
-								updateAnimTime(curve, ts);
+								updateAnimTime(curve, ts, animStart, animStop);
 							if (curve = prop.GetCurve(layer, FBXSDK_CURVENODE_COMPONENT_Z))
-								updateAnimTime(curve, ts);
+								updateAnimTime(curve, ts, animStart, animStop);
 							//if (ts.start < ts.stop)
 								affectedNodes[node] += ts;
 						}
@@ -596,7 +604,7 @@ namespace readers {
 			Animation *animation = new Animation();
 			model->animations.push_back(animation);
 			animation->id = animStack->GetName();
-			animStack->GetScene()->GetEvaluator()->SetContext(animStack);
+			animStack->GetScene()->SetCurrentAnimationStack(animStack);
 
 			// Add the NodeAnimations to the Animation
 			for (std::map<FbxNode *, AnimInfo>::const_iterator itr = affectedNodes.begin(); itr != affectedNodes.end(); itr++) {
@@ -610,13 +618,14 @@ namespace readers {
 				nodeAnim->rotate = (*itr).second.rotate;
 				nodeAnim->scale = (*itr).second.scale;
 				const float stepSize = (*itr).second.framerate <= 0.f ? (*itr).second.stop - (*itr).second.start : 1000.f / (*itr).second.framerate;
+				const float last = (*itr).second.stop + stepSize * 0.5f;
 				FbxTime fbxTime;
 				// Calculate all keyframes upfront
-				for (float time = (*itr).second.start; time <= (*itr).second.stop; time += stepSize) {
+				for (float time = (*itr).second.start; time <= last; time += stepSize) {
 					time = std::min(time, (*itr).second.stop);
 					fbxTime.SetMilliSeconds((FbxLongLong)time);
 					Keyframe *kf = new Keyframe();
-					kf->time = time;
+					kf->time = (time - animStart);
 					FbxAMatrix *m = &(*itr).first->EvaluateLocalTransform(fbxTime);
 					FbxVector4 v = m->GetT();
 					kf->translation[0] = (float)v.mData[0];
@@ -642,14 +651,14 @@ namespace readers {
 			}
 		}
 
-		inline void updateAnimTime(FbxAnimCurve *const &curve, AnimInfo &ts) {
+		inline void updateAnimTime(FbxAnimCurve *const &curve, AnimInfo &ts, const float &animStart, const float &animStop) {
 			FbxTimeSpan fts;
 			curve->GetTimeInterval(fts);
 			const FbxTime start = fts.GetStart();
 			const FbxTime stop = fts.GetStop();
-			ts.start = std::min(ts.start, (float)(start.GetMilliSeconds()));
-			ts.stop = std::max(ts.stop, (float)stop.GetMilliSeconds());
-			// Could check the nunber and type of keys (ie curve->KeyGetInterpolation) to lower the framerate
+			ts.start = std::max(animStart, std::min(ts.start, (float)(start.GetMilliSeconds())));
+			ts.stop = std::min(animStop, std::max(ts.stop, (float)stop.GetMilliSeconds()));
+			// Could check the number and type of keys (ie curve->KeyGetInterpolation) to lower the framerate
 			ts.framerate = std::max(ts.framerate, (float)stop.GetFrameRate(FbxTime::eDefaultMode));
 		}
 
