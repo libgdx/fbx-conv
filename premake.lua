@@ -114,6 +114,9 @@ project "fbx-conv"
 			"./libs/libpng/lib/linux/x64",
 			"./libs/zlib/lib/linux/x64",
 		}
+		
+		linkoptions {"-Wl,--no-as-needed"}
+		
 		links {
 			"png",
 			"z",
