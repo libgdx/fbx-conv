@@ -48,7 +48,9 @@ namespace log {
 		const int filter;
 		LogMessages * const &messages;
 
-		Log(LogMessages * const &messages, const int &filter = -1) : messages(messages), filter(filter) {}
+		Log(LogMessages * const &messages, const int &filter = -1) : messages(messages), filter(filter) {
+			fputs("\n", stdout);
+		}
 
 		virtual ~Log() {
 			delete messages;
