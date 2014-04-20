@@ -70,7 +70,7 @@ project "fbx-conv"
 		defines {
 			"NDEBUG",
 		}
-		flags { "Optimize" }
+--		flags { "Optimize" }
 
 	--- VISUAL STUDIO --------------------------------------------------
 	configuration "vs*"
