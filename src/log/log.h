@@ -45,12 +45,10 @@ namespace log {
 		static const int LOG_WARNING	= 0x1 << 4;
 		static const int LOG_ERROR		= 0x1 << 5;
 
-		const int filter;
-		LogMessages * const &messages;
+		int filter;
+		LogMessages * messages;
 
-		Log(LogMessages * const &messages, const int &filter = -1) : messages(messages), filter(filter) {
-			fputs("\n", stdout);
-		}
+		Log(LogMessages * const &messages, const int &filter = -1) : messages(messages), filter(filter) {}
 
 		virtual ~Log() {
 			delete messages;
