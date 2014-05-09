@@ -155,6 +155,13 @@ void Node::serialize(json::BaseJSONWriter &writer) const {
 	writer << json::end;
 }
 
+template<class T, size_t n> void writeAsFloat(json::BaseJSONWriter &writer, const char *k, const T(&v)[n]) {
+	static float tmp[n];
+	for (int i = 0; i < n; ++i)
+		tmp[i] = (float)v[i];
+	writer << k << tmp;
+}
+
 void NodePart::serialize(json::BaseJSONWriter &writer) const {
 	writer << json::obj;
 	writer << "meshpartid" = meshPart->id;
@@ -164,9 +171,9 @@ void NodePart::serialize(json::BaseJSONWriter &writer) const {
 		for (std::vector<std::pair<Node *, FbxAMatrix> >::const_iterator it = bones.begin(); it != bones.end(); ++it) {
 			writer << json::obj;
 			writer << "node" = it->first->id;
-			writer << "translation" = it->second.GetT().mData;
-			writer << "rotation" = it->second.GetQ().mData;
-			writer << "scale" = it->second.GetS().mData;
+			writeAsFloat(writer, "translation", it->second.GetT().mData);
+			writeAsFloat(writer, "rotation", it->second.GetQ().mData);
+			writeAsFloat(writer, "scale", it->second.GetS().mData);
 			writer << json::end;
 		}
 		writer.end();

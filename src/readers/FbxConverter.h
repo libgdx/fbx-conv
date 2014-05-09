@@ -704,19 +704,19 @@ namespace readers {
 			}
 		}
 
-		inline bool cmp(const double &v1, const double &v2, const double &epsilon = 0.000001) {
+		inline bool cmp(const float &v1, const float &v2, const float &epsilon = 0.000001) {
 			const double d = v1 - v2;
 			return ((d < 0.f) ? -d : d) < epsilon;
 		}
 
-		inline bool cmp(const double *v1, const double *v2, const unsigned int &count) {
+		inline bool cmp(const float *v1, const float *v2, const unsigned int &count) {
 			for (unsigned int i = 0; i < count; i++)
 				if (!cmp(v1[i],v2[i]))
 					return false;
 			return true;
 		}
 
-		inline bool isLerp(const double *v1, const double &t1, const double *v2, const double &t2, const double *v3, const double &t3, const int size) {
+		inline bool isLerp(const float *v1, const float &t1, const float *v2, const float &t2, const float *v3, const float &t3, const int size) {
 			const double d = (t2 - t1) / (t3 - t1);
 			for (int i = 0; i < size; i++)
 				if (!cmp(v2[i], v1[i] + d * (v3[i] - v1[i])))

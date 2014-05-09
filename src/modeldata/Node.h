@@ -30,9 +30,9 @@ namespace modeldata {
 	/** A node is responsable for destroying its parts and children */
 	struct Node : public json::ConstSerializable {
 		struct {
-			double translation[3];
-			double rotation[4];
-			double scale[3];
+			float translation[3];
+			float rotation[4];
+			float scale[3];
 		} transform;
 		std::string id;
 		std::vector<NodePart *> parts;
