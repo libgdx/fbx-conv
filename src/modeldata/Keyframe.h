@@ -26,10 +26,10 @@ namespace fbxconv {
 namespace modeldata {
 
 	struct Keyframe : public json::ConstSerializable {
-		double time;
-		double translation[3];
-		double rotation[4];
-		double scale[3];
+		float time;
+		float translation[3];
+		float rotation[4];
+		float scale[3];
 		bool hasTranslation;
 		bool hasRotation;
 		bool hasScale;
