@@ -302,8 +302,14 @@ namespace readers {
 			for (int i = 0; i < childCount; i++)
 				addMesh(model, node->GetChild(i));
 
-			if (fbxMeshMap.find(node->GetGeometry()) != fbxMeshMap.end())
-				addMesh(model, fbxMeshMap[node->GetGeometry()], node);
+			FbxGeometry *geometry = node->GetGeometry();
+			if (geometry) {
+				if (fbxMeshMap.find(geometry) != fbxMeshMap.end())
+					addMesh(model, fbxMeshMap[geometry], node);
+				else
+					log->debug("Geomertry(%X) of %s not found in fbxMeshMap[size=%d]", (unsigned long)(geometry), node->GetName(), fbxMeshMap.size());
+			}
+			
 		}
 
 		void addMesh(Model * const &model, FbxMeshInfo * const &meshInfo, FbxNode * const &node) {
@@ -429,36 +435,34 @@ namespace readers {
 			int cnt = scene->GetGeometryCount();
 			FbxGeometryConverter converter(manager);
 			for (int i = 0; i < cnt; i++) {
-				FbxGeometry * const geometry = scene->GetGeometry(i);
+				FbxGeometry * geometry = scene->GetGeometry(i);
 				if (fbxMeshMap.find(geometry) == fbxMeshMap.end()) {
 					FbxMesh *mesh;
 					if (geometry->Is<FbxMesh>() && ((FbxMesh*)geometry)->IsTriangleMesh())
 						mesh = (FbxMesh*)geometry;
 					else {
 						log->status(log::sSourceConvertFbxTriangulate, getGeometryName(geometry), geometry->GetClassId().GetName());
-						//printf("Triangulating %s geometry\n", geometry->GetClassId().GetName());
-						FbxNodeAttribute * const attr = converter.Triangulate(geometry, false);
+						FbxNodeAttribute * const attr = converter.Triangulate(geometry, true);
 						if (attr->Is<FbxMesh>())
-							mesh = (FbxMesh*)attr;
+							geometry = mesh = (FbxMesh*)attr;
 						else {
 							log->warning(log::wSourceConvertFbxCantTriangulate, geometry->GetClassId().GetName());
 							continue;
 						}
 					}
 					int indexCount = (mesh->GetPolygonCount() * 3);
-					log->info(log::iSourceConvertFbxMeshInfo, getGeometryName(geometry), mesh->GetPolygonCount(), indexCount, mesh->GetControlPointsCount());
+					log->verbose(log::iSourceConvertFbxMeshInfo, getGeometryName(geometry), mesh->GetPolygonCount(), indexCount, mesh->GetControlPointsCount());
 					if (indexCount > settings->maxIndexCount)
 						log->warning(log::wSourceConvertFbxExceedsIndices, indexCount, settings->maxIndexCount);
+					if (mesh->GetElementMaterialCount() <= 0) {
+						log->error(log::wSourceConvertFbxNoMaterial, getGeometryName(geometry));
+						continue;
+					}
 					FbxMeshInfo * const info = new FbxMeshInfo(log, mesh, settings->packColors, settings->maxVertexBonesCount, settings->forceMaxVertexBoneCount, settings->maxNodePartBonesCount);
 					meshInfos.push_back(info);
 					fbxMeshMap[geometry] = info;
 					if (info->bonesOverflow)
 						log->warning(log::wSourceConvertFbxExceedsBones);
-					if (info->elementMaterialCount <= 0) {
-						log->error(log::eSourceConvertFbxNoMaterial, getGeometryName(geometry));
-						scene = 0;
-						break;
-					}
 				}
 			}
 		}
@@ -478,41 +482,52 @@ namespace readers {
 			result->id = material->GetName();
 
 			if ((!material->Is<FbxSurfaceLambert>()) || GetImplementation(material, FBXSDK_IMPLEMENTATION_HLSL) || GetImplementation(material, FBXSDK_IMPLEMENTATION_CGFX)) {
-				printf("Skipping unsupported material: %s, replacing it by a red diffuse color, because:\n", result->id.c_str());
 				if (!material->Is<FbxSurfaceLambert>())
-					printf("- Material must extend FbxSurfaceLambert\n");
+					log->warning(log::wSourceConvertFbxMaterialUnknown, result->id.c_str());
 				if (GetImplementation(material, FBXSDK_IMPLEMENTATION_HLSL))
-					printf("- HLSL shading implementation not supported");
+					log->warning(log::wSourceConvertFbxMaterialHLSL, result->id.c_str());
 				if (GetImplementation(material, FBXSDK_IMPLEMENTATION_CGFX))
-					printf("- CgFX shading implementation not supported");
-				result->diffuse[0] = 1.f;
-				result->diffuse[1] = 0.f;
-				result->diffuse[2] = 0.f;
+					log->warning(log::wSourceConvertFbxMaterialCgFX, result->id.c_str());
+				result->diffuse.set(1.f, 0.f, 0.f);
 				return result;
 			}
 
 			FbxSurfaceLambert * const &lambert = (FbxSurfaceLambert *)material;
-			set<3>(result->ambient, lambert->Ambient.Get().mData);
-			set<3>(result->diffuse, lambert->Diffuse.Get().mData);
-			set<3>(result->emissive, lambert->Emissive.Get().mData);
+			if (lambert->Ambient.IsValid())
+				result->ambient.set(lambert->Ambient.Get().mData);
+			if (lambert->Diffuse.IsValid())
+				result->diffuse.set(lambert->Diffuse.Get().mData);
+			if (lambert->Emissive.IsValid())
+				result->emissive.set(lambert->Emissive.Get().mData);
 
 			addTextures(result->textures, lambert->Ambient, Material::Texture::Ambient);
 			addTextures(result->textures, lambert->Diffuse, Material::Texture::Diffuse);
 			addTextures(result->textures, lambert->Emissive, Material::Texture::Emissive);
 			addTextures(result->textures, lambert->Bump, Material::Texture::Bump);
 			addTextures(result->textures, lambert->NormalMap, Material::Texture::Normal);
-			FbxDouble factor = lambert->TransparencyFactor.Get();
-			FbxDouble3 color = lambert->TransparentColor.Get();
-			FbxDouble trans = (color[0] * factor + color[1] * factor + color[2] * factor) / 3.0;
-			result->opacity = 1.f - (float)trans;
+
+			if (lambert->TransparencyFactor.IsValid() && lambert->TransparentColor.IsValid()) {
+				FbxDouble factor = 1.f - lambert->TransparencyFactor.Get();
+				FbxDouble3 color = lambert->TransparentColor.Get();
+				FbxDouble trans = (color[0] * factor + color[1] * factor + color[2] * factor) / 3.0;
+				result->opacity.set((float)trans);
+			}
+			else if (lambert->TransparencyFactor.IsValid())
+				result->opacity.set(1.f - lambert->TransparencyFactor.Get());
+			else if (lambert->TransparentColor.IsValid()) {
+				FbxDouble3 color = lambert->TransparentColor.Get();
+				result->opacity.set((color[0] + color[1] + color[2]) / 3.0);
+			}
 
 			if (!material->Is<FbxSurfacePhong>())
 				return result;
 
 			FbxSurfacePhong * const &phong = (FbxSurfacePhong *)material;
 
-			set<3>(result->specular, phong->Specular.Get().mData);
-			result->shininess = (float)phong->Shininess.Get();
+			if (phong->Specular.IsValid())
+				result->specular.set(phong->Specular.Get().mData);
+			if (phong->Shininess.IsValid())
+				result->shininess.set((float)phong->Shininess.Get());
 
 			addTextures(result->textures, phong->Specular, Material::Texture::Specular);
 			addTextures(result->textures, phong->Reflection, Material::Texture::Reflection);

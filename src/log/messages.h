@@ -57,8 +57,11 @@ LOG_SET_MSG(wSourceConvertFbxCantTriangulate,	"[%s] Skipping geometry, because i
 LOG_SET_MSG(wSourceConvertFbxExceedsIndices,	"Mesh contains more indices (%d) than the specified maximum (%d)")
 LOG_SET_MSG(wSourceConvertFbxExceedsBones,		"Mesh contains more blendweights per polygon than the specified maximum.")
 LOG_SET_MSG(wSourceConvertFbxZeroWeights,		"Mesh contains vertices with zero bone weights.")
+LOG_SET_MSG(wSourceConvertFbxNoMaterial,		"[%s] Skipping geometry without material")
+LOG_SET_MSG(wSourceConvertFbxMaterialUnknown,	"[%s] Material doesn\'t extend FbxSurfaceLambert, replaced with RED diffuse")
+LOG_SET_MSG(wSourceConvertFbxMaterialHLSL,		"[%s] Material HLSL shading not supported, replaced with RED diffuse")
+LOG_SET_MSG(wSourceConvertFbxMaterialCgFX,		"[%s] Material CgFX shading not supported, replaced with RED diffuse")
 LOG_SET_MSG(eSourceConvert,						"Error converting source file")
-LOG_SET_MSG(eSourceConvertFbxNoMaterial,		"[%s] Geometry without material")
 
 LOG_SET_MSG(sSourceClose,						"Closing source file")
 LOG_SET_MSG(eSourceClose,						"Error closing source file")
@@ -67,6 +70,14 @@ LOG_SET_MSG(sExportToG3DB,						"Exporting to G3DB file: %s")
 LOG_SET_MSG(sExportToG3DJ,						"Exporting to G3DJ file: %s")
 LOG_SET_MSG(sExportClose,						"Closing exported file")
 LOG_SET_MSG(eExportFiletypeUnknown,				"Unknown target filetype")
+
+LOG_SET_MSG(iModelInfoNull,						"Model is null")
+LOG_SET_MSG(iModelInfoStart,					"Listing model information:")
+LOG_SET_MSG(iModelInfoID,						"ID        : %s")
+LOG_SET_MSG(iModelInfoVersion,					"Version   : Hi=%d, Lo=%d")
+LOG_SET_MSG(iModelInfoMeshesSummary,			"Meshes    : %d (%d vertices, %d parts, %d indices)")
+LOG_SET_MSG(iModelInfoNodesSummary,				"Nodes     : %d root, %d total, %d parts")
+LOG_SET_MSG(iModelInfoMaterialsSummary,			"Materials : %d (%d textures)")
 
 LOG_END_MESSAGES()
 

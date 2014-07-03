@@ -83,6 +83,20 @@ namespace modeldata {
 			return false;
 		}
 
+		size_t getTotalNodeCount() const {
+			size_t result = children.size();
+			for (std::vector<Node*>::const_iterator it = children.begin(); it != children.end(); ++it)
+				result += (*it)->getTotalNodeCount();
+			return result;
+		}
+
+		size_t getTotalNodePartCount() const {
+			size_t result = parts.size();
+			for (std::vector<Node*>::const_iterator it = children.begin(); it != children.end(); ++it)
+				result += (*it)->getTotalNodePartCount();
+			return result;
+		}
+
 		virtual void serialize(json::BaseJSONWriter &writer) const;
 	};
 }

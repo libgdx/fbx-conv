@@ -56,8 +56,11 @@ LOG_ADD_CODE(wSourceConvertFbxCantTriangulate)
 LOG_ADD_CODE(wSourceConvertFbxExceedsIndices)
 LOG_ADD_CODE(wSourceConvertFbxExceedsBones)
 LOG_ADD_CODE(wSourceConvertFbxZeroWeights)
+LOG_ADD_CODE(wSourceConvertFbxNoMaterial)
+LOG_ADD_CODE(wSourceConvertFbxMaterialUnknown)
+LOG_ADD_CODE(wSourceConvertFbxMaterialHLSL)
+LOG_ADD_CODE(wSourceConvertFbxMaterialCgFX)
 LOG_ADD_CODE(eSourceConvert)
-LOG_ADD_CODE(eSourceConvertFbxNoMaterial)
 
 LOG_ADD_CODE(sSourceClose)
 LOG_ADD_CODE(eSourceClose)
@@ -66,6 +69,14 @@ LOG_ADD_CODE(sExportToG3DB)
 LOG_ADD_CODE(sExportToG3DJ)
 LOG_ADD_CODE(sExportClose)
 LOG_ADD_CODE(eExportFiletypeUnknown)
+
+LOG_ADD_CODE(iModelInfoNull)
+LOG_ADD_CODE(iModelInfoStart)
+LOG_ADD_CODE(iModelInfoID)
+LOG_ADD_CODE(iModelInfoVersion)
+LOG_ADD_CODE(iModelInfoMeshesSummary)
+LOG_ADD_CODE(iModelInfoNodesSummary)
+LOG_ADD_CODE(iModelInfoMaterialsSummary)
 
 } }
 

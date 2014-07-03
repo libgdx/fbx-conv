@@ -33,7 +33,7 @@ namespace modeldata {
 		Attributes attributes;
 		/** the size (in number of floats) of each vertex */
 		unsigned int vertexSize;
-		/** the number of vertices this mesh contains */
+		/** the vertices that this mesh contains */
 		std::vector<float> vertices;
 		/** hash lookup table for faster duplicate vertex checking */
 		std::vector<unsigned int> hashes;

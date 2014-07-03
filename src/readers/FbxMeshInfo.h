@@ -130,7 +130,8 @@ namespace readers {
 			if (skin) {
 				fetchVertexBlendWeights();
 				fetchMeshPartsAndBones();
-			} else
+			}
+			else
 				fetchMeshParts();
 
 			fetchAttributes();

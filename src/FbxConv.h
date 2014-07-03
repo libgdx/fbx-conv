@@ -71,6 +71,16 @@ class FbxConv {
 		bool execute(int const &argc, const char** const &argv) {
 			Settings settings;
 			FbxConvCommand command(log, argc, argv, &settings);
+#ifdef DEBUG
+			log->filter |= log::Log::LOG_DEBUG;
+#else
+			log->filter &= ~log::Log::LOG_DEBUG;
+#endif
+			if (settings.verbose)
+				log->filter |= log::Log::LOG_VERBOSE;
+			else
+				log->filter &= ~log::Log::LOG_VERBOSE;
+
 
 			if (command.error != log::iNoError)
 				command.printCommand();
@@ -85,6 +95,8 @@ class FbxConv {
 			bool result = false;
 			modeldata::Model *model = new modeldata::Model();
 			if (load(settings, model)) {
+				if (settings->verbose)
+					info(model);
 				if (save(settings, model))
 					result = true;
 			}
@@ -159,6 +171,19 @@ class FbxConv {
 			myfile.close();
 
 			return result;
+		}
+
+		void info(modeldata::Model *model) {
+			if (!model)
+				log->verbose(log::iModelInfoNull);
+			else {
+				log->verbose(log::iModelInfoStart);
+				log->verbose(log::iModelInfoID, model->id.c_str());
+				log->verbose(log::iModelInfoVersion, model->version[0], model->version[1]);
+				log->verbose(log::iModelInfoMeshesSummary, model->meshes.size(), model->getTotalVertexCount(), model->getMeshpartCount(), model->getTotalIndexCount());
+				log->verbose(log::iModelInfoNodesSummary, model->nodes.size(), model->getTotalNodeCount(), model->getTotalNodePartCount());
+				log->verbose(log::iModelInfoMaterialsSummary, model->materials.size(), model->getTotalTextureCount());
+			}
 		}
 	};
 }

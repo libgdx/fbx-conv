@@ -27,6 +27,48 @@
 
 namespace fbxconv {
 namespace modeldata {
+	template<typename T, size_t n=1>
+	struct OptionalValue {
+		bool valid;
+		T value[n];
+		OptionalValue() : valid(false) {
+			for (int i = 0; i < n; ++i)
+				value[i] = (T)0;
+		}
+		inline void unset() {
+			valid = false;
+		}
+		void set(T v0, ...) {
+			va_list vl;
+			value[0] = v0;
+			va_start(vl, v0);
+			for (int i = 1; i < n; i++)
+				value[i] = va_arg(vl, T);
+			va_end(vl);
+			valid = true;
+		}
+		template <typename S, size_t m> void set(const S (&v)[m]) {
+			const int c = m > n ? n : m;
+			for (int i = 0; i < c; i++)
+				value[i] = (T)v[i];
+			valid = true;
+		}
+	};
+
+	template<typename T>
+	struct OptionalValue<T, 1> {
+		bool valid;
+		T value;
+		OptionalValue() : valid(false), value((T)0) {}
+		inline void unset() {
+			valid = false;
+		}
+		inline void set(T v) {
+			valid = true;
+			value = v;
+		}
+	};
+
 	struct Material : public json::ConstSerializable {
 		struct Texture : public json::ConstSerializable {
 			enum Usage {
@@ -61,33 +103,18 @@ namespace modeldata {
 
 		FbxSurfaceMaterial *source;
 		std::string id;
-		float diffuse[3];
-		float ambient[3];
-		float emissive[3];
-		float specular[3];
-		float shininess;
-		float opacity;
+		OptionalValue<float, 3> diffuse;
+		OptionalValue<float, 3> ambient;
+		OptionalValue<float, 3> emissive;
+		OptionalValue<float, 3> specular;
+		OptionalValue<float> shininess;
+		OptionalValue<float> opacity;
 		std::vector<Texture *> textures;
 		
-		Material() : source(0) {
-			memset(diffuse,  0, sizeof(diffuse));
-			memset(ambient,  0, sizeof(ambient));
-			memset(emissive, 0, sizeof(emissive));
-			memset(specular, 0, sizeof(specular));
-			shininess = 0.f;
-			opacity = 1.f;
-		}
+		Material() : source(0), diffuse(), ambient(), emissive(), specular(), shininess(), opacity() { }
 
-		Material(const Material &copyFrom) {
-			id = copyFrom.id;
-			memcpy(diffuse,  copyFrom.diffuse,  sizeof(diffuse));
-			memcpy(ambient,  copyFrom.ambient,  sizeof(diffuse));
-			memcpy(emissive, copyFrom.emissive, sizeof(diffuse));
-			memcpy(specular, copyFrom.specular, sizeof(diffuse));
-			shininess = copyFrom.shininess;
-			opacity = copyFrom.opacity;
-			source = copyFrom.source;
-		}
+		Material(const Material &rhs) : source(rhs.source), id(rhs.id), diffuse(rhs.diffuse),
+			ambient(rhs.ambient), emissive(rhs.emissive), specular(rhs.specular), shininess(rhs.shininess), opacity(rhs.opacity)  {	}
 
 		~Material() {
 			for (std::vector<Texture *>::iterator itr = textures.begin(); itr != textures.end(); ++itr)

@@ -95,6 +95,48 @@ namespace modeldata {
 			return NULL;
 		}
 
+		size_t getTotalNodeCount() const {
+			size_t result = nodes.size();
+			for (std::vector<Node*>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
+				result += (*it)->getTotalNodeCount();
+			return result;
+		}
+
+		size_t getTotalNodePartCount() const {
+			size_t result = 0;
+			for (std::vector<Node*>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
+				result += (*it)->getTotalNodePartCount();
+			return result;
+		}
+
+		size_t getMeshpartCount() const {
+			size_t result = 0;
+			for (std::vector<Mesh *>::const_iterator it = meshes.begin(); it != meshes.end(); ++it)
+				result += (*it)->parts.size();
+			return result;
+		}
+
+		size_t getTotalVertexCount() const {
+			size_t result = 0;
+			for (std::vector<Mesh *>::const_iterator it = meshes.begin(); it != meshes.end(); ++it)
+				result += (*it)->vertices.size();
+			return result;
+		}
+
+		size_t getTotalIndexCount() const {
+			size_t result = 0;
+			for (std::vector<Mesh *>::const_iterator it = meshes.begin(); it != meshes.end(); ++it)
+				result += (*it)->indexCount();
+			return result;
+		}
+
+		size_t getTotalTextureCount() const {
+			size_t result = 0;
+			for (std::vector<Material*>::const_iterator it = materials.begin(); it != materials.end(); ++it)
+				result += (*it)->textures.size();
+			return result;
+		}
+
 		virtual void serialize(json::BaseJSONWriter &writer) const;
 	};
 }
