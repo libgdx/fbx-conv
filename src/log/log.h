@@ -184,6 +184,7 @@ namespace log {
 	const int Log::LOG_STATUS;
 	const int Log::LOG_PROGRESS;
 	const int Log::LOG_DEBUG;
+	const int Log::LOG_VERBOSE;
 	const int Log::LOG_INFO;
 	const int Log::LOG_WARNING;
 	const int Log::LOG_ERROR;
