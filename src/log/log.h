@@ -47,7 +47,7 @@ namespace log {
 		static const int LOG_ERROR		= 0x1 << 6;
 
 		int filter;
-		LogMessages * const &messages;
+		LogMessages * messages;
 
 		Log(LogMessages * const &messages, const int &filter = -1) : messages(messages), filter(filter) {}
 
