@@ -259,7 +259,7 @@ private:
 	template<class T> inline void values(const std::vector<T> &values, const unsigned int &lineSize = 0) {
 		const size_t count = values.size();
 		const size_t bytes = count * sizeof(T);
-		if (openData(values[0], count)) {
+		if (count > 0 && openData(values[0], count)) {
 			for (typename std::vector<T>::const_iterator it = values.begin(); it != values.end(); ++it)
 				dataItem(&(*it), 1);
 			writeCloseData();

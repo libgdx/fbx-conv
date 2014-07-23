@@ -63,7 +63,7 @@ namespace readers {
 		std::map<FbxGeometry *, FbxMeshInfo *> fbxMeshMap;
 		std::map<FbxSurfaceMaterial *, Material *> materialsMap;
 		std::map<std::string, TextureFileInfo> textureFiles;
-		std::map<FbxMeshInfo *, std::vector<std::vector<MeshPart *> > > meshParts;
+		std::map<FbxMeshInfo *, std::vector<std::vector<MeshPart *> > > meshParts; //[FbxMeshInfo][materialIndex][boneIndex]
 		std::map<const FbxNode *, Node *> nodeMap;
 
 		Settings *settings;
@@ -223,28 +223,31 @@ namespace readers {
 				for (int i = 0; i < matCount && i < parts.size(); i++) {
 					Material *material = materialsMap[node->source->GetMaterial(i)];
 					for (int j = 0; j < parts[i].size(); j++) {
-						NodePart *nodePart = new NodePart();
-						node->parts.push_back(nodePart);
-						nodePart->material = material;
-						nodePart->meshPart = parts[i][j];
-						for (int k = 0; k < nodePart->meshPart->sourceBones.size(); k++) {
-							if (nodeMap.find(nodePart->meshPart->sourceBones[k]->GetLink()) != nodeMap.end()) {
-								std::pair<Node*, FbxAMatrix> p;
-								p.first = nodeMap[nodePart->meshPart->sourceBones[k]->GetLink()];
-								getBindPose(node->source, nodePart->meshPart->sourceBones[k], p.second);
-								nodePart->bones.push_back(p);
-							} else {
-								log->warning(log::wSourceConvertFbxInvalidBone, node->id.c_str(), nodePart->meshPart->sourceBones[k]->GetLink()->GetName());
+						if (parts[i][j]) {
+							NodePart *nodePart = new NodePart();
+							node->parts.push_back(nodePart);
+							nodePart->material = material;
+							nodePart->meshPart = parts[i][j];
+							for (int k = 0; k < nodePart->meshPart->sourceBones.size(); k++) {
+								if (nodeMap.find(nodePart->meshPart->sourceBones[k]->GetLink()) != nodeMap.end()) {
+									std::pair<Node*, FbxAMatrix> p;
+									p.first = nodeMap[nodePart->meshPart->sourceBones[k]->GetLink()];
+									getBindPose(node->source, nodePart->meshPart->sourceBones[k], p.second);
+									nodePart->bones.push_back(p);
+								}
+								else {
+									log->warning(log::wSourceConvertFbxInvalidBone, node->id.c_str(), nodePart->meshPart->sourceBones[k]->GetLink()->GetName());
+								}
 							}
-						}
 
-						nodePart->uvMapping.resize(meshInfo->uvCount);
-						for (unsigned int k = 0; k < meshInfo->uvCount; k++) {
-							for (std::vector<Material::Texture *>::iterator it = material->textures.begin(); it != material->textures.end(); ++it) {
-								FbxFileTexture *texture = (*it)->source;
-								TextureFileInfo &info = textureFiles[texture->GetFileName()];
-								if (meshInfo->uvMapping[k] == texture->UVSet.Get().Buffer()) {
-									nodePart->uvMapping[k].push_back(*it);
+							nodePart->uvMapping.resize(meshInfo->uvCount);
+							for (unsigned int k = 0; k < meshInfo->uvCount; k++) {
+								for (std::vector<Material::Texture *>::iterator it = material->textures.begin(); it != material->textures.end(); ++it) {
+									FbxFileTexture *texture = (*it)->source;
+									TextureFileInfo &info = textureFiles[texture->GetFileName()];
+									if (meshInfo->uvMapping[k] == texture->UVSet.Get().Buffer()) {
+										nodePart->uvMapping[k].push_back(*it);
+									}
 								}
 							}
 						}
@@ -326,16 +329,12 @@ namespace readers {
 
 			std::vector<std::vector<MeshPart *> > &parts = meshParts[meshInfo];
 			parts.resize(meshInfo->meshPartCount);
-			int idx = 0;
 			for (int i = 0; i < meshInfo->meshPartCount; i++) {
 				const int n = meshInfo->partBones[i].size();
 				const int m = n == 0 ? 1 : n;
 				parts[i].resize(m);
 				for (int j = 0; j < m; j++) {
-					std::stringstream ss;
-					ss << meshInfo->id.c_str() <<  "_part" << (++idx);
 					MeshPart *part = new MeshPart();
-					part->id = ss.str();
 					part->primitiveType = PRIMITIVETYPE_TRIANGLES;
 					parts[i][j] = part;
 					mesh->parts.push_back(part);
@@ -350,7 +349,7 @@ namespace readers {
 			for (unsigned int poly = 0; poly < meshInfo->polyCount; poly++) {
 				unsigned int ps = meshInfo->mesh->GetPolygonSize(poly);
 				MeshPart * const &part = parts[meshInfo->polyPartMap[poly]][meshInfo->polyPartBonesMap[poly]];
-				Material * const &material = materialsMap[node->GetMaterial(meshInfo->polyPartMap[poly])];
+				//Material * const &material = materialsMap[node->GetMaterial(meshInfo->polyPartMap[poly])];
 
 				for (unsigned int i = 0; i < ps; i++) {
 					const unsigned int v = meshInfo->mesh->GetPolygonVertex(poly, i);
@@ -359,6 +358,25 @@ namespace readers {
 					pidx++;
 				}
 			}
+
+			int idx = 0;
+			for (int i = parts.size() - 1; i >= 0; --i) {
+				for (int j = parts[i].size() - 1; j >= 0; --j) {
+					MeshPart *part = parts[i][j];
+					if (!part->indices.size()) {
+						parts[i][j] = 0;
+						mesh->parts.erase(std::remove(mesh->parts.begin(), mesh->parts.end(), part), mesh->parts.end());
+						log->warning(log::wSourceConvertFbxEmptyMeshpart, node->GetName(), node->GetMaterial(i)->GetName());
+						delete part;
+					}
+					else {
+						std::stringstream ss;
+						ss << meshInfo->id.c_str() << "_part" << (++idx);
+						part->id = ss.str();
+					}
+				}
+			}
+
 			delete[] vertex;
 		}
 

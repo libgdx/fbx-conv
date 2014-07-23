@@ -59,6 +59,7 @@ LOG_SET_MSG(wSourceConvertFbxExceedsBones,		"Mesh contains more blendweights per
 LOG_SET_MSG(wSourceConvertFbxZeroWeights,		"Mesh contains vertices with zero bone weights.")
 LOG_SET_MSG(wSourceConvertFbxDuplicateMesh,		"[%s] Skipping geometry with duplicate mesh")
 LOG_SET_MSG(wSourceConvertFbxNoMaterial,		"[%s] Skipping geometry without material")
+LOG_SET_MSG(wSourceConvertFbxEmptyMeshpart,		"[%s] Skipping empty node part, material: '%s'")
 LOG_SET_MSG(wSourceConvertFbxMaterialUnknown,	"[%s] Material doesn\'t extend FbxSurfaceLambert, replaced with RED diffuse")
 LOG_SET_MSG(wSourceConvertFbxMaterialHLSL,		"[%s] Material HLSL shading not supported, replaced with RED diffuse")
 LOG_SET_MSG(wSourceConvertFbxMaterialCgFX,		"[%s] Material CgFX shading not supported, replaced with RED diffuse")
