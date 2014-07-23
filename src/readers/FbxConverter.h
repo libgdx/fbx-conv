@@ -307,7 +307,7 @@ namespace readers {
 				if (fbxMeshMap.find(geometry) != fbxMeshMap.end())
 					addMesh(model, fbxMeshMap[geometry], node);
 				else
-					log->debug("Geomertry(%X) of %s not found in fbxMeshMap[size=%d]", (unsigned long)(geometry), node->GetName(), fbxMeshMap.size());
+					log->debug("Geometry(%X) of %s not found in fbxMeshMap[size=%d]", (unsigned long)(geometry), node->GetName(), fbxMeshMap.size());
 			}
 			
 		}
@@ -434,35 +434,38 @@ namespace readers {
 		void prefetchMeshes() {
 			int cnt = scene->GetGeometryCount();
 			FbxGeometryConverter converter(manager);
-			for (int i = 0; i < cnt; i++) {
+			for (int i = 0; i < scene->GetGeometryCount(); ++i) {
+				FbxGeometry * geometry = scene->GetGeometry(i);
+				if (!geometry->Is<FbxMesh>() || !((FbxMesh*)geometry)->IsTriangleMesh()) {
+					log->status(log::sSourceConvertFbxTriangulate, getGeometryName(geometry), geometry->GetClassId().GetName());
+					FbxNodeAttribute * const attr = converter.Triangulate(geometry, true);
+				}
+			}
+			cnt = scene->GetGeometryCount();
+			for (int i = 0; i < cnt; ++i) {
 				FbxGeometry * geometry = scene->GetGeometry(i);
 				if (fbxMeshMap.find(geometry) == fbxMeshMap.end()) {
-					FbxMesh *mesh;
-					if (geometry->Is<FbxMesh>() && ((FbxMesh*)geometry)->IsTriangleMesh())
-						mesh = (FbxMesh*)geometry;
-					else {
-						log->status(log::sSourceConvertFbxTriangulate, getGeometryName(geometry), geometry->GetClassId().GetName());
-						FbxNodeAttribute * const attr = converter.Triangulate(geometry, true);
-						if (attr->Is<FbxMesh>())
-							geometry = mesh = (FbxMesh*)attr;
-						else {
-							log->warning(log::wSourceConvertFbxCantTriangulate, geometry->GetClassId().GetName());
-							continue;
-						}
+					if (!geometry->Is<FbxMesh>()) {
+						log->warning(log::wSourceConvertFbxCantTriangulate, geometry->GetClassId().GetName());
+						continue;
 					}
+					FbxMesh *mesh = (FbxMesh*)geometry;
 					int indexCount = (mesh->GetPolygonCount() * 3);
-					log->verbose(log::iSourceConvertFbxMeshInfo, getGeometryName(geometry), mesh->GetPolygonCount(), indexCount, mesh->GetControlPointsCount());
+					log->verbose(log::iSourceConvertFbxMeshInfo, getGeometryName(mesh), mesh->GetPolygonCount(), indexCount, mesh->GetControlPointsCount());
 					if (indexCount > settings->maxIndexCount)
 						log->warning(log::wSourceConvertFbxExceedsIndices, indexCount, settings->maxIndexCount);
 					if (mesh->GetElementMaterialCount() <= 0) {
-						log->error(log::wSourceConvertFbxNoMaterial, getGeometryName(geometry));
+						log->error(log::wSourceConvertFbxNoMaterial, getGeometryName(mesh));
 						continue;
 					}
 					FbxMeshInfo * const info = new FbxMeshInfo(log, mesh, settings->packColors, settings->maxVertexBonesCount, settings->forceMaxVertexBoneCount, settings->maxNodePartBonesCount);
 					meshInfos.push_back(info);
-					fbxMeshMap[geometry] = info;
+					fbxMeshMap[mesh] = info;
 					if (info->bonesOverflow)
 						log->warning(log::wSourceConvertFbxExceedsBones);
+				}
+				else {
+					log->warning(log::wSourceConvertFbxDuplicateMesh, getGeometryName(geometry));
 				}
 			}
 		}

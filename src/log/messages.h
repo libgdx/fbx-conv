@@ -57,6 +57,7 @@ LOG_SET_MSG(wSourceConvertFbxCantTriangulate,	"[%s] Skipping geometry, because i
 LOG_SET_MSG(wSourceConvertFbxExceedsIndices,	"Mesh contains more indices (%d) than the specified maximum (%d)")
 LOG_SET_MSG(wSourceConvertFbxExceedsBones,		"Mesh contains more blendweights per polygon than the specified maximum.")
 LOG_SET_MSG(wSourceConvertFbxZeroWeights,		"Mesh contains vertices with zero bone weights.")
+LOG_SET_MSG(wSourceConvertFbxDuplicateMesh,		"[%s] Skipping geometry with duplicate mesh")
 LOG_SET_MSG(wSourceConvertFbxNoMaterial,		"[%s] Skipping geometry without material")
 LOG_SET_MSG(wSourceConvertFbxMaterialUnknown,	"[%s] Material doesn\'t extend FbxSurfaceLambert, replaced with RED diffuse")
 LOG_SET_MSG(wSourceConvertFbxMaterialHLSL,		"[%s] Material HLSL shading not supported, replaced with RED diffuse")
