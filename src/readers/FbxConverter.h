@@ -450,16 +450,22 @@ namespace readers {
 		}
 
 		void prefetchMeshes() {
-			int cnt = scene->GetGeometryCount();
-			FbxGeometryConverter converter(manager);
-			for (int i = 0; i < scene->GetGeometryCount(); ++i) {
-				FbxGeometry * geometry = scene->GetGeometry(i);
-				if (!geometry->Is<FbxMesh>() || !((FbxMesh*)geometry)->IsTriangleMesh()) {
-					log->status(log::sSourceConvertFbxTriangulate, getGeometryName(geometry), geometry->GetClassId().GetName());
-					FbxNodeAttribute * const attr = converter.Triangulate(geometry, true);
+			{
+				int cnt = scene->GetGeometryCount();
+				FbxGeometryConverter converter(manager);
+				std::vector<FbxGeometry *> triangulate;
+				for (int i = 0; i < scene->GetGeometryCount(); ++i) {
+					FbxGeometry * geometry = scene->GetGeometry(i);
+					if (!geometry->Is<FbxMesh>() || !((FbxMesh*)geometry)->IsTriangleMesh())
+						triangulate.push_back(geometry);
+				}
+				for (std::vector<FbxGeometry *>::iterator it = triangulate.begin(); it != triangulate.end(); ++it)
+				{
+					log->status(log::sSourceConvertFbxTriangulate, getGeometryName(*it), (*it)->GetClassId().GetName());
+					FbxNodeAttribute * const attr = converter.Triangulate(*it, true);
 				}
 			}
-			cnt = scene->GetGeometryCount();
+			int cnt = scene->GetGeometryCount();
 			for (int i = 0; i < cnt; ++i) {
 				FbxGeometry * geometry = scene->GetGeometry(i);
 				if (fbxMeshMap.find(geometry) == fbxMeshMap.end()) {
