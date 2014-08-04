@@ -13,6 +13,25 @@ back-port any bug fixes or improvements.
 
 Hangout notes https://docs.google.com/document/d/1nz-RexbymNtA4pW1B5tXays0tjByBvO8BJSKrWeU69g/edit#
 
+Command-line Usage
+====================
+*   Windows - `fbx-conv-win32.exe [options] <input> [<output>]`
+*   Linux - `fbx-conv-lin64 [options] <input> [<output>]`
+*   Mac - `fbx-conv-mac [options] <input> [<output>]`
+
+###Options/flags
+*   **`-?`**				-Display help information.
+*   **`-o <type>`**			-Set the type of the output file to <type>
+*   **`-f`**				-Flip the V texture coordinates.
+*   **`-p`**				-Pack vertex colors to one float.
+*   **`-m <size>`**			-The maximum amount of vertices or indices a mesh may contain (default: 32k)
+*   **`-b <size>`**			-The maximum amount of bones a nodepart can contain (default: 12)
+*   **`-w <size>`**			-The maximum amount of bone weights per vertex (default: 4)
+*   **`-v`**				-Verbose: print additional progress information
+
+###Example
+`fbx-conv-win32.exe -f -v myModel.fbx convertedModel.g3db`
+
 Precompiled Binaries
 ====================
 You can download the precompiled binaries from http://libgdx.badlogicgames.com/fbx-conv
