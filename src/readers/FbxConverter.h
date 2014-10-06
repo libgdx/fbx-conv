@@ -616,13 +616,14 @@ namespace readers {
 						FbxProperty prop = curveNode->GetDstProperty(o);
 						FbxNode *node = static_cast<FbxNode *>(prop.GetFbxObject());
 						if (node) {
-							FbxString propName = prop.GetName();
+														FbxString propName = prop.GetName();
 							if ( propName == "DeformPercent" )
 							{
 								// When using this propName in model an unhandled exception is launched in sentence node->LclTranslation.GetName()
-								std::cout << "Warning: propName: " << propName << " cannot be processed !" << std::endl;
+								log->warning("Skipping propName '" + propName + "'");
 								continue;
 							}
+
 							// Only add translation, scaling or rotation
 							if ((!node->LclTranslation.IsValid() || propName != node->LclTranslation.GetName()) && 
 								(!node->LclScaling.IsValid() || propName != node->LclScaling.GetName()) &&
