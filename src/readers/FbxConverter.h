@@ -620,7 +620,7 @@ namespace readers {
 							if ( propName == "DeformPercent" )
 							{
 								// When using this propName in model an unhandled exception is launched in sentence node->LclTranslation.GetName()
-								log->warning("Skipping propName '" + propName + "'");
+								log->warning("Skipping propName 'DeformPercent'");
 								continue;
 							}
 
