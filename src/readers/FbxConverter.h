@@ -620,7 +620,7 @@ namespace readers {
 							if ( propName == "DeformPercent" )
 							{
 								// When using this propName in model an unhandled exception is launched in sentence node->LclTranslation.GetName()
-								log->warning("Skipping propName 'DeformPercent'");
+								log->warning(log::wSourceConvertFbxSkipPropname, animStack->GetName(), (const char *)propName);
 								continue;
 							}
 
