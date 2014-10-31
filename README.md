@@ -43,7 +43,7 @@ On Windows you'll need to install VC 2010 Redistributable Package http://www.mic
 On Linux and Mac, we have to link to the dynamic libraries of the FBX SDK (libfbxsdk.so and libfbxsdk.dylib). We recommend copying libfbxsdk.so
 to /usr/lib on Linux. Otherwise you can use LD_LIBRARY_PATH and set it to the directory you put the .so file.
 
-There's also a [GUI wrapper](https://github.com/Reydw/Fbx-Converter-GUI) around it.
+There's also a [Qt GUI wrapper](https://github.com/Reydw/Fbx-Converter-GUI) and [Java GUI](https://github.com/ASneakyFox/libgdx-fbxconv-gui) around it.
 
 Building
 ========
