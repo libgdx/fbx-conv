@@ -201,20 +201,13 @@ void Animation::serialize(json::BaseJSONWriter &writer) const {
 void NodeAnimation::serialize(json::BaseJSONWriter &writer) const {
 	writer.obj(2);
 	writer << "boneId" = node->id;
-	writer << "keyframes" = keyframes;
-	writer.end();
-}
-
-void Keyframe::serialize(json::BaseJSONWriter &writer) const {
-	writer << json::obj;
-	writer << "keytime" = time;
-	if (hasRotation)
-		writer << "rotation" = rotation;
-	if (hasScale)
-		writer << "scale" = scale;
-	if (hasTranslation)
+	if (!translation.empty())
 		writer << "translation" = translation;
-	writer << json::end;
+	if (!rotation.empty())
+		writer << "rotation" = rotation;
+	if (!scaling.empty())
+		writer << "scaling" = scaling;
+	writer.end();
 }
 
 } }

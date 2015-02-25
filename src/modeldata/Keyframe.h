@@ -24,36 +24,37 @@
 
 namespace fbxconv {
 namespace modeldata {
-
+	template<int n>
 	struct Keyframe : public json::ConstSerializable {
+		static const unsigned char InterpolationConstant = 0;
+		static const unsigned char InterpolationLinear = 1;
+		static const unsigned char InterpolationCubic = 2;
+
 		float time;
-		float translation[3];
-		float rotation[4];
-		float scale[3];
-		bool hasTranslation;
-		bool hasRotation;
-		bool hasScale;
+		float value[n];
+		unsigned char interpolation;
 
 		Keyframe() {
 			time = 0.;
-			translation[0] = translation[1] = translation[2] = 0.;
-			rotation[0] = rotation[1] = rotation[2] = 0.; rotation[3] = 1.;
-			scale[0] = scale[1] = scale[2] = 1.;
-			hasTranslation = hasRotation = hasScale = false;
+			memset(value, 0, sizeof(value));
+			interpolation = InterpolationLinear;
 		}
 
-		Keyframe(const Keyframe &rhs) {
+		Keyframe(const Keyframe<n> &rhs) {
 			time = rhs.time;
-			memcpy(translation, rhs.translation, sizeof(translation));
-			memcpy(rotation, rhs.rotation, sizeof(rotation));
-			memcpy(scale, rhs.scale, sizeof(scale));
-			hasTranslation = rhs.hasTranslation;
-			hasRotation = rhs.hasRotation;
-			hasScale = rhs.hasScale;
+			memcpy(value, rhs.value, sizeof(value));
 		}
 
-		virtual void serialize(json::BaseJSONWriter &writer) const;
+		virtual void serialize(json::BaseJSONWriter &writer) const {
+			writer << json::obj;
+			if (time != 0.0f)
+				writer << "keytime" = time;
+			writer << "value" = value;
+			writer << json::end;
+		}
+
 	};
+
 } }
 
 #endif // MODELDATA_KEYFRAME_H

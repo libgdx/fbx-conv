@@ -30,7 +30,9 @@ namespace modeldata {
 
 	struct NodeAnimation : public json::ConstSerializable {
 		const Node *node;
-		std::vector<Keyframe *> keyframes;
+		std::vector<Keyframe<3>> translation;
+		std::vector<Keyframe<4>> rotation;
+		std::vector<Keyframe<3>> scaling;
 		bool translate, rotate, scale;
 
 		NodeAnimation() : node(0), translate(false), rotate(false), scale(false) {}
@@ -40,14 +42,12 @@ namespace modeldata {
 			translate = copyFrom.translate;
 			rotate = copyFrom.rotate;
 			scale = copyFrom.scale;
-			for (std::vector<Keyframe *>::const_iterator itr = copyFrom.keyframes.begin(); itr != copyFrom.keyframes.end(); ++itr)
-				keyframes.push_back(new Keyframe(*(*itr)));
-		}
-
-		~NodeAnimation() {
-			for (std::vector<Keyframe *>::iterator itr = keyframes.begin(); itr != keyframes.end(); ++itr)
-				if ((*itr)!=0)
-					delete *itr;
+			for (std::vector<Keyframe<3>>::const_iterator itr = copyFrom.translation.begin(); itr != copyFrom.translation.end(); ++itr)
+				translation.push_back(*itr);
+			for (std::vector<Keyframe<4>>::const_iterator itr = copyFrom.rotation.begin(); itr != copyFrom.rotation.end(); ++itr)
+				rotation.push_back(*itr);
+			for (std::vector<Keyframe<3>>::const_iterator itr = copyFrom.scaling.begin(); itr != copyFrom.scaling.end(); ++itr)
+				scaling.push_back(*itr);
 		}
 
 		virtual void serialize(json::BaseJSONWriter &writer) const;

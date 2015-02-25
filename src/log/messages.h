@@ -63,7 +63,12 @@ LOG_SET_MSG(wSourceConvertFbxEmptyMeshpart,		"[%s] Skipping empty node part, mat
 LOG_SET_MSG(wSourceConvertFbxMaterialUnknown,	"[%s] Material doesn\'t extend FbxSurfaceLambert, replaced with RED diffuse")
 LOG_SET_MSG(wSourceConvertFbxMaterialHLSL,		"[%s] Material HLSL shading not supported, replaced with RED diffuse")
 LOG_SET_MSG(wSourceConvertFbxMaterialCgFX,		"[%s] Material CgFX shading not supported, replaced with RED diffuse")
+LOG_SET_MSG(wSourceConvertFbxLayeredAnimation,	"[%s] Multiple (%d) layers aren't supported at this time (animation blending should not be included)")
+LOG_SET_MSG(wSourceConvertFbxMultipleCurves,	"[%s] Multiple (%d) curves per node aren't supported at this time, please report an issue: https://github.com/libgdx/fbx-conv/issues/new")
+LOG_SET_MSG(wSourceConvertFbxFallbackAnimation, "[%s] Falling back to FPS sampled animation keyframes")
 LOG_SET_MSG(wSourceConvertFbxSkipPropname,		"[%s] Skipping propName '%s'")
+LOG_SET_MSG(wSourceConvertFbxUnknownNodeAnim,	"[%s] Skipping unknown node animation ('%s')")
+LOG_SET_MSG(wSourceConvertFbxSkipAnimation,		"[%s] Skipping animation because it doesn't affect any nodes")
 LOG_SET_MSG(eSourceConvert,						"Error converting source file")
 
 LOG_SET_MSG(sSourceClose,						"Closing source file")

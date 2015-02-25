@@ -187,5 +187,40 @@ namespace readers {
 			return *this;
 		}
 	};
+
+	inline bool cmp(const float &v1, const float &v2, const double &epsilon = 0.000001) {
+		const double d = (double)v1 - (double)v2;
+		return ((d < 0.0) ? -d : d) < epsilon;
+	}
+
+	inline bool cmp(const float *v1, const float *v2, const unsigned int &count) {
+		for (unsigned int i = 0; i < count; i++)
+		if (!cmp(v1[i], v2[i]))
+			return false;
+		return true;
+	}
+
+	inline bool isLerp(const float *v1, const float &t1, const float *v2, const float &t2, const float *v3, const float &t3, const int size) {
+		const double d = (t2 - t1) / (t3 - t1);
+		for (int i = 0; i < size; i++)
+		if (!cmp(v2[i], v1[i] + d * (v3[i] - v1[i])))
+			return false;
+		return true;
+	}
+
+	template<int n> inline static void set(float * const &dest, const FbxDouble * const &source) {
+		for (int i = 0; i < n; i++)
+			dest[i] = (float)source[i];
+	}
+
+	template<int n> inline static void set(double * const &dest, const FbxDouble * const &source) {
+		for (int i = 0; i < n; i++)
+			dest[i] = source[i];
+	}
+
+	template<class T> inline static void add_if_not_null(std::vector<T *> &dst, T * const &value) {
+		if (value != 0)
+			dst.push_back(value);
+	}
 } }
 #endif //FBXCONV_READERS_UTIL_H

@@ -28,6 +28,7 @@
 #include <algorithm>
 #include "util.h"
 #include "FbxMeshInfo.h"
+#include "FbxAnimation.h"
 #include "../log/log.h"
 
 using namespace fbxconv::modeldata;
@@ -534,16 +535,17 @@ namespace readers {
 			addTextures(result->textures, lambert->NormalMap, Material::Texture::Normal);
 
 			if (lambert->TransparencyFactor.IsValid() && lambert->TransparentColor.IsValid()) {
-				FbxDouble factor = 1.f - lambert->TransparencyFactor.Get();
+				FbxDouble factor = lambert->TransparencyFactor.Get();
 				FbxDouble3 color = lambert->TransparentColor.Get();
-				FbxDouble trans = (color[0] * factor + color[1] * factor + color[2] * factor) / 3.0;
-				result->opacity.set((float)trans);
+				FbxDouble avgColor = (color[0] + color[1] + color[2]) / 3.0;
+				result->opacity.set(1.f - (float)(avgColor * factor));
 			}
-			else if (lambert->TransparencyFactor.IsValid())
+			else if (lambert->TransparencyFactor.IsValid()) {
 				result->opacity.set(1.f - lambert->TransparencyFactor.Get());
+			}
 			else if (lambert->TransparentColor.IsValid()) {
 				FbxDouble3 color = lambert->TransparentColor.Get();
-				result->opacity.set((color[0] + color[1] + color[2]) / 3.0);
+				result->opacity.set(1.f - (float)((color[0] + color[1] + color[2]) / 3.0));
 			}
 
 			if (!material->Is<FbxSurfacePhong>())
@@ -586,206 +588,12 @@ namespace readers {
 		/** Add the animations if any */
 		void addAnimations(Model * const &model, const FbxScene * const &source) {
 			const unsigned int animCount = source->GetSrcObjectCount<FbxAnimStack>();
-			for (unsigned int i = 0; i < animCount; i++)
-				addAnimation(model, source->GetSrcObject<FbxAnimStack>(i));
-		}
-
-		/** Add the specified animation to the model */
-		void addAnimation(Model *const &model, FbxAnimStack * const &animStack) {
-			static std::vector<Keyframe *> frames;
-			static std::map<FbxNode *, AnimInfo> affectedNodes;
-			affectedNodes.clear();
-
-			FbxTimeSpan animTimeSpan = animStack->GetLocalTimeSpan();
-			float animStart = (float)(animTimeSpan.GetStart().GetMilliSeconds());
-			float animStop = (float)(animTimeSpan.GetStop().GetMilliSeconds());
-			if (animStop <= animStart)
-				animStop = 999999999.0f;
-
-			// Could also use animStack->GetLocalTimeSpan and animStack->BakeLayers, but its not guaranteed to be correct
-			const int layerCount = animStack->GetMemberCount<FbxAnimLayer>();
-			for (int l = 0; l < layerCount; l++) {
-				FbxAnimLayer *layer = animStack->GetMember<FbxAnimLayer>(l);
-				// For each layer check which node is affected and within what time frame and rate
-				const int curveNodeCount = layer->GetSrcObjectCount<FbxAnimCurveNode>();
-				for (int n = 0; n < curveNodeCount; n++) {
-					FbxAnimCurveNode *curveNode = layer->GetSrcObject<FbxAnimCurveNode>(n);
-					// Check which properties on this curve are changed
-					const int nc = curveNode->GetDstPropertyCount();
-					for (int o = 0; o < nc; o++) {
-						FbxProperty prop = curveNode->GetDstProperty(o);
-						FbxNode *node = static_cast<FbxNode *>(prop.GetFbxObject());
-						if (node) {
-							FbxString propName = prop.GetName();
-							if ( propName == "DeformPercent" )
-							{
-								// When using this propName in model an unhandled exception is launched in sentence node->LclTranslation.GetName()
-								log->warning(log::wSourceConvertFbxSkipPropname, animStack->GetName(), (const char *)propName);
-								continue;
-							}
-
-							// Only add translation, scaling or rotation
-							if ((!node->LclTranslation.IsValid() || propName != node->LclTranslation.GetName()) && 
-								(!node->LclScaling.IsValid() || propName != node->LclScaling.GetName()) &&
-								(!node->LclRotation.IsValid() || propName != node->LclRotation.GetName()))
-								continue;
-							FbxAnimCurve *curve;
-							AnimInfo ts;
-							ts.translate = propName == node->LclTranslation.GetName();
-							ts.rotate = propName == node->LclRotation.GetName();
-							ts.scale = propName == node->LclScaling.GetName();
-							if (curve = prop.GetCurve(layer, FBXSDK_CURVENODE_COMPONENT_X))
-								updateAnimTime(curve, ts, animStart, animStop);
-							if (curve = prop.GetCurve(layer, FBXSDK_CURVENODE_COMPONENT_Y))
-								updateAnimTime(curve, ts, animStart, animStop);
-							if (curve = prop.GetCurve(layer, FBXSDK_CURVENODE_COMPONENT_Z))
-								updateAnimTime(curve, ts, animStart, animStop);
-							//if (ts.start < ts.stop)
-								affectedNodes[node] += ts;
-						}
-					}
-				}
+			FbxAnimation animConverter(settings, log, model, nodeMap);
+			for (unsigned int animIndex = 0; animIndex < animCount; ++animIndex) {
+				Animation *animation = animConverter.convert(source->GetSrcObject<FbxAnimStack>(animIndex));
+				if (animation != 0)
+					model->animations.push_back(animation);
 			}
-
-			if (affectedNodes.empty())
-				return;
-
-			Animation *animation = new Animation();
-			model->animations.push_back(animation);
-			animation->id = animStack->GetName();
-			animStack->GetScene()->SetCurrentAnimationStack(animStack);
-
-			// Add the NodeAnimations to the Animation
-			for (std::map<FbxNode *, AnimInfo>::const_iterator itr = affectedNodes.begin(); itr != affectedNodes.end(); itr++) {
-				Node *node = model->getNode((*itr).first->GetName());
-				if (!node)
-					continue;
-				frames.clear();
-				NodeAnimation *nodeAnim = new NodeAnimation();
-				nodeAnim->node = node;
-				nodeAnim->translate = (*itr).second.translate;
-				nodeAnim->rotate = (*itr).second.rotate;
-				nodeAnim->scale = (*itr).second.scale;
-				const float stepSize = (*itr).second.framerate <= 0.f ? (*itr).second.stop - (*itr).second.start : 1000.f / (*itr).second.framerate;
-				const float last = (*itr).second.stop + stepSize * 0.5f;
-				FbxTime fbxTime;
-				// Calculate all keyframes upfront
-				for (float time = (*itr).second.start; time <= last; time += stepSize) {
-					time = std::min(time, (*itr).second.stop);
-					fbxTime.SetMilliSeconds((FbxLongLong)time);
-					Keyframe *kf = new Keyframe();
-					kf->time = (time - animStart);
-					FbxAMatrix *m = &(*itr).first->EvaluateLocalTransform(fbxTime);
-					FbxVector4 v = m->GetT();
-					kf->translation[0] = (float)v.mData[0];
-					kf->translation[1] = (float)v.mData[1];
-					kf->translation[2] = (float)v.mData[2];
-					FbxQuaternion q = m->GetQ();
-					kf->rotation[0] = (float)q.mData[0];
-					kf->rotation[1] = (float)q.mData[1];
-					kf->rotation[2] = (float)q.mData[2];
-					kf->rotation[3] = (float)q.mData[3];
-					v = m->GetS();
-					kf->scale[0] = (float)v.mData[0];
-					kf->scale[1] = (float)v.mData[1];
-					kf->scale[2] = (float)v.mData[2];
-					frames.push_back(kf);
-				}
-				// Only add keyframes really needed
-				addKeyframes(nodeAnim, frames);
-				if (nodeAnim->rotate || nodeAnim->scale || nodeAnim->translate)
-					animation->nodeAnimations.push_back(nodeAnim);
-				else
-					delete nodeAnim;
-			}
-		}
-
-		inline void updateAnimTime(FbxAnimCurve *const &curve, AnimInfo &ts, const float &animStart, const float &animStop) {
-			FbxTimeSpan fts;
-			curve->GetTimeInterval(fts);
-			const FbxTime start = fts.GetStart();
-			const FbxTime stop = fts.GetStop();
-			ts.start = std::max(animStart, std::min(ts.start, (float)(start.GetMilliSeconds())));
-			ts.stop = std::min(animStop, std::max(ts.stop, (float)stop.GetMilliSeconds()));
-			// Could check the number and type of keys (ie curve->KeyGetInterpolation) to lower the framerate
-			ts.framerate = std::max(ts.framerate, (float)stop.GetFrameRate(FbxTime::eDefaultMode));
-		}
-
-		void addKeyframes(NodeAnimation *const &anim, std::vector<Keyframe *> &keyframes) {
-			bool translate = false, rotate = false, scale = false;
-			// Check which components are actually changed
-			for (std::vector<Keyframe *>::const_iterator itr = keyframes.begin(); itr != keyframes.end(); ++itr) {
-				if (!translate && !cmp(anim->node->transform.translation, (*itr)->translation, 3))
-					translate = true;
-				if (!rotate && !cmp(anim->node->transform.rotation, (*itr)->rotation, 3))
-					rotate = true;
-				if (!scale && !cmp(anim->node->transform.scale, (*itr)->scale, 3))
-					scale = true;
-			}
-			// This allows to only export the values actual needed
-			anim->translate = translate;
-			anim->rotate = rotate;
-			anim->scale = scale;
-			for (std::vector<Keyframe *>::const_iterator itr = keyframes.begin(); itr != keyframes.end(); ++itr) {
-				(*itr)->hasRotation = rotate;
-				(*itr)->hasScale = scale;
-				(*itr)->hasTranslation = translate;
-			}
-
-			if (!keyframes.empty()) {
-				anim->keyframes.push_back(keyframes[0]);
-				const int last = (int)keyframes.size()-1;
-				Keyframe *k1 = keyframes[0], *k2, *k3;
-				for (int i = 1; i < last; i++) {
-					k2 = keyframes[i];
-					k3 = keyframes[i+1];
-					// Check if the middle keyframe can be calculated by information, if so dont add it
-					if ((translate && !isLerp(k1->translation, k1->time, k2->translation, k2->time, k3->translation, k3->time, 3)) ||
-						(rotate && !isLerp(k1->rotation, k1->time, k2->rotation, k2->time, k3->rotation, k3->time, 3)) || // FIXME use slerp for quaternions
-						(scale && !isLerp(k1->scale, k1->time, k2->scale, k2->time, k3->scale, k3->time, 3))) {
-							anim->keyframes.push_back(k2);
-							k1 = k2;
-					} else
-						delete k2;
-				}
-				if (last > 0)
-					anim->keyframes.push_back(keyframes[last]);
-			}
-		}
-
-		inline bool cmp(const float &v1, const float &v2, const float &epsilon = 0.000001) {
-			const double d = v1 - v2;
-			return ((d < 0.f) ? -d : d) < epsilon;
-		}
-
-		inline bool cmp(const float *v1, const float *v2, const unsigned int &count) {
-			for (unsigned int i = 0; i < count; i++)
-				if (!cmp(v1[i],v2[i]))
-					return false;
-			return true;
-		}
-
-		inline bool isLerp(const float *v1, const float &t1, const float *v2, const float &t2, const float *v3, const float &t3, const int size) {
-			const double d = (t2 - t1) / (t3 - t1);
-			for (int i = 0; i < size; i++)
-				if (!cmp(v2[i], v1[i] + d * (v3[i] - v1[i])))
-					return false;
-			return true;
-		}
-
-		template<int n> inline static void set(float * const &dest, const FbxDouble * const &source) {
-			for (int i = 0; i < n; i++)
-				dest[i] = (float)source[i];
-		}
-
-		template<int n> inline static void set(double * const &dest, const FbxDouble * const &source) {
-			for (int i = 0; i < n; i++)
-				dest[i] = source[i];
-		}
-
-		template<class T> inline static void add_if_not_null(std::vector<T *> &dst, T * const &value) {
-			if (value != 0)
-				dst.push_back(value);
 		}
 	};
 
