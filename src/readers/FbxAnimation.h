@@ -156,11 +156,7 @@ namespace readers {
 				kf.value[3] = localRotation.mData[3];
 				nodeAnimation->rotation.push_back(kf);
 			}
-			int start = nodeAnimation->rotation.size();
 			cleanupKeyframes<4>(nodeAnimation->rotation, (float*)nodeAnimation->node->transform.rotation);
-			int end = nodeAnimation->rotation.size();
-			if (end != start)
-				printf("Removed %d - %d = %d keyframes\n", start, end, start - end);
 			nodeAnimation->rotate = !nodeAnimation->rotation.empty();
 			return true;
 		}
@@ -168,7 +164,7 @@ namespace readers {
 		/** Add the specified animation by adding the actual keyframes of components the animation consist of */
 		bool convertAnimation(FbxAnimStack * const &animStack, Animation * &result) {
 			const int layerCount = animStack->GetMemberCount<FbxAnimLayer>();
-			if (layerCount != 1) {
+			if (layerCount > 1) {
 				log->warning(log::wSourceConvertFbxLayeredAnimation, animStack->GetName(), layerCount);
 				return false;
 			}
@@ -190,6 +186,8 @@ namespace readers {
 					FbxAnimCurveNode *curveNode = layer->GetSrcObject<FbxAnimCurveNode>(curveNodeIndex);
 
 					const int curveCount = curveNode->GetCurveCount(0U);
+					if (curveCount <= 0)
+						continue;
 					if (curveCount != 1) {
 						log->warning(log::wSourceConvertFbxMultipleCurves, animStack->GetName(), curveCount);
 						success = false;
@@ -226,8 +224,6 @@ namespace readers {
 							success = success && addTranslationKeyframes(nodeAnimation, fbxNode, curve);
 						else if (prop == PropRotation)
 							success = success && addRotationKeyframes(nodeAnimation, fbxNode, curve);
-
-						//printf("Anim(%s).Layer(%s).CurveNode(%s).Node(%s).Prop(%d).Keys[%d] = %s\n", animStack->GetName(), layer->GetName(), curveNode->GetName(), node->id.c_str(), prop, keyCount, getInterpolationName(itype));
 					}
 				}
 				if (nodeAnimationIndex < 0)
