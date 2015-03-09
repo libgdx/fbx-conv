@@ -16,6 +16,10 @@ if not FBX_SDK_ROOT then
 	printf("Set it to something like: C:\\Program Files\\Autodesk\\FBX\\FBX SDK\\2013.3")
 	os.exit()
 end
+BUILD_NUMBER = os.getenv("BUILD_NUMBER")
+if not BUILD_NUMBER then
+	BUILD_NUMBER = "0000"
+end
 
 -- avert your eyes children!
 if string.find(_ACTION, "xcode") then
@@ -69,6 +73,7 @@ project "fbx-conv"
 	configuration "Release"
 		defines {
 			"NDEBUG",
+			"BUILD_NUMBER=" .. BUILD_NUMBER,
 		}
 		flags { "Optimize" }
 
