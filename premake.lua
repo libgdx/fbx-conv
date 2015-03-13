@@ -61,7 +61,7 @@ project "fbx-conv"
 	}
 	defines {
 		"FBXSDK_NEW_API",
-		"BUILD_NUMBER=" .. BUILD_NUMBER,
+		"BUILD_NUMBER='" .. BUILD_NUMBER .. "'",
 	}
 	--- debugdir "."
 
