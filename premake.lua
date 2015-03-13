@@ -61,6 +61,7 @@ project "fbx-conv"
 	}
 	defines {
 		"FBXSDK_NEW_API",
+		"BUILD_NUMBER=" .. BUILD_NUMBER,
 	}
 	--- debugdir "."
 
@@ -73,7 +74,6 @@ project "fbx-conv"
 	configuration "Release"
 		defines {
 			"NDEBUG",
-			"BUILD_NUMBER=" .. BUILD_NUMBER,
 		}
 		flags { "Optimize" }
 
