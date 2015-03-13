@@ -18,7 +18,7 @@ if not FBX_SDK_ROOT then
 end
 BUILD_NUMBER = os.getenv("BUILD_NUMBER")
 if not BUILD_NUMBER then
-	BUILD_NUMBER = "0000"
+	BUILD_NUMBER = 0
 end
 
 -- avert your eyes children!
@@ -61,7 +61,7 @@ project "fbx-conv"
 	}
 	defines {
 		"FBXSDK_NEW_API",
-		"BUILD_NUMBER='" .. BUILD_NUMBER .. "'",
+		"BUILD_NUMBER=" .. BUILD_NUMBER,
 	}
 	--- debugdir "."
 
