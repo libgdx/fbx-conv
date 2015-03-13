@@ -21,7 +21,7 @@
 #define FBXCONV_FBXCONV_H
 
 #ifndef BUILD_NUMBER
-#define BUILD_NUMBER "0000"
+#define BUILD_NUMBER 0
 #endif
 
 #ifndef BUILD_ID
