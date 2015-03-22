@@ -534,16 +534,16 @@ namespace readers {
 			addTextures(result->textures, lambert->NormalMap, Material::Texture::Normal);
 
 			if (lambert->TransparencyFactor.IsValid() && lambert->TransparentColor.IsValid()) {
-				FbxDouble factor = 1.f - lambert->TransparencyFactor.Get();
+				FbxDouble factor = lambert->TransparencyFactor.Get();
 				FbxDouble3 color = lambert->TransparentColor.Get();
-				FbxDouble trans = (color[0] * factor + color[1] * factor + color[2] * factor) / 3.0;
-				result->opacity.set((float)trans);
+				FbxDouble avgColor = (color[0] + color[1] + color[2]) / 3.0;
+				result->opacity.set(1.f - (float)(avgColor * factor));
 			}
 			else if (lambert->TransparencyFactor.IsValid())
 				result->opacity.set(1.f - lambert->TransparencyFactor.Get());
 			else if (lambert->TransparentColor.IsValid()) {
 				FbxDouble3 color = lambert->TransparentColor.Get();
-				result->opacity.set((color[0] + color[1] + color[2]) / 3.0);
+				result->opacity.set(1.f - (float)((color[0] + color[1] + color[2]) / 3.0));
 			}
 
 			if (!material->Is<FbxSurfacePhong>())
