@@ -115,8 +115,8 @@ namespace readers {
 			pointBlendWeights(0),
 			skin((maxNodePartBoneCount > 0 && maxVertexBlendWeightCount > 0 && (unsigned int)mesh->GetDeformerCount(FbxDeformer::eSkin) > 0) ? static_cast<FbxSkin*>(mesh->GetDeformer(0, FbxDeformer::eSkin)) : 0),
 			bonesOverflow(false),
-			polyPartMap(new unsigned int[polyCount]),
-			polyPartBonesMap(new unsigned int[polyCount]),
+			polyPartMap(polyCount > 0 ? new unsigned int[polyCount] : 0),
+			polyPartBonesMap(polyCount > 0 ? new unsigned int[polyCount] : 0),
 			id(getID(mesh))
 		{
 			meshPartCount = calcMeshPartCount();
@@ -378,8 +378,10 @@ namespace readers {
 				int mp = -1;
 				for (int i = 0; i < elementMaterialCount && mp < 0; i++)
 					mp = mesh->GetElementMaterial(i)->GetIndexArray()[poly];
-				if (mp < 0 || mp >= meshPartCount)
+				if (mp < 0 || mp >= meshPartCount) {
 					polyPartMap[poly] = -1;
+					log->warning(log::wSourceConvertFbxNoPolyPart, mesh->GetName(), poly);
+				}
 				else {
 					polyPartMap[poly] = mp;
 					const unsigned int polySize = mesh->GetPolygonSize(poly);
@@ -400,8 +402,10 @@ namespace readers {
 				mp = -1;
 				for (int i = 0; i < elementMaterialCount && mp < 0; i++)
 					mp = mesh->GetElementMaterial(i)->GetIndexArray()[poly];
-				if (mp < 0 || mp >= meshPartCount)
+				if (mp < 0 || mp >= meshPartCount) {
 					polyPartMap[poly] = -1;
+					log->warning(log::wSourceConvertFbxNoPolyPart, mesh->GetName(), poly);
+				}
 				else
 					polyPartMap[poly] = mp;
 			}

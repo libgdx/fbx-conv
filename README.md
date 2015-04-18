@@ -1,6 +1,8 @@
 fbx-conv
 ========
 
+[![Build Status](http://144.76.220.132:8080/buildStatus/icon?job=fbx-conv)](http://144.76.220.132:8080/job/fbx-conv/)
+
 Command line utility using the FBX SDK to convert FBX/Collada/Obj files
 to more runtime friendly formats. The FBX content is parsed into an
 in-memory datastructure. Pluggable writers then take this datastructure

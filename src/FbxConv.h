@@ -21,14 +21,14 @@
 #define FBXCONV_FBXCONV_H
 
 #ifndef BUILD_NUMBER
-#define BUILD_NUMBER "0000"
+#define BUILD_NUMBER 0
 #endif
 
 #ifndef BUILD_ID
 #ifdef DEBUG
-#define BUILD_ID "debug version"
+#define BUILD_ID "(debug version)"
 #else
-#define BUILD_ID "pre-release"
+#define BUILD_ID ""
 #endif
 #endif
 

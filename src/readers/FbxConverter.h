@@ -114,8 +114,9 @@ namespace readers {
 				importer->GetAxisInfo(&axisSystem, &systemUnits);
 				scene = FbxScene::Create(manager,"__FBX_SCENE__");
 				importer->Import(scene);
-			} else {
-				log->error(fbxconv::log::eSourceLoadFbxSdk, "Unknown");
+			}
+			else {
+				log->error(fbxconv::log::eSourceLoadFbxSdk, importer->GetStatus().GetCode(), importer->GetStatus().GetErrorString());
             }
 
 			importer->Destroy();
@@ -349,7 +350,14 @@ namespace readers {
 			unsigned int pidx = 0;
 			for (unsigned int poly = 0; poly < meshInfo->polyCount; poly++) {
 				unsigned int ps = meshInfo->mesh->GetPolygonSize(poly);
-				MeshPart * const &part = parts[meshInfo->polyPartMap[poly]][meshInfo->polyPartBonesMap[poly]];
+				unsigned int pi = meshInfo->polyPartMap[poly];
+				unsigned int bi = meshInfo->polyPartBonesMap[poly];
+				if (pi >= parts.size() || bi >= parts[pi].size()) {
+					log->warning(log::wSourceConvertFbxInvalidMesh, node->GetName());
+					delete[] vertex;
+					return;
+				}
+				MeshPart * const &part = parts[pi][bi];
 				//Material * const &material = materialsMap[node->GetMaterial(meshInfo->polyPartMap[poly])];
 
 				for (unsigned int i = 0; i < ps; i++) {
