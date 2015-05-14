@@ -3,7 +3,7 @@ fbx-conv
 
 [![Build Status](http://144.76.220.132:8080/buildStatus/icon?job=fbx-conv)](http://144.76.220.132:8080/job/fbx-conv/)
 
-Command line utility using the FBX SDK to convert FBX/Collada/Obj files
+Command line utility using the FBX SDK to convert [FBX/Collada/Obj files](http://docs.autodesk.com/FBX/2014/ENU/FBX-SDK-Documentation/files/GUID-0B122E01-7DB8-48E3-AADA-5E85A197FEE1.htm)
 to more runtime friendly formats. The FBX content is parsed into an
 in-memory datastructure. Pluggable writers then take this datastructure
 to generate the output. Send us a pull request if you want the writer
