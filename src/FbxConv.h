@@ -57,7 +57,7 @@ class FbxConv {
 		fbxconv::log::Log *log;
 
 		FbxConv(fbxconv::log::Log *log) : log(log) {
-			log->info(log::iNameAndVersion, modeldata::VERSION_HI, modeldata::VERSION_LO, BUILD_NUMBER, BIT_COUNT, BUILD_ID);
+			log->info(log::iNameAndVersion, modeldata::VERSION_HI, modeldata::VERSION_LO, BUILD_NUMBER, BIT_COUNT, BUILD_ID, FBXSDK_VERSION_MAJOR, FBXSDK_VERSION_MINOR);
 		}
 
 		const char *getVersionString() {
@@ -65,7 +65,7 @@ class FbxConv {
 		}
 
 		const char *getNameAndVersionString() {
-			return log->format(log::iNameAndVersion, modeldata::VERSION_HI, modeldata::VERSION_LO, BUILD_NUMBER, BIT_COUNT, BUILD_ID);
+			return log->format(log::iNameAndVersion, modeldata::VERSION_HI, modeldata::VERSION_LO, BUILD_NUMBER, BIT_COUNT, BUILD_ID, FBXSDK_VERSION_MAJOR, FBXSDK_VERSION_MINOR);
 		}
 
 		bool execute(int const &argc, const char** const &argv) {
