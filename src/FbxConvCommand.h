@@ -59,8 +59,6 @@ struct FbxConvCommand {
 					settings->verbose = true;
 				else if (arg[1] == 'p')
 					settings->packColors = true;
-				else if (arg[1] == 'd') // FIXME: Remove this temporary option
-					settings->forceFpsSamplesAnimations = true;
 				else if ((arg[1] == 'i') && (i + 1 < argc))
 					settings->inType = parseType(argv[++i]);
 				else if ((arg[1] == 'o') && (i + 1 < argc))
@@ -124,8 +122,8 @@ private:
 			return;
 		}
 #ifdef ALLOW_INPUT_TYPE
-		if (settings->inType == FILETYPE_AUTO)
-			settings->inType = guessType(settings->inFile, FILETYPE_IN_DEFAULT);
+		if (inType == FILETYPE_AUTO)
+			inType = guessType(inFile, FILETYPE_IN_DEFAULT);
 #else
 		settings->inType = FILETYPE_IN_DEFAULT;
 #endif
