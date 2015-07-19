@@ -40,8 +40,6 @@ struct FbxConvCommand {
 		settings->flipV = false;
 		settings->packColors = false;
 		settings->verbose = false;
-		settings->forceFpsSamplesAnimations = false;
-		settings->forceMaxVertexBoneCount = true;
 		settings->maxNodePartBonesCount = 12;
 		settings->maxVertexBonesCount = 4;
 		settings->maxVertexCount = (1<<15)-1;

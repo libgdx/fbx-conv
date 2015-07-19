@@ -95,7 +95,6 @@ namespace log {
 			if (type  == LOG_PROGRESS) {
 				inProgress = true;
 				printf("PROGRESS: %-79s\r", s);
-				std::cout.flush();				
 			} else {
 				if (inProgress) {
 					printf("\n");
