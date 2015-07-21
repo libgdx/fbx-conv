@@ -61,7 +61,7 @@ namespace readers {
 
 		// Helper maps/lists, resources in those will not be disposed
 		std::map<FbxGeometry *, FbxMeshInfo *> fbxMeshMap;
-		std::map<FbxSurfaceMaterial *, Material *> materialsMap;
+		std::map<std::string, Material *> materialsMap;
 		std::map<std::string, TextureFileInfo> textureFiles;
 		std::map<FbxMeshInfo *, std::vector<std::vector<MeshPart *> > > meshParts; //[FbxMeshInfo][materialIndex][boneIndex]
 		std::map<const FbxNode *, Node *> nodeMap;
@@ -79,6 +79,8 @@ namespace readers {
 		static const FbxAxisSystem::EUpVector defaultUpAxis = FbxAxisSystem::eYAxis;
 		static const FbxAxisSystem::EFrontVector defaultFrontAxis = FbxAxisSystem::eParityOdd;
 		static const FbxAxisSystem::ECoordSystem defaultCoordSystem = FbxAxisSystem::eRightHanded;
+
+		const char *placeHolderMaterialName = "FBXCONV_PLACEHOLDER_MATERIAL";
 
 		//const char * const &filename, 
 		//const bool &packColors = false, const unsigned int &maxVertexCount = (1<<15)-1, const unsigned int &maxIndexCount = (1<<15)-1,
@@ -173,15 +175,18 @@ namespace readers {
 					uvTransforms[i].translate(0.f, 1.f).scale(1.f, -1.f);
 			}
 
-			for (std::map<FbxSurfaceMaterial *, Material *>::iterator it = materialsMap.begin(); it != materialsMap.end(); ++it) {
+			addMesh(model);
+			addNode(model);
+
+			for (std::vector<Node *>::iterator itr = model->nodes.begin(); itr != model->nodes.end(); ++itr)
+				updateNode(model, *itr);
+
+			for (std::map<std::string, Material *>::iterator it = materialsMap.begin(); it != materialsMap.end(); ++it) {
 				model->materials.push_back(it->second);
 				for (std::vector<Material::Texture *>::iterator tt = it->second->textures.begin(); tt != it->second->textures.end(); ++tt)
 					(*tt)->path = textureFiles[(*tt)->path].path;
 			}
-			addMesh(model);
-			addNode(model);
-			for (std::vector<Node *>::iterator itr = model->nodes.begin(); itr != model->nodes.end(); ++itr)
-				updateNode(model, *itr);
+
 			addAnimations(model, scene);
 			return true;
 		}
@@ -221,8 +226,10 @@ namespace readers {
 				FbxMeshInfo *meshInfo = fbxMeshMap[node->source->GetGeometry()];
 				std::vector<std::vector<MeshPart *> > &parts = meshParts[meshInfo];
 				const int matCount = node->source->GetMaterialCount();
-				for (int i = 0; i < matCount && i < parts.size(); i++) {
-					Material *material = materialsMap[node->source->GetMaterial(i)];
+				if (parts.size() > 0 && matCount < parts.size())
+					log->warning(log::wSourceConvertFbxNoPartMaterial, node->id.c_str(), parts.size() - matCount);
+				for (int i = 0; i < parts.size(); i++) {
+					Material *material = i < matCount ? getMaterial(node->source->GetMaterial(i)->GetName()) : getPlaceholderMaterial();
 					for (int j = 0; j < parts[i].size(); j++) {
 						if (parts[i][j]) {
 							NodePart *nodePart = new NodePart();
@@ -411,7 +418,7 @@ namespace readers {
 			const int matCount = node->GetMaterialCount();
 			for (int i = 0; i < matCount; i++) {
 				FbxSurfaceMaterial *material = node->GetMaterial(i);
-				Material *mat = materialsMap[material];
+				Material *mat = getMaterial(material->GetName());
 				for (std::vector<Material::Texture *>::iterator it = mat->textures.begin(); it != mat->textures.end(); ++it) {
 					FbxFileTexture *texture = (*it)->source;
 					TextureFileInfo &info = textureFiles[texture->GetFileName()];
@@ -506,9 +513,29 @@ namespace readers {
 			int cnt = scene->GetMaterialCount();
 			for (int i = 0; i < cnt; i++) {
 				FbxSurfaceMaterial * const &material = scene->GetMaterial(i);
-				if (materialsMap.find(material) == materialsMap.end())
-					materialsMap[material] = createMaterial(material);
+				if (materialsMap.find(material->GetName()) == materialsMap.end())
+					materialsMap[material->GetName()] = createMaterial(material);
 			}
+		}
+
+		Material *getMaterial(std::string name) {
+			std::map<std::string, Material*>::iterator it = materialsMap.find(name);
+			if (it == materialsMap.end()) {
+				log->warning(log::wSourceConvertFbxMaterialNotFound, name.c_str());
+				return getPlaceholderMaterial();
+			}
+			return it->second;
+		}
+
+		Material *getPlaceholderMaterial() {
+			std::map<std::string, Material*>::iterator it = materialsMap.find(placeHolderMaterialName);
+			if (it != materialsMap.end())
+				return it->second;
+			Material * const result = new Material();
+			result->diffuse.set(1.f, 0.f, 0.f);
+			result->id = placeHolderMaterialName;
+			materialsMap[result->id] = result;
+			return result;
 		}
 
 		Material *createMaterial(FbxSurfaceMaterial * const &material) {	
@@ -518,7 +545,7 @@ namespace readers {
 
 			if ((!material->Is<FbxSurfaceLambert>()) || GetImplementation(material, FBXSDK_IMPLEMENTATION_HLSL) || GetImplementation(material, FBXSDK_IMPLEMENTATION_CGFX)) {
 				if (!material->Is<FbxSurfaceLambert>())
-					log->warning(log::wSourceConvertFbxMaterialUnknown, result->id.c_str());
+					log->warning(log::wSourceConvertFbxMaterialUnsupported, result->id.c_str());
 				if (GetImplementation(material, FBXSDK_IMPLEMENTATION_HLSL))
 					log->warning(log::wSourceConvertFbxMaterialHLSL, result->id.c_str());
 				if (GetImplementation(material, FBXSDK_IMPLEMENTATION_CGFX))

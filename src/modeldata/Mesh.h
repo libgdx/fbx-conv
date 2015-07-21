@@ -72,6 +72,10 @@ namespace modeldata {
 			return result;
 		}
 
+		inline unsigned int vertexCount() {
+			return vertices.size() / vertexSize;
+		}
+
 		inline unsigned int add(const float *vertex) {
 			const unsigned int hash = calcHash(vertex, vertexSize);
 			const unsigned int n = (unsigned int)hashes.size();

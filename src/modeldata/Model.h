@@ -119,7 +119,7 @@ namespace modeldata {
 		size_t getTotalVertexCount() const {
 			size_t result = 0;
 			for (std::vector<Mesh *>::const_iterator it = meshes.begin(); it != meshes.end(); ++it)
-				result += (*it)->vertices.size();
+				result += (*it)->vertexCount();
 			return result;
 		}
 
