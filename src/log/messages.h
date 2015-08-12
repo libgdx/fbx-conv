@@ -66,6 +66,7 @@ LOG_SET_MSG(wSourceConvertFbxEmptyMeshpart,		"[%s] Skipping empty node part, mat
 LOG_SET_MSG(wSourceConvertFbxMaterialUnsupported,	"[%s] Material doesn\'t extend FbxSurfaceLambert, replaced with RED diffuse")
 LOG_SET_MSG(wSourceConvertFbxMaterialHLSL,		"[%s] Material HLSL shading not supported, replaced with RED diffuse")
 LOG_SET_MSG(wSourceConvertFbxMaterialCgFX,		"[%s] Material CgFX shading not supported, replaced with RED diffuse")
+LOG_SET_MSG(wSourceConvertFbxLayeredTexture,	"[%s] Layered texture blending not supported, assuming full opacity")
 LOG_SET_MSG(wSourceConvertFbxSkipPropname,		"[%s] Skipping propName '%s'")
 LOG_SET_MSG(wSourceConvertFbxInvalidMesh,		"[%s] Skipping invalid mesh")
 LOG_SET_MSG(eSourceConvert,						"Error converting source file")

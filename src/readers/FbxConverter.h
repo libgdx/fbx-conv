@@ -562,11 +562,11 @@ namespace readers {
 			if (lambert->Emissive.IsValid())
 				result->emissive.set(lambert->Emissive.Get().mData);
 
-			addTextures(result->textures, lambert->Ambient, Material::Texture::Ambient);
-			addTextures(result->textures, lambert->Diffuse, Material::Texture::Diffuse);
-			addTextures(result->textures, lambert->Emissive, Material::Texture::Emissive);
-			addTextures(result->textures, lambert->Bump, Material::Texture::Bump);
-			addTextures(result->textures, lambert->NormalMap, Material::Texture::Normal);
+			addTextures(result->id.c_str(), result->textures, lambert->Ambient, Material::Texture::Ambient);
+			addTextures(result->id.c_str(), result->textures, lambert->Diffuse, Material::Texture::Diffuse);
+			addTextures(result->id.c_str(), result->textures, lambert->Emissive, Material::Texture::Emissive);
+			addTextures(result->id.c_str(), result->textures, lambert->Bump, Material::Texture::Bump);
+			addTextures(result->id.c_str(), result->textures, lambert->NormalMap, Material::Texture::Normal);
 
 			if (lambert->TransparencyFactor.IsValid() && lambert->TransparentColor.IsValid()) {
 				FbxDouble factor = 1.f - lambert->TransparencyFactor.Get();
@@ -591,15 +591,24 @@ namespace readers {
 			if (phong->Shininess.IsValid())
 				result->shininess.set((float)phong->Shininess.Get());
 
-			addTextures(result->textures, phong->Specular, Material::Texture::Specular);
-			addTextures(result->textures, phong->Reflection, Material::Texture::Reflection);
+			addTextures(result->id.c_str(), result->textures, phong->Specular, Material::Texture::Specular);
+			addTextures(result->id.c_str(), result->textures, phong->Reflection, Material::Texture::Reflection);
 			return result;
 		}
 
-		inline void addTextures(std::vector<Material::Texture *> &textures, const FbxProperty &prop,  const Material::Texture::Usage &usage) {
-			const unsigned int n = prop.GetSrcObjectCount<FbxFileTexture>();
-			for (unsigned int i = 0; i < n; i++)
-				add_if_not_null(textures, createTexture(prop.GetSrcObject<FbxFileTexture>(i), usage));
+		void addTextures(const char *materialName, std::vector<Material::Texture *> &textures, const FbxProperty &prop,  const Material::Texture::Usage &usage) {
+			const unsigned int ftCount = prop.GetSrcObjectCount<FbxFileTexture>();
+			for (unsigned int ft = 0; ft < ftCount; ++ft)
+				add_if_not_null(textures, createTexture(prop.GetSrcObject<FbxFileTexture>(ft), usage));
+			const unsigned int ltCount = prop.GetSrcObjectCount<FbxLayeredTexture>();
+			for (unsigned int lt = 0; lt < ltCount; ++lt) {
+				FbxLayeredTexture * const &layeredTexture = prop.GetSrcObject<FbxLayeredTexture>(lt);
+				const unsigned int ftCount = layeredTexture->GetSrcObjectCount<FbxFileTexture>();
+				if (ftCount > 1)
+					log->warning(log::wSourceConvertFbxLayeredTexture, materialName);
+				for (unsigned int ft = 0; ft < ftCount; ++ft)
+					add_if_not_null(textures, createTexture(layeredTexture->GetSrcObject<FbxFileTexture>(ft), usage));
+			}
 		}
 
 		Material::Texture *createTexture(FbxFileTexture * const &texture, const Material::Texture::Usage &usage = Material::Texture::Unknown) {
