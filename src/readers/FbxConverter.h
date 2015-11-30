@@ -569,9 +569,9 @@ namespace readers {
 			addTextures(result->id.c_str(), result->textures, lambert->NormalMap, Material::Texture::Normal);
 
 			if (lambert->TransparencyFactor.IsValid() && lambert->TransparentColor.IsValid()) {
-				FbxDouble factor = 1.f - lambert->TransparencyFactor.Get();
+				FbxDouble factor = lambert->TransparencyFactor.Get();
 				FbxDouble3 color = lambert->TransparentColor.Get();
-				FbxDouble trans = (color[0] * factor + color[1] * factor + color[2] * factor) / 3.0;
+				FbxDouble trans = 1.0f - ((color[0] * factor + color[1] * factor + color[2] * factor) / 3.0);
 				result->opacity.set((float)trans);
 			}
 			else if (lambert->TransparencyFactor.IsValid())
