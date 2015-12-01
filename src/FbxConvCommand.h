@@ -46,6 +46,7 @@ struct FbxConvCommand {
 		settings->maxIndexCount = (1<<15)-1;
 		settings->outType = FILETYPE_AUTO;
 		settings->inType = FILETYPE_AUTO;
+		settings->optimiseOutput = false;
 
 		for (int i = 1; i < argc; i++) {
 			const char *arg = argv[i];
@@ -69,6 +70,8 @@ struct FbxConvCommand {
 					settings->maxVertexBonesCount = atoi(argv[++i]);
 				else if ((arg[1] == 'm') && (i + 1 < argc))
 					settings->maxVertexCount = settings->maxIndexCount = atoi(argv[++i]);
+				else if (arg[1] == 's')
+					settings->optimiseOutput = true;
 				else
 					log->error(error = log::eCommandLineUnknownOption, arg);
 			}
@@ -109,6 +112,7 @@ struct FbxConvCommand {
 		printf("-b <size>: The maximum amount of bones a nodepart can contain (default: 12)\n");
 		printf("-w <size>: The maximum amount of bone weights per vertex (default: 4)\n");
 		printf("-v       : Verbose: print additional progress information\n");
+		printf("-s       : Output G3DJ (JSON) without whitespace nor unnecessary trailing zeros after decimal point\n");
 		printf("\n");
 		printf("<input>  : The filename of the file to convert.\n");
 		printf("<output> : The filename of the converted file.\n");
