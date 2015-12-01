@@ -154,7 +154,7 @@ class FbxConv {
 				break;
 			case FILETYPE_G3DJ: 
 				log->status(log::sExportToG3DJ, settings->outFile.c_str());
-				jsonWriter = new json::JSONWriter(myfile);
+				jsonWriter = new json::JSONWriter(myfile, settings->optimiseOutput);
 				break;
 			default: 
 				log->error(log::eExportFiletypeUnknown);

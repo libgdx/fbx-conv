@@ -34,16 +34,20 @@ public:
 	const char *closeArray;
 	const char *keySeparator;
 	const char *valueSeparator;
-public:
-	std::ostream &stream;
 
-	JSONWriter(std::ostream &stream) : BaseJSONWriter(), stream(stream), indentCount(0), 
-		newline("\r\n"), indent("\t"), openObject("{"), closeObject("}"), openArray("["), closeArray("]"), keySeparator(": "), valueSeparator(", ")
+	std::ostream &stream;
+	bool optimiseOutput;
+
+	JSONWriter(std::ostream &stream, bool optimiseOutput) : BaseJSONWriter(), stream(stream), optimiseOutput(optimiseOutput), indentCount(0),
+		newline("\r\n"), indent("\t"), openObject("{"), closeObject("}"), openArray("["), closeArray("]"),
+		keySeparator((optimiseOutput) ? ":" : ": "), valueSeparator((optimiseOutput) ? "," : ", ")
 	{}
 protected:
 	char tmp[256];
 	int indentCount;
 	void nextline() {
+		if (optimiseOutput) return;
+
 		stream << newline;
 		for (int i = 0; i < indentCount; i++)
 			stream << indent;
@@ -105,14 +109,20 @@ protected:
 	}
 
 	virtual void writeValue(const int &value, const bool &iskey = false) {
-		sprintf(tmp, "% 3i", value);
+		if(optimiseOutput)
+			sprintf(tmp, "%i", value);
+		else
+			sprintf(tmp, "% 3i", value);
 		stream << tmp;
 		if (iskey)
 			stream << keySeparator;
 	}
 
 	virtual void writeValue(const long &value, const bool &iskey = false) {
-		sprintf(tmp, "% 3i", value);
+		if (optimiseOutput)
+			sprintf(tmp, "%i", value);
+		else
+			sprintf(tmp, "% 3i", value);
 		stream << tmp;
 		if (iskey)
 			stream << keySeparator;
@@ -121,16 +131,33 @@ protected:
 	virtual void writeValue(const float &value, const bool &iskey = false) {
 		if ((value * 0) != 0) {
 			const unsigned int t = (*(unsigned int*)&value) & 0xfeffffff;
-			sprintf(tmp, "% 8f", *(float*)&t);
+			if (optimiseOutput)
+				sprintf(tmp, "%8f", *(float*)&t);
+			else
+				sprintf(tmp, "% 8f", *(float*)&t);
 		} else
-			sprintf(tmp, "% 8f", value);
+			if (optimiseOutput)
+				sprintf(tmp, "%8f", value);
+			else
+				sprintf(tmp, "% 8f", value);
+
+		if(optimiseOutput)
+			RemoveTrailingZeros(tmp);
+
 		stream << tmp;
 		if (iskey)
 			stream << keySeparator;
 	}
 
 	virtual void writeValue(const double &value, const bool &iskey = false) {
-		sprintf(tmp, "% 8f", value);
+		if (optimiseOutput)
+			sprintf(tmp, "%8f", value);
+		else
+			sprintf(tmp, "% 8f", value);
+
+		if (optimiseOutput)
+			RemoveTrailingZeros(tmp);
+
 		stream << tmp;
 		if (iskey)
 			stream << keySeparator;
@@ -143,16 +170,40 @@ protected:
 		writeValue((int)value, iskey);
 	}
 	virtual void writeValue(const unsigned int &value, const bool &iskey = false) {
-		sprintf(tmp, "% 3i", value);
+		if (optimiseOutput)
+			sprintf(tmp, "%i", value);
+		else
+			sprintf(tmp, "% 3i", value);
 		stream << tmp;
 		if (iskey)
 			stream << keySeparator;
 	}
 	virtual void writeValue(const unsigned long &value, const bool &iskey = false) {
-		sprintf(tmp, "% 3i", value);
+		if (optimiseOutput)
+			sprintf(tmp, "%i", value);
+		else
+			sprintf(tmp, "% 3i", value);
 		stream << tmp;
 		if (iskey)
 			stream << keySeparator;
+	}
+
+	void RemoveTrailingZeros(char* const &value)
+	{
+		int length = std::strlen(value) - 1;
+
+		for (unsigned int i = length; i > 0; i--)
+		{
+			if (value[i] != '0')
+			{
+				if (value[i] == '.')
+					value[i] = '\0';
+				else
+					value[i + 1] = '\0';
+
+				break;
+			}
+		}
 	}
 };
 
