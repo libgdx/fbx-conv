@@ -51,6 +51,8 @@ struct Settings {
 	int maxVertexCount;
 	/** The maximum allowed amount of indices in one mesh, only used when deciding to merge meshes. */
 	int maxIndexCount;
+	/** Output G3DJ (JSON) without whitespace nor unnecessary trailing zeros after decimal point. */
+	bool optimiseOutput;
 };
 
 }

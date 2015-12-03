@@ -30,6 +30,7 @@ Command-line Usage
 *   **`-b <size>`**			-The maximum amount of bones a nodepart can contain (default: 12)
 *   **`-w <size>`**			-The maximum amount of bone weights per vertex (default: 4)
 *   **`-v`**				-Verbose: print additional progress information
+*   **`-s`**        -Output G3DJ (JSON) without whitespace and unnecessary trailing zeros after decimal point.
 
 ###Example
 `fbx-conv-win32.exe -f -v myModel.fbx convertedModel.g3db`
