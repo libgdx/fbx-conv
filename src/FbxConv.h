@@ -160,7 +160,7 @@ class FbxConv {
 				log->error(log::eExportFiletypeUnknown);
 				break;
 			}
-            jsonWriter->settings = settings;
+			jsonWriter->settings = settings;
 
 			if(jsonWriter) {
 				(*jsonWriter) << model;

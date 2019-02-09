@@ -313,7 +313,7 @@ private:
 	}
 public:
 	unsigned int defaultDataLineSize;
-    fbxconv::Settings * settings;
+	fbxconv::Settings * settings;
 
 	BaseJSONWriter() : block(Block::ROOT), defaultDataLineSize(32) {}
 

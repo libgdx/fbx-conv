@@ -52,8 +52,8 @@ struct Settings {
 	int maxVertexCount;
 	/** The maximum allowed amount of indices in one mesh, only used when deciding to merge meshes. */
 	int maxIndexCount;
-    /** Forces the emissive value to 0,0,0 when exporting, fixes some problems, enable by specifying -e */
-    bool omitEmit; 
+	/** Forces the emissive value to 0,0,0 when exporting, fixes some problems, enable by specifying -e */
+	bool omitEmit; 
 };
 
 }
