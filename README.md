@@ -29,7 +29,7 @@ Command-line Usage
 *   **`-m <size>`**			-The maximum amount of vertices or indices a mesh may contain (default: 32k)
 *   **`-b <size>`**			-The maximum amount of bones a nodepart can contain (default: 12)
 *   **`-w <size>`**			-The maximum amount of bone weights per vertex (default: 4)
-*   **`-e**         -Force emissive property to [0,0,0]
+*   **`-e`**         -Force emissive property to [0,0,0]
 *   **`-v`**				-Verbose: print additional progress information
 
 ###Example
