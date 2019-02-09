@@ -27,6 +27,7 @@
 #include <string>
 #include <cassert>
 #include <stdio.h>
+#include "../Settings.h"
 
 namespace json {
 
@@ -128,7 +129,7 @@ protected:
 		Block(const Type &type, const long long &capacity = -1, const unsigned int maxLineSize = 0) 
 			: type(type), capacity(capacity), size(0), wroteKey(false), maxLineSize(maxLineSize), lineSize(0) {}
 	};
-
+   
 private:
 	std::stack<Block> blocks;
 	Block block;
@@ -312,6 +313,7 @@ private:
 	}
 public:
 	unsigned int defaultDataLineSize;
+    fbxconv::Settings * settings;
 
 	BaseJSONWriter() : block(Block::ROOT), defaultDataLineSize(32) {}
 

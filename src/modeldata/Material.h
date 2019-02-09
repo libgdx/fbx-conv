@@ -106,6 +106,7 @@ namespace modeldata {
 		OptionalValue<float, 3> diffuse;
 		OptionalValue<float, 3> ambient;
 		OptionalValue<float, 3> emissive;
+        OptionalValue<float, 1> emissiveFactor;
 		OptionalValue<float, 3> specular;
 		OptionalValue<float> shininess;
 		OptionalValue<float> opacity;

@@ -39,20 +39,23 @@ struct FbxConvCommand {
 
 		settings->flipV = false;
 		settings->packColors = false;
-		settings->verbose = false;
+        settings->verbose = false;
 		settings->maxNodePartBonesCount = 12;
 		settings->maxVertexBonesCount = 4;
 		settings->maxVertexCount = (1<<15)-1;
 		settings->maxIndexCount = (1<<15)-1;
 		settings->outType = FILETYPE_AUTO;
 		settings->inType = FILETYPE_AUTO;
+        settings->omitEmit = false;
 
 		for (int i = 1; i < argc; i++) {
 			const char *arg = argv[i];
 			const int len = (int)strlen(arg);
-			if (len > 1 && arg[0] == '-') {
-				if (arg[1] == '?')
-					help = true;
+            if(len > 1 && arg[0] == '-') {
+                if(arg[1] == '?')
+                    help = true;
+                else if(arg[1] == 'e')
+                    settings->omitEmit = true;
 				else if (arg[1] == 'f')
 					settings->flipV = true;
 				else if (arg[1] == 'v')
@@ -109,6 +112,7 @@ struct FbxConvCommand {
 		printf("-b <size>: The maximum amount of bones a nodepart can contain (default: 12)\n");
 		printf("-w <size>: The maximum amount of bone weights per vertex (default: 4)\n");
 		printf("-v       : Verbose: print additional progress information\n");
+        printf("-e       : Force emissive property to [0,0,0].");
 		printf("\n");
 		printf("<input>  : The filename of the file to convert.\n");
 		printf("<output> : The filename of the converted file.\n");

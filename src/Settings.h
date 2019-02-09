@@ -31,6 +31,7 @@ namespace fbxconv {
 #define FILETYPE_OUT_DEFAULT	FILETYPE_G3DB
 #define FILETYPE_IN_DEFAULT		FILETYPE_FBX
 
+
 struct Settings {
 	std::string inFile;
 	int inType;
@@ -51,6 +52,8 @@ struct Settings {
 	int maxVertexCount;
 	/** The maximum allowed amount of indices in one mesh, only used when deciding to merge meshes. */
 	int maxIndexCount;
+    /** Forces the emissive value to 0,0,0 when exporting, fixes some problems, enable by specifying -e */
+    bool omitEmit; 
 };
 
 }
