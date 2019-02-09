@@ -559,10 +559,10 @@ namespace readers {
 				result->ambient.set(lambert->Ambient.Get().mData);
 			if (lambert->Diffuse.IsValid())
 				result->diffuse.set(lambert->Diffuse.Get().mData);
-            if(lambert->Emissive.IsValid()) {
-                result->emissiveFactor.set(lambert->EmissiveFactor.Get());
-                result->emissive.set(lambert->Emissive.Get().mData);
-            }
+			if(lambert->Emissive.IsValid()) {
+				result->emissiveFactor.set(lambert->EmissiveFactor.Get());
+				result->emissive.set(lambert->Emissive.Get().mData);
+			}
 
 			addTextures(result->id.c_str(), result->textures, lambert->Ambient, Material::Texture::Ambient);
 			addTextures(result->id.c_str(), result->textures, lambert->Diffuse, Material::Texture::Diffuse);

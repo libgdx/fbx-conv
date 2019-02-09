@@ -112,7 +112,7 @@ struct FbxConvCommand {
 		printf("-b <size>: The maximum amount of bones a nodepart can contain (default: 12)\n");
 		printf("-w <size>: The maximum amount of bone weights per vertex (default: 4)\n");
 		printf("-v       : Verbose: print additional progress information\n");
-        printf("-e       : Force emissive property to [0,0,0].");
+		printf("-e       : Force emissive property to [0,0,0].");
 		printf("\n");
 		printf("<input>  : The filename of the file to convert.\n");
 		printf("<output> : The filename of the converted file.\n");
