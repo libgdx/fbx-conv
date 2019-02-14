@@ -27,7 +27,6 @@
 #include <string>
 #include <cassert>
 #include <stdio.h>
-#include "../Settings.h"
 
 namespace json {
 
@@ -313,7 +312,6 @@ private:
 	}
 public:
 	unsigned int defaultDataLineSize;
-	fbxconv::Settings * settings;
 
 	BaseJSONWriter() : block(Block::ROOT), defaultDataLineSize(32) {}
 
