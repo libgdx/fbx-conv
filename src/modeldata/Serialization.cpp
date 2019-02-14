@@ -121,9 +121,6 @@ void Material::serialize(json::BaseJSONWriter &writer) const {
 		and multiplies it by each component in the emissive[3] array producing correct emissive values now.
 		*/
 		float z[3] = { emissive.value[0] * emissiveFactor.value, emissive.value[1] * emissiveFactor.value, emissive.value[2] * emissiveFactor.value };
-		if(writer.settings->omitEmit) {
-			z[0] = 0; z[1] = 0; z[2] = 0;
-		}
 		writer << "emissive" = z;
 	}
 	if (opacity.valid)
