@@ -52,7 +52,7 @@ struct FbxConvCommand {
 			const int len = (int)strlen(arg);
 			if(len > 1 && arg[0] == '-') {
 				if(arg[1] == '?')
-				    help = true;
+				    	help = true;
 				else if (arg[1] == 'f')
 					settings->flipV = true;
 				else if (arg[1] == 'v')
