@@ -14,8 +14,6 @@
  * limitations under the License.
  ******************************************************************************/
 /** @author Xoppa */
-#define _CRT_NO_VA_START_VALIDATION
-
 #if defined(_MSC_VER) && defined(_DEBUG)
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
