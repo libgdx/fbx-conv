@@ -115,11 +115,6 @@ void Material::serialize(json::BaseJSONWriter &writer) const {
 	if (diffuse.valid)
 		writer << "diffuse" = diffuse.value;
 	if(emissive.valid) {
-		/*
-		A problem was introduced in LibGDX version 1.9.9 as it included support for emissive textures. FBX-conv was exporting
-		g3db & g3dj files with incorrect emissive properties. This fix reads the emissiveFactor value from the fbx file
-		and multiplies it by each component in the emissive[3] array producing correct emissive values now.
-		*/
 		float z[3] = { emissive.value[0] * emissiveFactor.value, emissive.value[1] * emissiveFactor.value, emissive.value[2] * emissiveFactor.value };
 		writer << "emissive" = z;
 	}
