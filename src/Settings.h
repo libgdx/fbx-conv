@@ -31,7 +31,6 @@ namespace fbxconv {
 #define FILETYPE_OUT_DEFAULT	FILETYPE_G3DB
 #define FILETYPE_IN_DEFAULT		FILETYPE_FBX
 
-
 struct Settings {
 	std::string inFile;
 	int inType;
