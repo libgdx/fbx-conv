@@ -114,8 +114,14 @@ void Material::serialize(json::BaseJSONWriter &writer) const {
 		writer << "ambient" = ambient.value;
 	if (diffuse.valid)
 		writer << "diffuse" = diffuse.value;
-	if (emissive.valid)
-		writer << "emissive" = emissive.value;
+	if (emissive.valid) {
+		float z[3] = {
+			emissive.value[0] * emissiveFactor.value,
+			emissive.value[1] * emissiveFactor.value,
+			emissive.value[2] * emissiveFactor.value
+			};
+		writer << "emissive" = z;
+	}
 	if (opacity.valid)
 		writer << "opacity" = opacity.value;
 	if (specular.valid)
