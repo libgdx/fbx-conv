@@ -6,6 +6,9 @@ matrix:
     language: cpp
     os: linux
     before_install:
+      - wget -O premake4.tar.gz http://sourceforge.net/projects/premake/files/Premake/4.4/premake-4.4-beta5-linux.tar.gz/download
+      - tar -xf premake4.tar.gz
+      - export PATH=$PATH:$PWD
       - wget http://images.autodesk.com/adsk/files/fbx20151_fbxsdk_linux.tar.gz
       - tar -xf fbx20151_fbxsdk_linux.tar.gz
       - chmod +x fbx20151_fbxsdk_linux
