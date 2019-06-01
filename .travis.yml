@@ -4,14 +4,14 @@ matrix:
   include:
   - os: linux
   before_install:
-  - wget http://images.autodesk.com/adsk/files/fbx20151_fbxsdk_linux.tar.gz
-  - tar -xf fbx20151_fbxsdk_linux.tar.gz
-  - chmod +x fbx20151_fbxsdk_linux
-  - yes yes | ./fbx20151_fbxsdk_linux fbx-sdk-linux
-  - export FBX_SDK_ROOT=$PWD/fbx-sdk-linux
-  - export LD_LIBRARY_PATH=$PWD/fbx-sdk-linux/lib/gcc/x64/release/
+    - wget http://images.autodesk.com/adsk/files/fbx20151_fbxsdk_linux.tar.gz
+    - tar -xf fbx20151_fbxsdk_linux.tar.gz
+    - chmod +x fbx20151_fbxsdk_linux
+    - yes yes | ./fbx20151_fbxsdk_linux fbx-sdk-linux
+    - export FBX_SDK_ROOT=$PWD/fbx-sdk-linux
+    - export LD_LIBRARY_PATH=$PWD/fbx-sdk-linux/lib/gcc/x64/release/
   install:
-  - cd build/gmake
-  - make config=release
+    - cd build/gmake
+    - make config=release
   - os: osx
   - os: windows
