@@ -11,4 +11,5 @@ matrix:
     - export FBX_SDK_ROOT=$PWD/fbx-sdk-linux
     - export LD_LIBRARY_PATH=$PWD/fbx-sdk-linux/lib/gcc/x64/release/
     - cd build/gmake/
+  install: true
   script: make config=release
