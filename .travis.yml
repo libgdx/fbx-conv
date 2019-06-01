@@ -1,0 +1,7 @@
+language: cpp
+
+matrix:
+	include:
+	- os: linux
+	- os: osx
+	- os: windows
