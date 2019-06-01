@@ -12,6 +12,7 @@ matrix:
       - wget http://images.autodesk.com/adsk/files/fbx20151_fbxsdk_linux.tar.gz
       - tar -xf fbx20151_fbxsdk_linux.tar.gz
       - chmod +x fbx20151_fbxsdk_linux
+      - mkdir fbx-sdk-linux
       - yes yes | ./fbx20151_fbxsdk_linux fbx-sdk-linux
       - export FBX_SDK_ROOT=$PWD/fbx-sdk-linux
       - export LD_LIBRARY_PATH=$PWD/fbx-sdk-linux/lib/gcc/x64/release/
