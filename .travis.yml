@@ -2,7 +2,7 @@ language: cpp
 
 matrix:
   include:
-	- os: linux
+  - os: linux
   before_install:
   - wget http://images.autodesk.com/adsk/files/fbx20151_fbxsdk_linux.tar.gz
   - tar -xf fbx20151_fbxsdk_linux.tar.gz
