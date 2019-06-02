@@ -45,7 +45,7 @@ matrix:
       - unzip premake5.zip
       - export PATH=$PATH:$PWD
       - wget http://images.autodesk.com/adsk/files/fbx20151_fbxsdk_vs2013_win.exe
-      - fbx20151_fbxsdk_vs2013_win.exe
+      - fbx20151_fbxsdk_vs2013_win.exe /S
       - generate_vs2013.bat
       - cd build/vs2013/
     install: true
