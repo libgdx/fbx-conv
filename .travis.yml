@@ -41,11 +41,13 @@ matrix:
     language: cpp
     os: windows
     before_install:
+      - choco install 7zip
       - wget -O premake5.zip https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-5.0.0-alpha14-windows.zip
       - unzip premake5.zip
       - export PATH=$PATH:$PWD
       - wget http://images.autodesk.com/adsk/files/fbx20151_fbxsdk_vs2013_win.exe
-      - fbx20151_fbxsdk_vs2013_win.exe /S
+      - 7z x -ofbx-sdk-windows/ fbx20151_fbxsdk_vs2013_win.exe
+      - export FBX_SDK_ROOT=$PWD/fbx-sdk-windows/
       - generate_vs2013.bat
       - cd build/vs2013/
     install: true
