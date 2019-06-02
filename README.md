@@ -21,7 +21,7 @@ Command-line Usage
 *   Linux - `fbx-conv-lin64 [options] <input> [<output>]`
 *   Mac - `fbx-conv-mac [options] <input> [<output>]`
 
-###Options/flags
+### Options/flags
 *   **`-?`**				-Display help information.
 *   **`-o <type>`**			-Set the type of the output file to <type>
 *   **`-f`**				-Flip the V texture coordinates.
@@ -31,7 +31,7 @@ Command-line Usage
 *   **`-w <size>`**			-The maximum amount of bone weights per vertex (default: 4)
 *   **`-v`**				-Verbose: print additional progress information
 
-###Example
+### Example
 `fbx-conv-win32.exe -f -v myModel.fbx convertedModel.g3db`
 
 Precompiled Binaries
