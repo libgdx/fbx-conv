@@ -36,4 +36,4 @@ matrix:
       - ./generate_xcode
       - cd build/xcode4/
     install: true
-    script: xcode -list -workspace fbx-conv.xcworkspace
+    script: xcodebuild build -workspace fbx-conv.xcworkspace
