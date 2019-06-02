@@ -30,8 +30,8 @@ matrix:
       - wget http://images.autodesk.com/adsk/files/fbx20151_fbxsdk_clang_mac.pkg.tgz
       - tar -xf fbx20151_fbxsdk_clang_mac.pkg.tgz
       - mkdir fbx-sdk-mac
-      - installer -pkg fbx20151_fbxsdk_clang_macos.pkg -target fbx-sdk-mac
-      - export FBX_SDK_ROOT=$PWD/fbx-sdk-mac
+      - installer -pkg fbx20151_fbxsdk_clang_macos.pkg -target /
+      - export FBX_SDK_ROOT=/
       - export LD_LIBRARY_PATH=$PWD/fbx-sdk-mac/lib/gcc/x64/release/
       - ./generate_xcode
       - cd build/xcode4/
