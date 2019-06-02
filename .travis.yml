@@ -51,4 +51,4 @@ matrix:
       - generate_vs2013.bat
       - cd build/vs2013/
     install: true
-    script: MSBuild.exe fbx-conv.sln /property:Configuration=Release
+    script: msbuild fbx-conv.sln /property:Configuration=Release
