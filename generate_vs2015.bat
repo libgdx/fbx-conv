@@ -6,4 +6,4 @@ echo Premake can be downloaded from https://premake.github.io/download.html
 exit /b
 )
 
-premake5 --file=premake.lua vs2013
+premake5 --file=premake.lua vs2015
