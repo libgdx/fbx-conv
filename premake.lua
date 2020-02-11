@@ -89,7 +89,7 @@ project "fbx-conv"
 			"_CRT_NONSTDC_NO_WARNINGS"
 		}
 		includedirs {
-			"C:\\Program Files\\Autodesk\\FBX\\FBX SDK\\2016.1\\include"
+			(FBX_SDK_ROOT .. "/include/"),
 		}
 		libdirs {			
 			"./libs/libpng/lib/windows/x86",
@@ -103,14 +103,12 @@ project "fbx-conv"
 		
 	configuration { "vs*", "Debug" }
 		libdirs {
-			-- (FBX_SDK_ROOT .. "/lib/vs2010/x86/debug"),
-			"C:\\Program Files\\Autodesk\\FBX\\FBX SDK\\2016.1\\lib\\vs2015\\x86\\debug",
+			(FBX_SDK_ROOT .. "/lib/vs2015/x86/debug"),
 		}
 		
 	configuration { "vs*", "Release" }
 		libdirs {
-			-- (FBX_SDK_ROOT .. "/lib/vs2010/x86/release"),
-			"C:\\Program Files\\Autodesk\\FBX\\FBX SDK\\2016.1\\lib\\vs2015\\x86\\release",
+			(FBX_SDK_ROOT .. "/lib/vs2015/x86/release"),
 		}
 
 	--- LINUX ----------------------------------------------------------
