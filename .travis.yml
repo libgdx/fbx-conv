@@ -43,7 +43,7 @@ matrix:
     env:
       - MSBUILD_PATH="c:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin"
     before_install:
-      - choco install visualstudiocommunity2013
+      - choco install visualstudiocommunity2015
       - choco install 7zip
       - wget -O premake5.zip https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-5.0.0-alpha14-windows.zip
       - unzip premake5.zip
@@ -52,7 +52,7 @@ matrix:
       - 7z x -ofbx-sdk-windows/ fbx20161_fbxsdk_vs2015_win0.exe
       - export FBX_SDK_ROOT=$PWD/fbx-sdk-windows/
       - export PATH=$MSBUILD_PATH:$PATH
-      - generate_vs2013.bat
-      - cd build/vs2013/
+      - generate_vs2015.bat
+      - cd build/vs2015/
     install: true
     script: MSBuild.exe fbx-conv.sln /property:Configuration=Release 
