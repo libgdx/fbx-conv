@@ -9,11 +9,11 @@ matrix:
       - wget -O premake5.tar.gz https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-5.0.0-alpha14-linux.tar.gz
       - tar -xf premake5.tar.gz
       - export PATH=$PATH:$PWD
-      - wget http://images.autodesk.com/adsk/files/fbx20151_fbxsdk_linux.tar.gz
-      - tar -xf fbx20151_fbxsdk_linux.tar.gz
-      - chmod +x fbx20151_fbxsdk_linux
+      - wget http://download.autodesk.com/us/fbx/2019/2019.0/fbx20190_fbxsdk_linux.tar.gz
+      - tar -xf fbx20190_fbxsdk_linux.tar.gz
+      - chmod +x fbx20190_fbxsdk_linux
       - mkdir fbx-sdk-linux
-      - yes yes | ./fbx20151_fbxsdk_linux fbx-sdk-linux
+      - yes yes | ./fbx20190_fbxsdk_linux fbx-sdk-linux
       - export FBX_SDK_ROOT=$PWD/fbx-sdk-linux
       - export LD_LIBRARY_PATH=$FBX_SDK_ROOT/lib/gcc/x64/release/
       - ./generate_makefile
@@ -27,12 +27,12 @@ matrix:
       - wget -O premake5.tar.gz https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-5.0.0-alpha14-macosx.tar.gz
       - tar -xf premake5.tar.gz
       - export PATH=$PATH:$PWD
-      - wget http://images.autodesk.com/adsk/files/fbx20151_fbxsdk_clang_mac.pkg.tgz
-      - tar -xf fbx20151_fbxsdk_clang_mac.pkg.tgz
-      - sudo installer -pkg fbx20151_fbxsdk_clang_macos.pkg -target /
+      - wget http://download.autodesk.com/us/fbx/2019/2019.0/fbx20190_fbxsdk_clang_mac.pkg.tgz
+      - tar -xf fbx20190_fbxsdk_clang_mac.pkg.tgz
+      - sudo installer -pkg fbx20190_fbxsdk_clang_mac.pkg -target /
       - sudo mv "/Applications/Autodesk/FBX SDK/" /Applications/Autodesk/SDK/
-      - export FBX_SDK_ROOT=/Applications/Autodesk/SDK/2015.1/
-      - export LD_LIBRARY_PATH=/Applications/Autodesk/SDK/2015.1/lib/clang/release/
+      - export FBX_SDK_ROOT=/Applications/Autodesk/SDK/2019.0/
+      - export LD_LIBRARY_PATH=/Applications/Autodesk/SDK/2019.0/lib/clang/release/
       - ./generate_xcode
       - cd build/xcode4/
     install: true
@@ -47,8 +47,8 @@ matrix:
       - wget -O premake5.zip https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-5.0.0-alpha14-windows.zip
       - unzip premake5.zip
       - export PATH=$PATH:$PWD
-      - wget http://images.autodesk.com/adsk/files/fbx20161_fbxsdk_vs2015_win0.exe
-      - 7z x -ofbx-sdk-windows/ fbx20161_fbxsdk_vs2015_win0.exe
+      - wget http://download.autodesk.com/us/fbx/2019/2019.0/fbx20190_fbxsdk_vs2015_win.exe
+      - 7z x -ofbx-sdk-windows/ fbx20190_fbxsdk_vs2015_win.exe
       - export FBX_SDK_ROOT=$PWD/fbx-sdk-windows/
       - export PATH=$MSBUILD_PATH:$PATH
       - generate_vs2015.bat
