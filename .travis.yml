@@ -29,7 +29,7 @@ matrix:
       - export PATH=$PATH:$PWD
       - wget http://download.autodesk.com/us/fbx/2019/2019.0/fbx20190_fbxsdk_clang_mac.pkg.tgz
       - tar -xf fbx20190_fbxsdk_clang_mac.pkg.tgz
-      - sudo installer -pkg fbx20190_fbxsdk_clang_mac.pkg -target /
+      - sudo installer -pkg fbx20190_fbxsdk_clang_macos.pkg -target /
       - sudo mv "/Applications/Autodesk/FBX SDK/" /Applications/Autodesk/SDK/
       - export FBX_SDK_ROOT=/Applications/Autodesk/SDK/2019.0/
       - export LD_LIBRARY_PATH=/Applications/Autodesk/SDK/2019.0/lib/clang/release/
