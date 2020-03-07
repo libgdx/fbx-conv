@@ -23,7 +23,7 @@ Command-line Usage
 
 ### Options/flags
 *   **`-?`**				-Display help information.
-*   **`-o <type>`**			-Set the type of the output file to <type>
+*   **`-o <type>`**			-Set the type of the output file to `<type>` : FBX, G3DJ (json) or G3DB (binary).
 *   **`-f`**				-Flip the V texture coordinates.
 *   **`-p`**				-Pack vertex colors to one float.
 *   **`-m <size>`**			-The maximum amount of vertices or indices a mesh may contain (default: 32k)
