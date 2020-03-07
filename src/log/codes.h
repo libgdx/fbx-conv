@@ -40,10 +40,12 @@ LOG_ADD_CODE(eCommandLineInvalidVertexCount)
 LOG_ADD_CODE(eCommandLineUnknownFiletype)
 
 LOG_ADD_CODE(sSourceLoad)
+LOG_ADD_CODE(sSourceLoadFbxVersion)
 LOG_ADD_CODE(pSourceLoadFbxImport)
 LOG_ADD_CODE(wSourceLoadFbxNodeRrSs)
 LOG_ADD_CODE(eSourceLoadGeneral)
 LOG_ADD_CODE(eSourceLoadFiletypeUnknown)
+LOG_ADD_CODE(eSourceLoadFbxVersionUnknown)
 LOG_ADD_CODE(eSourceLoadFbxSdk)
 
 LOG_ADD_CODE(sSourceConvert)

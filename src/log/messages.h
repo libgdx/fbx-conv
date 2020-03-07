@@ -41,10 +41,12 @@ LOG_SET_MSG(eCommandLineInvalidVertexCount,		"Maximum vertex count must be betwe
 LOG_SET_MSG(eCommandLineUnknownFiletype,		"Unknown filetype: %s")
 
 LOG_SET_MSG(sSourceLoad,						"Loading source file")
+LOG_SET_MSG(sSourceLoadFbxVersion,              "FBX file version %d %d %d")
 LOG_SET_MSG(pSourceLoadFbxImport,				"Import FBX %01.2f%% %s")
 LOG_SET_MSG(wSourceLoadFbxNodeRrSs,				"[%s] Node uses RrSs mode, transformation might be incorrect")
 LOG_SET_MSG(eSourceLoadGeneral,					"Error loading source file")
 LOG_SET_MSG(eSourceLoadFiletypeUnknown,			"Unknown source filetype")
+LOG_SET_MSG(eSourceLoadFbxVersionUnknown,       "Unknown FBX file version, supported version up to %d (may be too recent)")
 LOG_SET_MSG(eSourceLoadFbxSdk,					"FBX SDK encountered an error (%d): %s")
 
 LOG_SET_MSG(sSourceConvert,						"Converting source file")
