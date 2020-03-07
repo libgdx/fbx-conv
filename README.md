@@ -49,6 +49,8 @@ There's also a [Qt GUI wrapper](https://github.com/Reydw/Fbx-Converter-GUI) and 
 
 Building
 ========
-You'll need premake and an installation of the FBX SDK 2014. Once installed/downloaded, set the
+You'll need premake and an installation of the FBX SDK 2015.1. Once installed/downloaded, set the
 FBX_SDK_ROOT to the directory where you installed the FBX SDK. Then run one of the 
 generate_XXX scripts. These will generate a Visual Studio/XCode project, or a Makefile.
+
+On Linux and Mac, you can follow [Travis build steps](.travis.yml) in order to build and run it.
