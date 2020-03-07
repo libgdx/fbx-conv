@@ -120,10 +120,6 @@ namespace log {
 			log(type, vformat(m, vl));
 		}
 
-		virtual void log(const int &type, const int &code, ...) {
-			va_list vl; va_start(vl, code); vlog(type, code, vl); va_end(vl);
-		}
-
 		virtual void status(const char *s, ...) {
 			va_list vl; va_start(vl, s); vlog(LOG_STATUS, s, vl); va_end(vl);
 		}
