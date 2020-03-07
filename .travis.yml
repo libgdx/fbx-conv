@@ -1,57 +1,74 @@
 git:
-    depth: 3
+  depth: 3
 matrix:
   include:
-  - name: "Linux FBX-Conv build"
-    language: cpp
-    os: linux
-    before_install:
-      - wget -O premake5.tar.gz https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-5.0.0-alpha14-linux.tar.gz
-      - tar -xf premake5.tar.gz
-      - export PATH=$PATH:$PWD
-      - wget http://download.autodesk.com/us/fbx/2019/2019.0/fbx20190_fbxsdk_linux.tar.gz
-      - tar -xf fbx20190_fbxsdk_linux.tar.gz
-      - chmod +x fbx20190_fbxsdk_linux
-      - mkdir fbx-sdk-linux
-      - yes yes | ./fbx20190_fbxsdk_linux fbx-sdk-linux
-      - export FBX_SDK_ROOT=$PWD/fbx-sdk-linux
-      - export LD_LIBRARY_PATH=$FBX_SDK_ROOT/lib/gcc/x64/release/
-      - ./generate_makefile
-      - cd build/gmake/
-    install: true
-    script: make config=release
-  - name: "OSX FBX-Conv build"
-    language: cpp
-    os: osx
-    before_install:
-      - wget -O premake5.tar.gz https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-5.0.0-alpha14-macosx.tar.gz
-      - tar -xf premake5.tar.gz
-      - export PATH=$PATH:$PWD
-      - wget http://download.autodesk.com/us/fbx/2019/2019.0/fbx20190_fbxsdk_clang_mac.pkg.tgz
-      - tar -xf fbx20190_fbxsdk_clang_mac.pkg.tgz
-      - sudo installer -pkg fbx20190_fbxsdk_clang_macos.pkg -target /
-      - sudo mv "/Applications/Autodesk/FBX SDK/" /Applications/Autodesk/SDK/
-      - export FBX_SDK_ROOT=/Applications/Autodesk/SDK/2019.0/
-      - export LD_LIBRARY_PATH=/Applications/Autodesk/SDK/2019.0/lib/clang/release/
-      - ./generate_xcode
-      - cd build/xcode4/
-    install: true
-    script: xcodebuild -configuration Release
-  - name: "Windows FBX-Conv build"
-    language: cpp
-    os: windows
-    env:
-      - MSBUILD_PATH="c:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin"
-    before_install:
-      - choco install 7zip
-      - wget -O premake5.zip https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-5.0.0-alpha14-windows.zip
-      - unzip premake5.zip
-      - export PATH=$PATH:$PWD
-      - wget http://download.autodesk.com/us/fbx/2019/2019.0/fbx20190_fbxsdk_vs2015_win.exe
-      - 7z x -ofbx-sdk-windows/ fbx20190_fbxsdk_vs2015_win.exe
-      - export FBX_SDK_ROOT=$PWD/fbx-sdk-windows/
-      - export PATH=$MSBUILD_PATH:$PATH
-      - generate_vs2015.bat
-      - cd build/vs2015/
-    install: true
-    script: MSBuild.exe fbx-conv.sln /property:Configuration=Release 
+    - name: "Linux FBX-Conv build"
+      language: cpp
+      os: linux
+      before_install:
+        - pip install --user awscli
+        - wget -O premake5.tar.gz https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-5.0.0-alpha14-linux.tar.gz
+        - tar -xf premake5.tar.gz
+        - export PATH=$PATH:$PWD
+        - wget http://download.autodesk.com/us/fbx/2019/2019.0/fbx20190_fbxsdk_linux.tar.gz
+        - tar -xf fbx20190_fbxsdk_linux.tar.gz
+        - chmod +x fbx20190_fbxsdk_linux
+        - mkdir fbx-sdk-linux
+        - yes yes | ./fbx20190_fbxsdk_linux fbx-sdk-linux
+        - export FBX_SDK_ROOT=$PWD/fbx-sdk-linux
+        - export LD_LIBRARY_PATH=$FBX_SDK_ROOT/lib/gcc4/x64/release
+        - ./generate_makefile
+        - cd build/gmake/
+      install: true
+      script: make config=release
+      after_success:
+        - cp $LD_LIBRARY_PATH/libfbxsdk.so bin/Release/
+        - zip -j fbx-conv-linux.zip bin/Release/libfbxsdk.so bin/Release/fbx-conv
+        - aws s3 cp fbx-conv-linux.zip s3://fbx-conv/linux/
+    - name: "OSX FBX-Conv build"
+      language: cpp
+      os: osx
+      before_install:
+        - pip3 install awscli
+        - wget -O premake5.tar.gz https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-5.0.0-alpha14-macosx.tar.gz
+        - tar -xf premake5.tar.gz
+        - export PATH=$PATH:$PWD
+        - wget http://download.autodesk.com/us/fbx/2019/2019.0/fbx20190_fbxsdk_clang_mac.pkg.tgz
+        - tar -xf fbx20190_fbxsdk_clang_mac.pkg.tgz
+        - sudo installer -pkg fbx20190_fbxsdk_clang_macos.pkg -target /
+        - sudo mv "/Applications/Autodesk/FBX SDK/" /Applications/Autodesk/SDK/
+        - export FBX_SDK_ROOT=/Applications/Autodesk/SDK/2019.0/
+        - export LD_LIBRARY_PATH=/Applications/Autodesk/SDK/2019.0/lib/clang/release
+        - ./generate_xcode
+        - cd build/xcode4/
+      install: true
+      script: xcodebuild -configuration Release
+      after_success:
+        - cp $LD_LIBRARY_PATH/libfbxsdk.dylib bin/Release/
+        - zip -j fbx-conv-mac.zip bin/Release/libfbxsdk.dylib bin/Release/fbx-conv
+        - aws s3 cp fbx-conv-mac.zip s3://fbx-conv/mac/
+    - name: "Windows FBX-Conv build"
+      language: cpp
+      os: windows
+      env:
+        - MSBUILD_PATH="c:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin"
+      before_install:
+        - choco install python3 --version 3.7.4 --params "/InstallDir:C:\\Python"
+        - export PATH="/c/Python:/c/Python/Scripts:$PATH"
+        - python -m pip install --upgrade pip wheel
+        - pip3 install awscli
+        - aws --version
+        - choco install 7zip
+        - wget -O premake5.zip https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-5.0.0-alpha14-windows.zip
+        - unzip premake5.zip
+        - export PATH=$PATH:$PWD
+        - wget http://download.autodesk.com/us/fbx/2019/2019.0/fbx20190_fbxsdk_vs2015_win.exe
+        - 7z x -ofbx-sdk-windows/ fbx20190_fbxsdk_vs2015_win.exe
+        - export FBX_SDK_ROOT=$PWD/fbx-sdk-windows/
+        - export PATH=$MSBUILD_PATH:$PATH
+        - generate_vs2015.bat
+        - cd build/vs2015/
+      install: true
+      script: MSBuild.exe fbx-conv.sln /property:Configuration=Release
+      after_success:
+        - aws s3 cp bin/Release/fbx-conv.exe s3://fbx-conv/win/
