@@ -36,11 +36,15 @@ Command-line Usage
 
 Precompiled Binaries
 ====================
-You can download the precompiled binaries from http://libgdx.badlogicgames.com/fbx-conv
 
-The binaries are recompiled on any changes in the Git repository, via our trusty Jenkins instance, see http://libgdx.badlogicgames.com:8080/
+* [Mac](https://fbx-conv.s3.eu-west-2.amazonaws.com/mac/fbx-conv-mac.zip)
+* [Linux 64](https://fbx-conv.s3.eu-west-2.amazonaws.com/linux/fbx-conv-linux.zip)
+* [Windows](https://fbx-conv.s3.eu-west-2.amazonaws.com/win/fbx-conv.exe)
 
-On Windows you'll need to install VC 2010 Redistributable Package http://www.microsoft.com/en-us/download/confirmation.aspx?id=5555
+
+These binaries are recompiled on any changes in the Git repository, via the travis build
+
+On Windows you'll need to install VC 2015 Redistributable Package https://www.microsoft.com/en-us/download/details.aspx?id=48145
 
 On Linux and Mac, we have to link to the dynamic libraries of the FBX SDK (libfbxsdk.so and libfbxsdk.dylib). We recommend copying libfbxsdk.so
 to /usr/lib on Linux. Otherwise you can use LD_LIBRARY_PATH and set it to the directory you put the .so file.
@@ -49,7 +53,7 @@ There's also a [Qt GUI wrapper](https://github.com/Reydw/Fbx-Converter-GUI) and 
 
 Building
 ========
-You'll need premake and an installation of the FBX SDK 2015.1. Once installed/downloaded, set the
+You'll need premake and an installation of the FBX SDK 2019.0. Once installed/downloaded, set the
 FBX_SDK_ROOT to the directory where you installed the FBX SDK. Then run one of the 
 generate_XXX scripts. These will generate a Visual Studio/XCode project, or a Makefile.
 
