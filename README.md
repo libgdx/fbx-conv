@@ -10,7 +10,7 @@ to generate the output. Send us a pull request if you want the writer
 for your engine/framework/app to be integrated. We'll build the
 converter for Windows, Linux and Mac.
 
-The FBX parser is largely based on GamePlay SDK's encoder. We'll try to 
+The FBX parser is largely based on GamePlay SDK's encoder. We'll try to
 back-port any bug fixes or improvements.
 
 Hangout notes https://docs.google.com/document/d/1nz-RexbymNtA4pW1B5tXays0tjByBvO8BJSKrWeU69g/edit#
@@ -54,7 +54,21 @@ There's also a [Qt GUI wrapper](https://github.com/Reydw/Fbx-Converter-GUI) and 
 Building
 ========
 You'll need premake and an installation of the FBX SDK 2019.0. Once installed/downloaded, set the
-FBX_SDK_ROOT to the directory where you installed the FBX SDK. Then run one of the 
+FBX_SDK_ROOT to the directory where you installed the FBX SDK. Then run one of the
 generate_XXX scripts. These will generate a Visual Studio/XCode project, or a Makefile.
 
 On Linux and Mac, you can follow [Travis build steps](.travis.yml) in order to build and run it.
+
+Docker
+======
+Why not build your own docker image:
+
+```bash
+docker build . -t fbx-conv
+```
+
+Once done, run `fbx-conv` like this:
+
+```bash
+docker run --rm -v $PWD:/home fbx-conv my-model.obj
+```
