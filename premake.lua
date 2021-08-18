@@ -125,6 +125,7 @@ project "fbx-conv"
 			"png",
 			"z",
 			"pthread",
+			"xml2",
 			"fbxsdk",
 			"dl",
 		}
